@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "waterfowl-web",
+      "runtimeExecutable": "/Users/macbookprom5/Library/Python/3.9/lib/python/site-packages/playwright/driver/node",
+      "runtimeArgs": ["/tmp/npm-bootstrap/package/bin/npm-cli.js", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

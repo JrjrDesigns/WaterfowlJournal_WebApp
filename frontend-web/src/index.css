@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-navy-950 text-white font-sans;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  input, textarea, select {
+    @apply bg-navy-800 border border-gray-700 text-white rounded-lg px-3 py-2 w-full outline-none transition-all;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply border-orange-500 ring-1 ring-orange-500;
+  }
+
+  input::placeholder, textarea::placeholder {
+    @apply text-gray-500;
+  }
+
+  select option {
+    @apply bg-navy-800;
+  }
+}
+
+/* Leaflet dark map overrides */
+.leaflet-container {
+  background: #0d1526;
+  border-radius: 0.75rem;
+}
+
+.leaflet-control-zoom a {
+  background-color: #111c2e !important;
+  color: white !important;
+  border-color: #374151 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #1e3050 !important;
+}
+
+/* Datepicker dark theme */
+.react-datepicker {
+  background-color: #111c2e !important;
+  border: 1px solid #374151 !important;
+  color: white !important;
+  font-family: Inter, sans-serif !important;
+}
+
+.react-datepicker__header {
+  background-color: #0d1526 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker__day {
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #f97316 !important;
+  border-radius: 0.25rem;
+}
+
+.react-datepicker__day--selected {
+  background-color: #f97316 !important;
+  border-radius: 0.25rem;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #ea6c0a !important;
+  border-radius: 0.25rem;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #9ca3af !important;
+}
+
+.react-datepicker__input-container input {
+  cursor: pointer;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1526;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
