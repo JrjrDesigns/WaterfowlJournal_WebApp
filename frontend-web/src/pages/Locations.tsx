@@ -214,7 +214,7 @@ export default function Locations() {
   if (selectedLocation) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Delete blind confirm */}
+        {/* Delete confirm modals */}
         {deleteBlindTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
             <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm">
@@ -227,53 +227,21 @@ export default function Locations() {
             </div>
           </div>
         )}
-
-        {/* Add blind modal */}
-        {showNewBlind && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/50 p-0 sm:p-4">
-            <div className="w-full sm:max-w-md bg-surface border border-hairline rounded-t-2xl sm:rounded-2xl p-6">
-              <h2 className="font-display text-2xl text-ink tracking-wider mb-4">ADD BLIND</h2>
-              {pendingPin && (
-                <p className="text-xs text-muted mb-4 font-mono">
-                  {pendingPin.lat.toFixed(5)}, {pendingPin.lng.toFixed(5)}
-                </p>
-              )}
-              <form onSubmit={handleCreateBlind} className="space-y-4">
-                {blindError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{blindError}</div>}
-                <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Blind Name</label>
-                  <input type="text" value={blindName} onChange={e => setBlindName(e.target.value)} placeholder="South Point" autoFocus />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Blind Type</label>
-                  <div className="flex flex-wrap gap-2">
-                    {BLIND_TYPES.map(t => (
-                      <button key={t} type="button" onClick={() => setBlindType(t)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${blindType === t ? 'bg-ink border-ink text-white' : 'border-hairline text-muted hover:border-ink hover:text-ink'}`}>
-                        {t === 'a-frame' ? 'A-Frame' : t.charAt(0).toUpperCase() + t.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Notes</label>
-                  <textarea value={blindNotes} onChange={e => setBlindNotes(e.target.value)} placeholder="Setup notes, access info…" rows={2} className="resize-none" />
-                </div>
-                <div className="flex gap-3 pt-1">
-                  <button type="button" onClick={() => { setShowNewBlind(false); setPendingPin(null) }}
-                    className="flex-1 py-2.5 rounded-xl border border-hairline text-muted font-semibold text-sm">Cancel</button>
-                  <button type="submit" disabled={creatingBlind}
-                    className="flex-1 py-2.5 rounded-xl bg-ink text-white font-semibold text-sm disabled:opacity-50">
-                    {creatingBlind ? 'Saving…' : 'Save Blind'}
-                  </button>
-                </div>
-              </form>
+        {deleteLocTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
+            <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm">
+              <h3 className="text-lg font-semibold text-ink mb-2">Delete "{deleteLocTarget.name}"?</h3>
+              <p className="text-muted text-sm mb-6">This will also delete all blinds at this location. Cannot be undone.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteLocTarget(null)} className="flex-1 py-2.5 rounded-lg border border-hairline text-muted text-sm font-semibold">Cancel</button>
+                <button onClick={handleDeleteLocation} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold">Delete</button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-3">
           <button onClick={() => setSelectedLocation(null)} className="text-muted hover:text-ink transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -290,88 +258,107 @@ export default function Locations() {
           </button>
         </div>
 
-        <p className="text-xs text-muted mb-4 ml-8">Tap the map to drop a blind pin</p>
-
-        {/* Delete location confirm */}
-        {deleteLocTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
-            <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm">
-              <h3 className="text-lg font-semibold text-ink mb-2">Delete "{deleteLocTarget.name}"?</h3>
-              <p className="text-muted text-sm mb-6">This will also delete all blinds at this location. Cannot be undone.</p>
-              <div className="flex gap-3">
-                <button onClick={() => setDeleteLocTarget(null)} className="flex-1 py-2.5 rounded-lg border border-hairline text-muted text-sm font-semibold">Cancel</button>
-                <button onClick={handleDeleteLocation} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold">Delete</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Map */}
-        <div className="h-64 rounded-xl overflow-hidden border border-hairline mb-5">
-          <MapContainer center={mapCenter} zoom={14} style={{ height: '100%', width: '100%' }}>
+        {/* Map — satellite tiles */}
+        <div className="rounded-xl overflow-hidden border border-hairline mb-0" style={{ height: 280 }}>
+          <MapContainer center={mapCenter} zoom={16} style={{ height: '100%', width: '100%' }}>
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+              maxZoom={19}
             />
             <MapPinDropper onDrop={handleMapClick} />
-            {/* Center marker */}
             <Marker position={mapCenter} icon={new L.Icon({
               iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
               shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
               iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41],
             })}>
-              <Popup>{selectedLocation.name} — center</Popup>
+              <Popup>{selectedLocation.name}</Popup>
             </Marker>
             {blinds.map(b => (
               <Marker key={b.id} position={[b.lat, b.lng]} icon={greenIcon}>
-                <Popup>
-                  <strong>{b.name}</strong><br />
-                  {b.blind_type}
-                </Popup>
+                <Popup><strong>{b.name}</strong><br />{b.blind_type}</Popup>
               </Marker>
             ))}
-            {pendingPin && (
-              <Marker position={[pendingPin.lat, pendingPin.lng]} icon={greenIcon} />
-            )}
+            {pendingPin && <Marker position={[pendingPin.lat, pendingPin.lng]} icon={greenIcon} />}
           </MapContainer>
         </div>
 
-        {/* Blinds list */}
-        <div className="mb-3">
-          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">
-            Blinds at this location
-          </p>
-          {blindsLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-ink" />
+        {/* Inline add-blind form — expands directly below map, map stays visible */}
+        {showNewBlind && pendingPin ? (
+          <div className="bg-surface border border-t-0 border-hairline rounded-b-xl px-4 pt-4 pb-5 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="font-display text-xl text-ink tracking-wider leading-none">ADD BLIND</p>
+                <p className="text-xs text-muted font-mono mt-0.5">{pendingPin.lat.toFixed(5)}, {pendingPin.lng.toFixed(5)}</p>
+              </div>
+              <button onClick={() => { setShowNewBlind(false); setPendingPin(null) }} className="text-muted hover:text-ink transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ) : blinds.length === 0 ? (
-            <div className="text-center py-8 bg-surface border border-hairline rounded-xl">
-              <p className="text-muted text-sm">No blinds yet.</p>
-              <p className="text-muted text-xs mt-1">Tap the map to drop your first blind pin.</p>
-            </div>
-          ) : (
-            <div className="bg-surface border border-hairline rounded-xl overflow-hidden divide-y divide-hairline">
-              {blinds.map(b => (
-                <div key={b.id} className="flex items-center px-4 py-3 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-ink text-sm">{b.name}</p>
-                    <p className="text-xs text-muted uppercase tracking-wider mt-0.5">
-                      {b.blind_type === 'a-frame' ? 'A-Frame' : b.blind_type.charAt(0).toUpperCase() + b.blind_type.slice(1)}
-                      {b.notes ? ` · ${b.notes}` : ''}
-                    </p>
-                    <p className="text-xs text-muted/60 font-mono mt-0.5">{b.lat.toFixed(5)}, {b.lng.toFixed(5)}</p>
-                  </div>
-                  <button onClick={() => setDeleteBlindTarget(b)} className="text-muted hover:text-red-500 transition-colors flex-shrink-0">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+            <form onSubmit={handleCreateBlind} className="space-y-3">
+              {blindError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg">{blindError}</div>}
+              <input type="text" value={blindName} onChange={e => setBlindName(e.target.value)} placeholder="Blind name" autoFocus />
+              <div className="flex flex-wrap gap-2">
+                {BLIND_TYPES.map(t => (
+                  <button key={t} type="button" onClick={() => setBlindType(t)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${blindType === t ? 'bg-ink border-ink text-white' : 'border-hairline text-muted hover:border-ink hover:text-ink'}`}>
+                    {t === 'a-frame' ? 'A-Frame' : t.charAt(0).toUpperCase() + t.slice(1)}
                   </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+              <textarea value={blindNotes} onChange={e => setBlindNotes(e.target.value)} placeholder="Notes (optional)" rows={2} className="resize-none" />
+              <div className="flex gap-3">
+                <button type="button" onClick={() => { setShowNewBlind(false); setPendingPin(null) }}
+                  className="flex-1 py-2.5 rounded-xl border border-hairline text-muted font-semibold text-sm">Cancel</button>
+                <button type="submit" disabled={creatingBlind}
+                  className="flex-1 py-2.5 rounded-xl bg-ink text-white font-semibold text-sm disabled:opacity-50">
+                  {creatingBlind ? 'Saving…' : 'Save Blind'}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <p className="text-xs text-muted text-center py-2 mb-3">Tap the map to drop a blind pin</p>
+        )}
+
+        {/* Blinds list */}
+        {!showNewBlind && (
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Blinds at this location</p>
+            {blindsLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-ink" />
+              </div>
+            ) : blinds.length === 0 ? (
+              <div className="text-center py-8 bg-surface border border-hairline rounded-xl">
+                <p className="text-muted text-sm">No blinds yet.</p>
+                <p className="text-muted text-xs mt-1">Tap the map to drop your first blind pin.</p>
+              </div>
+            ) : (
+              <div className="bg-surface border border-hairline rounded-xl overflow-hidden divide-y divide-hairline">
+                {blinds.map(b => (
+                  <div key={b.id} className="flex items-center px-4 py-3 gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-ink text-sm">{b.name}</p>
+                      <p className="text-xs text-muted uppercase tracking-wider mt-0.5">
+                        {b.blind_type === 'a-frame' ? 'A-Frame' : b.blind_type.charAt(0).toUpperCase() + b.blind_type.slice(1)}
+                        {b.notes ? ` · ${b.notes}` : ''}
+                      </p>
+                      <p className="text-xs text-muted/60 font-mono mt-0.5">{b.lat.toFixed(5)}, {b.lng.toFixed(5)}</p>
+                    </div>
+                    <button onClick={() => setDeleteBlindTarget(b)} className="text-muted hover:text-red-500 transition-colors flex-shrink-0">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )
   }
