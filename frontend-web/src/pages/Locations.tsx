@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { fetchLocations, createLocation, deleteLocation, fetchBlindsForLocation, createBlind, deleteBlind } from '../utils/api'
 
@@ -85,6 +85,14 @@ function MapPinDropper({ onDrop }: { onDrop: (lat: number, lng: number) => void 
   return null
 }
 
+function FlyTo({ coords }: { coords: [number, number] | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (coords) map.flyTo(coords, 15, { duration: 1.2 })
+  }, [coords])
+  return null
+}
+
 export default function Locations() {
   const [locations, setLocations] = useState<LocationData[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,6 +107,33 @@ export default function Locations() {
   const [locCenter, setLocCenter] = useState<{ lat: number; lng: number } | null>(null)
   const [creatingLoc, setCreatingLoc] = useState(false)
   const [locError, setLocError] = useState('')
+
+  // Geocode search
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState('')
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null)
+
+  const handleGeocode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    setSearching(true)
+    setSearchError('')
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      )
+      const data = await res.json()
+      if (data.length === 0) { setSearchError('No results found'); return }
+      const { lat, lon } = data[0]
+      setFlyTarget([parseFloat(lat), parseFloat(lon)])
+    } catch {
+      setSearchError('Search failed')
+    } finally {
+      setSearching(false)
+    }
+  }
 
   // New blind modal
   const [showNewBlind, setShowNewBlind] = useState(false)
@@ -372,7 +407,7 @@ export default function Locations() {
           <div className="w-full sm:max-w-lg bg-surface border border-hairline rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-hairline">
               <h2 className="font-display text-2xl text-ink tracking-wider">NEW LOCATION</h2>
-              <button onClick={() => { setShowNewLocation(false); setLocName(''); setLocCenter(null); setLocError('') }}
+              <button onClick={() => { setShowNewLocation(false); setLocName(''); setLocCenter(null); setLocError(''); setSearchQuery(''); setSearchError(''); setFlyTarget(null) }}
                 className="text-muted hover:text-ink transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -401,20 +436,44 @@ export default function Locations() {
 
               <div>
                 <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                  Center Point — tap map to set
+                  Center Point — search or tap map to set
                 </label>
+
+                {/* Address search */}
+                <form onSubmit={handleGeocode} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search address or place…"
+                    className="flex-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={searching}
+                    className="flex-shrink-0 px-3 py-2 bg-ink text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-colors"
+                  >
+                    {searching ? '…' : 'Go'}
+                  </button>
+                </form>
+                {searchError && <p className="text-xs text-red-500 mb-2">{searchError}</p>}
+
                 <div className="h-48 rounded-xl overflow-hidden border border-hairline mb-2">
                   <MapContainer center={[44, -93]} zoom={5} style={{ height: '100%', width: '100%' }}>
                     <TileLayer
-                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                      attribution='&copy; Esri'
+                      maxZoom={19}
                     />
+                    <FlyTo coords={flyTarget} />
                     <MapPinDropper onDrop={(lat, lng) => setLocCenter({ lat, lng })} />
                     {locCenter && <Marker position={[locCenter.lat, locCenter.lng]} icon={greenIcon} />}
                   </MapContainer>
                 </div>
-                {locCenter && (
+                {locCenter ? (
                   <p className="text-xs text-muted font-mono">{locCenter.lat.toFixed(5)}, {locCenter.lng.toFixed(5)}</p>
+                ) : (
+                  <p className="text-xs text-muted">Search to navigate, then tap to drop your center pin</p>
                 )}
               </div>
 
