@@ -439,23 +439,25 @@ export default function Locations() {
                   Center Point — search or tap map to set
                 </label>
 
-                {/* Address search */}
-                <form onSubmit={handleGeocode} className="flex gap-2 mb-2">
+                {/* Address search — plain div, not a form, to avoid nested form conflict */}
+                <div className="flex gap-2 mb-2">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleGeocode(e as unknown as React.FormEvent) } }}
                     placeholder="Search address or place…"
                     className="flex-1"
                   />
                   <button
-                    type="submit"
+                    type="button"
                     disabled={searching}
+                    onClick={e => handleGeocode(e as unknown as React.FormEvent)}
                     className="flex-shrink-0 px-3 py-2 bg-ink text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-colors"
                   >
                     {searching ? '…' : 'Go'}
                   </button>
-                </form>
+                </div>
                 {searchError && <p className="text-xs text-red-500 mb-2">{searchError}</p>}
 
                 <div className="h-48 rounded-xl overflow-hidden border border-hairline mb-2">
