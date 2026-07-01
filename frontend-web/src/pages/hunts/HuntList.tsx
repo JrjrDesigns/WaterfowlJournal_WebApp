@@ -10,7 +10,7 @@ interface Hunt {
   name: string
   blind_name: string
   date: string
-  weather_data: { temp?: number; condition?: string } | null
+  weather_data: { temp?: number; condition?: string; wind_speed?: number } | null
   harvests: Array<{ species_name: string; count: number }>
   photos: string[]
 }
@@ -26,13 +26,8 @@ export default function HuntList() {
   const { isPro } = useAuth()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    loadYears()
-  }, [])
-
-  useEffect(() => {
-    loadHunts()
-  }, [selectedYear])
+  useEffect(() => { loadYears() }, [])
+  useEffect(() => { loadHunts() }, [selectedYear])
 
   const loadYears = async () => {
     try {
@@ -42,9 +37,7 @@ export default function HuntList() {
       if (available.length > 0 && selectedYear === null) {
         setSelectedYear(available[0])
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }
 
   const loadHunts = async () => {
@@ -52,9 +45,7 @@ export default function HuntList() {
     try {
       const data = await fetchHunts(selectedYear || undefined)
       setHunts(data)
-    } catch {
-      // ignore
-    } finally {
+    } catch { /* ignore */ } finally {
       setLoading(false)
     }
   }
@@ -70,35 +61,49 @@ export default function HuntList() {
     navigate('/hunts/create')
   }
 
+  const conditionSummary = (hunt: Hunt) => {
+    const parts: string[] = []
+    if (hunt.weather_data?.temp != null) parts.push(`${hunt.weather_data.temp}°F`)
+    if (hunt.weather_data?.wind_speed != null) parts.push(`${hunt.weather_data.wind_speed} mph`)
+    if (hunt.weather_data?.condition) parts.push(hunt.weather_data.condition)
+    return parts.join(' · ') || null
+  }
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6">
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="hunt_limit" />}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-white uppercase tracking-wider">My Hunts</h1>
+        <div>
+          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-0.5 flex items-center gap-2">
+            <span className="inline-block w-5 h-px bg-muted/50" />
+            Field Journal
+          </p>
+          <h1 className="font-display text-4xl text-ink tracking-wider leading-none">MY HUNTS</h1>
+        </div>
         <button
           onClick={handleNewHunt}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl transition-colors text-sm uppercase tracking-wider"
+          className="flex items-center gap-2 bg-ink hover:bg-black text-white font-semibold px-4 py-2.5 rounded-lg transition-colors text-sm"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
-          New Hunt
+          Log Hunt
         </button>
       </div>
 
       {/* Year tabs */}
       {years.length > 0 && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
           {years.map(year => (
             <button
               key={year}
               onClick={() => setSelectedYear(year)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
                 selectedYear === year
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-navy-800 text-gray-400 border border-gray-700 hover:border-gray-500'
+                  ? 'bg-ink text-white border-ink'
+                  : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
               }`}
             >
               {year}
@@ -107,89 +112,71 @@ export default function HuntList() {
         </div>
       )}
 
-      {/* Free limit banner */}
-      {!isPro && (
-        <div className="flex items-center justify-between bg-navy-800 border border-orange-500/30 rounded-xl px-4 py-3 mb-6">
-          <span className="text-sm text-gray-400">
-            <span className="text-orange-500 font-bold">{Math.min(hunts.length, FREE_HUNT_LIMIT)}/{FREE_HUNT_LIMIT}</span> hunts used on Free plan
+      {/* Free limit indicator */}
+      {!isPro && hunts.length > 0 && (
+        <div className="flex items-center justify-between py-2 mb-4">
+          <span className="text-xs text-muted">
+            <span className="font-semibold text-ink">{Math.min(hunts.length, FREE_HUNT_LIMIT)}</span>
+            <span> / {FREE_HUNT_LIMIT} hunts on Free</span>
           </span>
-          <Link to="/profile?upgrade=1" className="text-xs font-bold text-orange-500 hover:text-orange-400 uppercase tracking-wider">
-            Upgrade →
+          <Link to="/profile?upgrade=1" className="text-xs font-semibold text-ink underline underline-offset-2">
+            Upgrade
           </Link>
         </div>
       )}
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-orange-500" />
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-ink" />
         </div>
       ) : hunts.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-20 h-20 bg-navy-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-10 h-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-          <p className="text-gray-400 font-semibold">No hunts recorded yet</p>
-          <p className="text-gray-600 text-sm mt-1">Tap "New Hunt" to log your first hunt</p>
+          <p className="text-muted font-semibold">No hunts logged yet.</p>
+          <p className="text-muted text-sm mt-1">Tap "Log Hunt" to record your first sit.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {hunts.map(hunt => (
-            <Link
-              key={hunt.id}
-              to={`/hunts/${hunt.id}`}
-              className="flex items-stretch gap-3 bg-navy-800 border border-gray-700 hover:border-orange-500/50 rounded-xl p-3 transition-all group"
-            >
-              {/* Thumbnail */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-navy-700 flex items-center justify-center">
-                {hunt.photos && hunt.photos[0] ? (
-                  <img src={hunt.photos[0]} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <svg className="w-7 h-7 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                  </svg>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-bold text-white text-sm leading-tight group-hover:text-orange-400 transition-colors truncate">
-                    {hunt.name}
-                  </p>
-                  <svg className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <svg className="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  </svg>
-                  <span className="text-xs text-gray-500 truncate">{hunt.blind_name}</span>
-                </div>
-                <p className="text-xs text-gray-600 mt-0.5">
-                  {format(new Date(hunt.date + 'T12:00:00'), 'MM-dd-yyyy')}
-                </p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  {hunt.weather_data?.temp != null && (
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+        <div className="bg-surface rounded-xl border border-hairline overflow-hidden">
+          <div className="divide-y divide-hairline">
+            {hunts.map((hunt, idx) => {
+              const total = totalHarvested(hunt.harvests)
+              const summary = conditionSummary(hunt)
+              return (
+                <Link
+                  key={hunt.id}
+                  to={`/hunts/${hunt.id}`}
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-bg transition-colors group"
+                >
+                  {/* Thumbnail */}
+                  {hunt.photos?.[0] ? (
+                    <img src={hunt.photos[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-hairline" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-bg flex-shrink-0 border border-hairline flex items-center justify-center">
+                      <svg className="w-5 h-5 text-muted/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       </svg>
-                      {hunt.weather_data.temp}°F
-                    </span>
+                    </div>
                   )}
-                  <span className="text-xs text-orange-500 font-semibold flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {totalHarvested(hunt.harvests)} birds
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-muted uppercase tracking-wider">
+                      {format(new Date(hunt.date + 'T12:00:00'), 'MMM d, yyyy')}
+                    </p>
+                    <p className="text-sm font-semibold text-ink truncate mt-0.5">{hunt.blind_name || hunt.name}</p>
+                    {summary && (
+                      <p className="text-xs text-muted mt-0.5 truncate">{summary}</p>
+                    )}
+                  </div>
+
+                  {/* Bird count */}
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-display text-3xl text-green leading-none">{total}</p>
+                    <p className="text-xs text-muted uppercase tracking-wider">birds</p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

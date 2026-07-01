@@ -8,10 +8,15 @@
   }
 
   body {
-    @apply bg-navy-950 text-white font-sans;
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    background: #F1F2F4;
+    color: #13141A;
+    font-family: "Work Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
   #root {
@@ -21,74 +26,89 @@
   }
 
   input, textarea, select {
-    @apply bg-navy-800 border border-gray-700 text-white rounded-lg px-3 py-2 w-full outline-none transition-all;
+    background: #FFFFFF;
+    border: 1px solid #E4E5E3;
+    color: #13141A;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.95rem;
   }
 
   input:focus, textarea:focus, select:focus {
-    @apply border-orange-500 ring-1 ring-orange-500;
+    border-color: #13141A;
+    box-shadow: 0 0 0 1px #13141A;
   }
 
   input::placeholder, textarea::placeholder {
-    @apply text-gray-500;
+    color: #797B7E;
   }
 
   select option {
-    @apply bg-navy-800;
+    background: #FFFFFF;
+    color: #13141A;
   }
 }
 
-/* Leaflet dark map overrides */
+/* Leaflet light map overrides */
 .leaflet-container {
-  background: #0d1526;
+  background: #F1F2F4;
   border-radius: 0.75rem;
 }
 
 .leaflet-control-zoom a {
-  background-color: #111c2e !important;
-  color: white !important;
-  border-color: #374151 !important;
+  background-color: #FFFFFF !important;
+  color: #13141A !important;
+  border-color: #E4E5E3 !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #1e3050 !important;
+  background-color: #F1F2F4 !important;
 }
 
-/* Datepicker dark theme */
+/* Datepicker light theme */
 .react-datepicker {
-  background-color: #111c2e !important;
-  border: 1px solid #374151 !important;
-  color: white !important;
-  font-family: Inter, sans-serif !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #E4E5E3 !important;
+  color: #13141A !important;
+  font-family: "Work Sans", sans-serif !important;
+  border-radius: 0.5rem !important;
 }
 
 .react-datepicker__header {
-  background-color: #0d1526 !important;
-  border-bottom: 1px solid #374151 !important;
+  background-color: #F1F2F4 !important;
+  border-bottom: 1px solid #E4E5E3 !important;
 }
 
 .react-datepicker__current-month,
 .react-datepicker__day-name,
 .react-datepicker__day {
-  color: white !important;
+  color: #13141A !important;
 }
 
 .react-datepicker__day:hover {
-  background-color: #f97316 !important;
+  background-color: #E4E5E3 !important;
   border-radius: 0.25rem;
+  color: #13141A !important;
 }
 
 .react-datepicker__day--selected {
-  background-color: #f97316 !important;
+  background-color: #13141A !important;
+  color: #FFFFFF !important;
   border-radius: 0.25rem;
 }
 
 .react-datepicker__day--keyboard-selected {
-  background-color: #ea6c0a !important;
+  background-color: #13141A !important;
+  color: #FFFFFF !important;
   border-radius: 0.25rem;
 }
 
 .react-datepicker__navigation-icon::before {
-  border-color: #9ca3af !important;
+  border-color: #797B7E !important;
 }
 
 .react-datepicker__input-container input {
@@ -101,14 +121,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1526;
+  background: #F1F2F4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: #E4E5E3;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: #797B7E;
 }

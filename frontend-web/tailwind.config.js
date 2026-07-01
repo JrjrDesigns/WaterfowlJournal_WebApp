@@ -4,21 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: {
-          950: '#0a0f1e',
-          900: '#0d1526',
-          800: '#111c2e',
-          700: '#162338',
-          600: '#1e3050',
-        },
-        orange: {
-          500: '#f97316',
-          600: '#ea6c0a',
-          400: '#fb923c',
-        },
+        ink:      '#13141A',
+        bg:       '#F1F2F4',
+        surface:  '#FFFFFF',
+        hairline: '#E4E5E3',
+        muted:    '#797B7E',
+        green:    '#1B5E45',
+        blue:     '#1B4F6E',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['"Work Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['"Bebas Neue"', '"Arial Narrow"', 'sans-serif'],
+        brand:   ['"Playfair Display"', 'Georgia', 'serif'],
       },
     },
   },

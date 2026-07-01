@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blind Guide — A field journal for waterfowl hunters</title>
+<meta name="description" content="Blind Guide is a hunting journal for waterfowlers. Log every sit — birds, weather, water, and what worked — then read the patterns across the season." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 110'%3E%3Cpath d='M50,104 C32,80 16,66 16,44 A34,34 0 1 1 84,44 C84,66 68,80 50,104 Z' fill='%231B5E45'/%3E%3Cg fill='white'%3E%3Cellipse cx='59' cy='43' rx='17' ry='16.5'/%3E%3Cpath d='M16,44 C12,45 12,53 16,54 L52,52 L52,38 Z'/%3E%3C/g%3E%3Ccircle cx='63' cy='40' r='2.4' fill='%231B5E45'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#F1F2F4;
+    --surface:#FFFFFF;
+    --hairline:#E4E5E3;
+    --ink:#13141A;
+    --muted:#797B7E;
+    --green:#1B5E45;   /* data only */
+    --blue:#1B4F6E;    /* secondary data only */
+    --maxw:1120px;
+    /* PLACEHOLDER hero photo — replace url(...) with url('/hero.jpg') */
+    --hero-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwMCIgaGVpZ2h0PSI5MDAiIHZpZXdCb3g9IjAgMCAxNjAwIDkwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGRlZnM+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzEwMTgyNiIvPgogICAgPHN0b3Agb2Zmc2V0PSIwLjQ1IiBzdG9wLWNvbG9yPSIjMjgzOTRiIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjAuNzIiIHN0b3AtY29sb3I9IiM1YjZiNzgiLz4KICAgIDxzdG9wIG9mZnNldD0iMC44NCIgc3RvcC1jb2xvcj0iIzlhYTNhNiIvPgogICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjYjhiY2I4Ii8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8cmFkaWFsR3JhZGllbnQgaWQ9InN1biIgY3g9IjAuNjIiIGN5PSIwLjg2IiByPSIwLjUiPgogICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZThlM2Q0IiBzdG9wLW9wYWNpdHk9IjAuOSIvPgogICAgPHN0b3Agb2Zmc2V0PSIwLjI1IiBzdG9wLWNvbG9yPSIjZDhjZmI4IiBzdG9wLW9wYWNpdHk9IjAuNDUiLz4KICAgIDxzdG9wIG9mZnNldD0iMC42IiBzdG9wLWNvbG9yPSIjOWFhM2E2IiBzdG9wLW9wYWNpdHk9IjAiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogIDxsaW5lYXJHcmFkaWVudCBpZD0id2F0ZXIiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2FlYjRiMiIvPgogICAgPHN0b3Agb2Zmc2V0PSIwLjI1IiBzdG9wLWNvbG9yPSIjN2Q4Njg4Ii8+CiAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyMDJhMzEiLz4KICA8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0idXJsKCNza3kpIi8+CjxyZWN0IHdpZHRoPSIxNjAwIiBoZWlnaHQ9Ijc2MCIgZmlsbD0idXJsKCNzdW4pIi8+CjwhLS0gZGlzdGFudCB0cmVlbGluZSAtLT4KPHBhdGggZD0iTTAsNjEyIEw2MCw2MDQgTDE0MCw2MTAgTDIzMCw1OTggTDMyMCw2MDYgTDQzMCw2MDAgTDU0MCw2MDggTDY2MCw2MDIgTDc4MCw2MDkgTDkwMCw2MDEgTDEwMzAsNjA3IEwxMTYwLDYwMCBMMTMwMCw2MDYgTDE0NDAsNjAxIEwxNjAwLDYwNyBMMTYwMCw2NDAgTDAsNjQwIFoiIGZpbGw9IiMzYTQ3NGYiIG9wYWNpdHk9IjAuNyIvPgo8IS0tIHdhdGVyIC0tPgo8cmVjdCB5PSI2MjQiIHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjI3NiIgZmlsbD0idXJsKCN3YXRlcikiLz4KPGVsbGlwc2UgY3g9Ijk5MCIgY3k9IjcwMCIgcng9IjQyMCIgcnk9IjI2IiBmaWxsPSIjY2ZkM2NmIiBvcGFjaXR5PSIwLjI1Ii8+CjwhLS0gcmVlZHMgbGVmdCAtLT4KPGcgZmlsbD0iIzBlMTUxOSI+CiAgPHBhdGggZD0iTTYwLDkwMCBDNzAsODAwIDY0LDcyMCA3OCw2NjAgQzg0LDcwMCA4MCw4MDAgODgsOTAwIFoiLz4KICA8cGF0aCBkPSJNMTEwLDkwMCBDMTE2LDgxMCAxMTIsNzQwIDEyNiw2OTAgQzEzMCw3NjAgMTI0LDgzMCAxMzIsOTAwIFoiLz4KICA8cGF0aCBkPSJNMTUwLDkwMCBDMTU4LDgyMCAxNTIsNzYwIDE2OCw3MTAgQzE3MCw3ODAgMTY0LDg0MCAxNzYsOTAwIFoiLz4KICA8cmVjdCB4PSI3NCIgeT0iNjQwIiB3aWR0aD0iOCIgaGVpZ2h0PSIzNCIgcng9IjQiLz4KICA8cmVjdCB4PSIxMjIiIHk9IjY3MiIgd2lkdGg9IjciIGhlaWdodD0iMzAiIHJ4PSIzIi8+CjwvZz4KPCEtLSByZWVkcyByaWdodCAtLT4KPGcgZmlsbD0iIzBlMTUxOSI+CiAgPHBhdGggZD0iTTE1NDAsOTAwIEMxNTMwLDgwMCAxNTM2LDcyMCAxNTIyLDY2MCBDMTUxNiw3MDAgMTUyMCw4MDAgMTUxMiw5MDAgWiIvPgogIDxwYXRoIGQ9Ik0xNDg2LDkwMCBDMTQ4MCw4MTUgMTQ4Niw3NDUgMTQ3Miw2OTUgQzE0NjgsNzY1IDE0NzQsODM1IDE0NjYsOTAwIFoiLz4KICA8cmVjdCB4PSIxNTE2IiB5PSI2MzgiIHdpZHRoPSI4IiBoZWlnaHQ9IjM0IiByeD0iNCIvPgo8L2c+CjwhLS0gY29tbWl0dGVkIGZsb2NrLCBjdXBwZWQgd2luZ3MsIGZhZGluZyB3aXRoIGRlcHRoIC0tPgo8ZyBmaWxsPSIjMTAxNzFmIj4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NjAsMjUwKSBzY2FsZSgyLjYpIj4KICAgIDxwYXRoIGQ9Ik0wLDAgQy03LC05IC0xNiwtMTMgLTIyLC0xMSBDLTE1LC03IC05LC0zIC00LDIgQy05LC0xIC0xNiwtMSAtMjEsMyBDLTE0LDIgLTcsNCAwLDUgQzcsNCAxNCwyIDIxLDMgQzE2LC0xIDksLTEgNCwyIEM5LC0zIDE1LC03IDIyLC0xMSBDMTYsLTEzIDcsLTkgMCwwIFoiLz4KICA8L2c+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwLDIwMCkgc2NhbGUoMi4yKSIgb3BhY2l0eT0iMC45NSI+CiAgICA8cGF0aCBkPSJNMCwwIEMtNywtOSAtMTYsLTEzIC0yMiwtMTEgQy0xNSwtNyAtOSwtMyAtNCwyIEMtOSwtMSAtMTYsLTEgLTIxLDMgQy0xNCwyIC03LDQgMCw1IEM3LDQgMTQsMiAyMSwzIEMxNiwtMSA5LC0xIDQsMiBDOSwtMyAxNSwtNyAyMiwtMTEgQzE2LC0xMyA3LC05IDAsMCBaIi8+CiAgPC9nPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg4MCwzMDApIHNjYWxlKDMpIHJvdGF0ZSgtNikiPgogICAgPHBhdGggZD0iTTAsMCBDLTcsLTkgLTE2LC0xMyAtMjIsLTExIEMtMTUsLTcgLTksLTMgLTQsMiBDLTksLTEgLTE2LC0xIC0yMSwzIEMtMTQsMiAtNyw0IDAsNSBDNyw0IDE0LDIgMjEsMyBDMTYsLTEgOSwtMSA0LDIgQzksLTMgMTUsLTcgMjIsLTExIEMxNiwtMTMgNywtOSAwLDAgWiIvPgogIDwvZz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2NjAsMzYwKSBzY2FsZSgzLjQpIHJvdGF0ZSg0KSI+CiAgICA8cGF0aCBkPSJNMCwwIEMtNywtOSAtMTYsLTEzIC0yMiwtMTEgQy0xNSwtNyAtOSwtMyAtNCwyIEMtOSwtMSAtMTYsLTEgLTIxLDMgQy0xNCwyIC03LDQgMCw1IEM3LDQgMTQsMiAyMSwzIEMxNiwtMSA5LC0xIDQsMiBDOSwtMyAxNSwtNyAyMiwtMTEgQzE2LC0xMyA3LC05IDAsMCBaIi8+CiAgPC9nPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMTAsMjM1KSBzY2FsZSgxLjcpIiBvcGFjaXR5PSIwLjg1Ij4KICAgIDxwYXRoIGQ9Ik0wLDAgQy03LC05IC0xNiwtMTMgLTIyLC0xMSBDLTE1LC03IC05LC0zIC00LDIgQy05LC0xIC0xNiwtMSAtMjEsMyBDLTE0LDIgLTcsNCAwLDUgQzcsNCAxNCwyIDIxLDMgQzE2LC0xIDksLTEgNCwyIEM5LC0zIDE1LC03IDIyLC0xMSBDMTYsLTEzIDcsLTkgMCwwIFoiLz4KICA8L2c+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDcwLDMzMCkgc2NhbGUoMS45KSIgb3BhY2l0eT0iMC45Ij4KICAgIDxwYXRoIGQ9Ik0wLDAgQy03LC05IC0xNiwtMTMgLTIyLC0xMSBDLTE1LC03IC05LC0zIC00LDIgQy05LC0xIC0xNiwtMSAtMjEsMyBDLTE0LDIgLTcsNCAwLDUgQzcsNCAxNCwyIDIxLDMgQzE2LC0xIDksLTEgNCwyIEM5LC0zIDE1LC03IDIyLC0xMSBDMTYsLTEzIDcsLTkgMCwwIFoiLz4KICA8L2c+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE0MCwzMjApIHNjYWxlKDEuMykiIG9wYWNpdHk9IjAuNyI+CiAgICA8cGF0aCBkPSJNMCwwIEMtNywtOSAtMTYsLTEzIC0yMiwtMTEgQy0xNSwtNyAtOSwtMyAtNCwyIEMtOSwtMSAtMTYsLTEgLTIxLDMgQy0xNCwyIC03LDQgMCw1IEM3LDQgMTQsMiAyMSwzIEMxNiwtMSA5LC0xIDQsMiBDOSwtMyAxNSwtNyAyMiwtMTEgQzE2LC0xMyA3LC05IDAsMCBaIi8+CiAgPC9nPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgyMCwxNTApIHNjYWxlKDEuMikiIG9wYWNpdHk9IjAuNzUiPgogICAgPHBhdGggZD0iTTAsMCBDLTcsLTkgLTE2LC0xMyAtMjIsLTExIEMtMTUsLTcgLTksLTMgLTQsMiBDLTksLTEgLTE2LC0xIC0yMSwzIEMtMTQsMiAtNyw0IDAsNSBDNyw0IDE0LDIgMjEsMyBDMTYsLTEgOSwtMSA0LDIgQzksLTMgMTUsLTcgMjIsLTExIEMxNiwtMTMgNywtOSAwLDAgWiIvPgogIDwvZz4KPC9nPgo8L3N2Zz4K");
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Work Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img,svg{display:block;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  /* ---- type primitives ---- */
+  .eyebrow{
+    font-family:"Work Sans";
+    font-weight:600;
+    font-size:.72rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--ink);opacity:.5;}
+  .display{
+    font-family:"Bebas Neue","Arial Narrow",sans-serif;
+    font-weight:400;
+    line-height:.9;
+    letter-spacing:.01em;
+    margin:0;
+  }
+  .lede{color:var(--muted);font-size:1.12rem;max-width:46ch;}
+
+  /* ---- buttons (chrome — never colored) ---- */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:"Work Sans";font-weight:600;font-size:.95rem;
+    padding:13px 22px;border-radius:7px;border:1px solid transparent;
+    cursor:pointer;transition:transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{transform:translateY(-1px);background:#000;}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--hairline);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn .arrow{transition:transform .15s ease;}
+  .btn:hover .arrow{transform:translateX(3px);}
+
+  /* ---- header ---- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    background:transparent;border-bottom:1px solid transparent;
+    transition:background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+  }
+  header.solid{
+    background:rgba(241,242,244,.85);
+    backdrop-filter:saturate(180%) blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  /* PLACEHOLDER MARK — swap for finalized logo */
+  .mark{
+    width:30px;height:30px;border-radius:6px;
+    border:1px dashed var(--muted);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Bebas Neue";font-size:1rem;color:var(--muted);
+    letter-spacing:.02em;transition:border-color .3s ease, color .3s ease;
+  }
+  .wordmark{font-family:"Bebas Neue";font-size:1.5rem;letter-spacing:.04em;line-height:1;transition:color .3s ease;}
+  .nav-links{display:flex;align-items:center;gap:30px;}
+  .nav-links a{font-size:.92rem;font-weight:500;color:var(--ink);transition:color .3s ease;}
+  .nav-links a:hover{color:var(--green);}
+  .nav-cta{display:flex;align-items:center;gap:18px;}
+  .open-app{font-size:.92rem;font-weight:500;color:var(--muted);transition:color .3s ease;}
+  .open-app:hover{color:var(--green);}
+
+  /* header while over the hero photo: white chrome */
+  header:not(.solid) .wordmark{color:#fff;}
+  header:not(.solid) .mark{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.6);}
+  header:not(.solid) .nav-links a{color:rgba(255,255,255,.92);}
+  header:not(.solid) .nav-links a:hover{color:#fff;}
+  header:not(.solid) .open-app{color:rgba(255,255,255,.78);}
+  header:not(.solid) .open-app:hover{color:#fff;}
+  header:not(.solid) .btn-primary{background:#fff;color:var(--ink);}
+  header:not(.solid) .btn-primary:hover{background:#fff;}
+
+  /* ---- hero (full-bleed image) ---- */
+  /* SWAP THE PHOTO HERE: set --hero-image to url('/your-photo.jpg').
+     Placeholder is an embedded dawn-marsh SVG. */
+  .hero{
+    position:relative;
+    min-height:92vh;
+    display:flex;align-items:flex-end;
+    background-image:
+      linear-gradient(to bottom, rgba(8,12,18,.42) 0%, rgba(8,12,18,0) 26%, rgba(8,12,18,0) 42%, rgba(8,12,18,.55) 78%, rgba(8,12,18,.82) 100%),
+      var(--hero-image);
+    background-size:cover;
+    background-position:center 38%;
+    background-repeat:no-repeat;
+  }
+  .hero-inner{padding-bottom:76px;max-width:760px;}
+  .hero .kicker{
+    display:inline-flex;align-items:center;gap:11px;
+    font-family:"Work Sans";font-weight:600;font-size:.74rem;
+    letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.82);
+    margin:0 0 22px;
+  }
+  .hero .kicker::before{content:"";width:30px;height:1px;background:rgba(255,255,255,.7);}
+  .hero h1{
+    font-family:"Bebas Neue","Arial Narrow",sans-serif;
+    color:#fff;line-height:.88;letter-spacing:.01em;margin:0;
+    font-size:clamp(4rem,11vw,9rem);
+    text-shadow:0 2px 30px rgba(0,0,0,.35);
+  }
+  .hero .hero-sub{
+    color:rgba(255,255,255,.9);font-size:1.18rem;line-height:1.55;
+    max-width:60ch;margin:26px 0 0;text-shadow:0 1px 14px rgba(0,0,0,.4);
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:36px;}
+  .hero .btn-primary{background:#fff;color:var(--ink);}
+  .hero .btn-primary:hover{background:#fff;transform:translateY(-1px);}
+  .hero .btn-ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.5);}
+  .hero .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.12);}
+  .hero-note{margin-top:22px;font-size:.85rem;color:rgba(255,255,255,.72);}
+
+  /* signature log card now floats over the hero/section seam */
+  .seam{position:relative;}
+  .floatcard{
+    max-width:430px;margin:-118px 0 0 auto;position:relative;z-index:5;
+  }
+
+  /* ---- the log entry card (signature artifact) ---- */
+  .logcard{
+    background:var(--surface);
+    border:1px solid var(--hairline);
+    border-radius:12px;
+    box-shadow:0 1px 0 var(--hairline), 0 18px 40px -28px rgba(19,20,26,.28);
+    overflow:hidden;
+  }
+  .logcard-head{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:18px 22px 16px;border-bottom:1px solid var(--hairline);
+  }
+  .logcard-head .label{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .logcard-head .entry{font-family:"Bebas Neue";font-size:1.3rem;letter-spacing:.03em;margin-top:3px;}
+  .logcard-head .coords{text-align:right;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.5;}
+  .logcard-body{padding:6px 22px 20px;}
+  .field-block{padding:16px 0;border-bottom:1px solid var(--hairline);}
+  .field-block:last-child{border-bottom:none;}
+  .field-block > .bl{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .frow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;}
+  .frow .k{font-size:.84rem;color:var(--muted);font-weight:500;}
+  .frow .v{font-family:"Work Sans";font-weight:600;font-size:.92rem;font-variant-numeric:tabular-nums;}
+  .frow .v.count{font-family:"Bebas Neue";font-size:1.35rem;color:var(--green);line-height:1;letter-spacing:.02em;}
+  .logcard-foot{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:16px 22px;background:#FAFBFB;border-top:1px solid var(--hairline);
+  }
+  .logcard-foot .tot{font-family:"Bebas Neue";font-size:2rem;color:var(--green);line-height:1;letter-spacing:.02em;}
+  .logcard-foot .tot small{font-family:"Work Sans";font-size:.72rem;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-left:6px;}
+  .logcard-foot .meta{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+  /* ---- section frame ---- */
+  section{padding:80px 0;}
+  section[id]{scroll-margin-top:84px;}
+  .section-head{max-width:620px;margin-bottom:46px;}
+  .section-head h2{font-size:clamp(2.2rem,4.4vw,3.2rem);margin:0;}
+  .section-head p{color:var(--muted);margin:16px 0 0;font-size:1.05rem;}
+
+  /* ---- what you log : spec-sheet rows ---- */
+  .specsheet{border-top:1px solid var(--hairline);}
+  .specrow{
+    display:grid;grid-template-columns:54px 1fr 2.1fr;gap:28px;align-items:start;
+    padding:30px 4px;border-bottom:1px solid var(--hairline);
+  }
+  .specrow .num{font-family:"Bebas Neue";font-size:1.5rem;color:var(--muted);line-height:1;letter-spacing:.03em;}
+  .specrow h3{margin:0;font-size:1.18rem;font-weight:600;}
+  .specrow p{margin:0;color:var(--muted);font-size:.98rem;}
+  .specrow .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+  .tag{font-size:.72rem;color:var(--muted);border:1px solid var(--hairline);border-radius:20px;padding:3px 11px;background:var(--surface);}
+
+  /* ---- season review : data gets color ---- */
+  .review{background:var(--surface);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+  .review-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:60px;align-items:center;}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:34px 28px;margin-top:8px;}
+  .stat .l{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .stat .n{font-family:"Bebas Neue";font-size:clamp(3rem,6vw,4.4rem);line-height:.92;color:var(--green);letter-spacing:.01em;margin-top:4px;}
+  .stat .n.blue{color:var(--blue);}
+  .stat .sub{font-size:.82rem;color:var(--muted);margin-top:2px;}
+
+  .ringwrap{display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .ring-cap{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:18px;}
+  .ring{position:relative;width:240px;height:240px;}
+  .ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .pct .big{font-family:"Bebas Neue";font-size:4.2rem;line-height:.9;color:var(--green);}
+  .ring .pct .small{font-size:.74rem;color:var(--muted);letter-spacing:.04em;}
+  .ring-note{margin-top:20px;font-size:.86rem;color:var(--muted);max-width:30ch;}
+  .ring-note b{color:var(--ink);font-weight:600;}
+
+  /* ---- spots / map motif ---- */
+  .spots-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+  .mapframe{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:12px;
+    padding:18px;box-shadow:0 18px 40px -30px rgba(19,20,26,.3);
+  }
+  .map-meta{display:flex;justify-content:space-between;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .spot-list{margin-top:26px;border-top:1px solid var(--hairline);}
+  .spot{display:flex;justify-content:space-between;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--hairline);}
+  .spot .nm{font-weight:600;font-size:.96rem;display:flex;align-items:center;gap:10px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .dot.g{background:var(--green);}
+  .dot.b{background:var(--blue);}
+  .spot .rate{font-family:"Bebas Neue";font-size:1.4rem;line-height:1;}
+  .spot .rate.g{color:var(--green);}
+  .spot .rate.b{color:var(--blue);}
+
+  /* ---- pricing ---- */
+  .pricing{text-align:center;}
+  .pricing .section-head{margin:0 auto 46px;text-align:center;}
+  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;margin:0 auto;text-align:left;}
+  .plan{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:14px;
+    padding:34px 32px;display:flex;flex-direction:column;
+  }
+  .plan.pro{border-color:var(--ink);}
+  .plan-name{display:flex;align-items:center;justify-content:space-between;}
+  .plan-name h3{margin:0;font-family:"Bebas Neue";font-size:1.7rem;letter-spacing:.04em;}
+  .badge{font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#fff;background:var(--ink);padding:4px 9px;border-radius:20px;}
+  .plan .price{margin:18px 0 4px;font-family:"Bebas Neue";font-size:3.4rem;line-height:.9;letter-spacing:.01em;}
+  .plan .price span{font-family:"Work Sans";font-size:.9rem;color:var(--muted);font-weight:500;letter-spacing:0;}
+  .plan .ptag{color:var(--muted);font-size:.92rem;margin:0 0 22px;}
+  .plan ul{list-style:none;margin:0 0 28px;padding:0;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--hairline);padding-top:22px;}
+  .plan li{display:flex;gap:11px;align-items:flex-start;font-size:.94rem;}
+  .plan li svg{flex:none;margin-top:3px;}
+  .plan li.off{color:var(--muted);}
+  .plan .btn{justify-content:center;margin-top:auto;}
+
+  /* ---- closing cta ---- */
+  .closing{text-align:center;padding:96px 0;}
+  .closing h2{font-family:"Bebas Neue";font-size:clamp(2.6rem,6vw,4.6rem);line-height:.92;margin:0 auto;max-width:16ch;}
+  .closing p{color:var(--muted);margin:20px auto 32px;max-width:44ch;}
+  .closing .hero-actions{justify-content:center;}
+
+  /* ---- footer ---- */
+  footer{border-top:1px solid var(--hairline);padding:54px 0 40px;}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;}
+  .foot-brand .wordmark{margin:14px 0 10px;}
+  .foot-brand p{color:var(--muted);font-size:.88rem;max-width:30ch;margin:0;}
+  .foot-col h4{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;font-weight:600;}
+  .foot-col a{display:block;font-size:.92rem;color:var(--ink);margin-bottom:11px;}
+  .foot-col a:hover{color:var(--green);}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:46px;padding-top:24px;border-top:1px solid var(--hairline);color:var(--muted);font-size:.82rem;flex-wrap:wrap;gap:12px;}
+
+  /* ---- reveal ---- */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  /* ---- responsive ---- */
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:46px;}
+    .review-grid,.spots-grid{grid-template-columns:1fr;gap:44px;}
+    .ringwrap{order:-1;}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px;}
+    .foot-brand{grid-column:1/-1;}
+  }
+  @media (max-width:680px){
+    body{font-size:16px;}
+    .nav-links{display:none;}
+    .open-app{display:none;}
+    .price-grid{grid-template-columns:1fr;}
+    .specrow{grid-template-columns:34px 1fr;gap:6px 16px;}
+    .specrow > div:last-child{grid-column:2/-1;}
+    .stat-row{grid-template-columns:1fr 1fr;gap:26px 18px;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .foot-bottom{flex-direction:column;align-items:flex-start;}
+    .hero{min-height:86vh;background-position:center 42%;}
+    .hero-inner{padding-bottom:54px;}
+    .floatcard{margin:-70px auto 0;max-width:100%;}
+    section{padding:62px 0;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="Blind Guide home">
+      <!-- PLACEHOLDER: replace .mark with finalized logo SVG -->
+      <span class="mark">BG</span>
+      <span class="wordmark">BLIND&nbsp;GUIDE</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#log">What you log</a>
+      <a href="#season">The season</a>
+      <a href="#spots">Spots</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="open-app" href="https://app.blindguideapp.com">Open app</a>
+      <a class="btn btn-primary" href="https://app.blindguideapp.com/signup">Start logging</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-inner reveal">
+        <p class="kicker">Not a weather app. A first.</p>
+        <h1>Forecast<br>the flight.</h1>
+        <p class="hero-sub">Blind Guide's AI reads the migration, the moon, the weather ahead, and every hunt you've logged — then points you to when and where birds will move. A waterfowl forecast that's never existed.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://app.blindguideapp.com/signup">Start your log <span class="arrow">→</span></a>
+          <a class="btn btn-ghost" href="#season">How the forecast works</a>
+        </div>
+        <p class="hero-note">Your waterfowl journal is free — yours to keep. No card needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- signature artifact floats over the hero/section seam -->
+  <div class="seam">
+    <div class="wrap">
+      <div class="logcard floatcard reveal" role="img" aria-label="Sample hunt log entry: November 16, 7 birds harvested over 2 hours 10 minutes.">
+        <div class="logcard-head">
+          <div>
+            <div class="label">Field Log</div>
+            <div class="entry">Entry #147</div>
+          </div>
+          <div class="coords">Nov 16 · 06:42<br>41.6005°N&nbsp;&nbsp;82.9100°W</div>
+        </div>
+        <div class="logcard-body">
+          <div class="field-block">
+            <div class="bl">Conditions</div>
+            <div class="frow"><span class="k">Wind</span><span class="v">NW 12 mph</span></div>
+            <div class="frow"><span class="k">Temp</span><span class="v">27°F</span></div>
+            <div class="frow"><span class="k">Sky</span><span class="v">Overcast</span></div>
+            <div class="frow"><span class="k">Water</span><span class="v">Falling</span></div>
+          </div>
+          <div class="field-block">
+            <div class="bl">Harvest</div>
+            <div class="frow"><span class="k">Mallard</span><span class="v count">4</span></div>
+            <div class="frow"><span class="k">Gadwall</span><span class="v count">2</span></div>
+            <div class="frow"><span class="k">Green-wing teal</span><span class="v count">1</span></div>
+          </div>
+        </div>
+        <div class="logcard-foot">
+          <div class="tot">7<small>Birds</small></div>
+          <div class="meta">2h 10m afield · 18 shells</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT YOU LOG -->
+  <section id="log">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">What you log</p>
+        <h2 class="display">One entry per sit. Everything that mattered.</h2>
+        <p>A few taps in the blind captures the whole picture — so a season of hunts becomes something you can actually read.</p>
+      </div>
+      <div class="specsheet reveal">
+        <div class="specrow">
+          <div class="num">01</div>
+          <div><h3>Birds &amp; harvest</h3></div>
+          <div>
+            <p>Tally by species, note bands and rare birds, and keep a running total without doing the math yourself.</p>
+            <div class="tags"><span class="tag">Species counts</span><span class="tag">Banded birds</span><span class="tag">Shells fired</span></div>
+          </div>
+        </div>
+        <div class="specrow">
+          <div class="num">02</div>
+          <div><h3>Weather &amp; water</h3></div>
+          <div>
+            <p>Wind, temperature, sky, and water level recorded with every entry — the conditions that decide whether birds move.</p>
+            <div class="tags"><span class="tag">Wind &amp; temp</span><span class="tag">Sky cover</span><span class="tag">Water level</span></div>
+          </div>
+        </div>
+        <div class="specrow">
+          <div class="num">03</div>
+          <div><h3>Spots &amp; maps</h3></div>
+          <div>
+            <p>Pin every blind, pothole, and field. See which spots are producing and which have gone quiet.</p>
+            <div class="tags"><span class="tag">Saved blinds</span><span class="tag">Spot history</span><span class="tag">GPS pins</span></div>
+          </div>
+        </div>
+        <div class="specrow">
+          <div class="num">04</div>
+          <div><h3>Patterns &amp; analytics</h3></div>
+          <div>
+            <p>Blind Guide reads the log back to you — best winds, peak dates, top species, and the spots earning their keep.</p>
+            <div class="tags"><span class="tag">Best conditions</span><span class="tag">Season trends</span><span class="tag">CSV export</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE SEASON / DATA -->
+  <section id="season" class="review">
+    <div class="wrap review-grid">
+      <div class="reveal">
+        <p class="eyebrow">The season, read back</p>
+        <h2 class="section-head display" style="margin-bottom:30px">The numbers you'd never keep on paper.</h2>
+        <div class="stat-row">
+          <div class="stat">
+            <div class="l">Hunts logged</div>
+            <div class="n">38</div>
+          </div>
+          <div class="stat">
+            <div class="l">Birds harvested</div>
+            <div class="n">214</div>
+          </div>
+          <div class="stat">
+            <div class="l">Days afield</div>
+            <div class="n">41</div>
+          </div>
+          <div class="stat">
+            <div class="l">Avg per hunt</div>
+            <div class="n blue">5.6</div>
+            <div class="sub">birds · trending up vs. last season</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal ringwrap">
+        <div class="ring-cap">Best conditions</div>
+        <div class="ring">
+          <svg viewBox="0 0 120 120" width="240" height="240" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#E4E5E3" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#1B5E45" stroke-width="10"
+              stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="78.4"
+              transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="pct">
+            <span class="big">76%</span>
+            <span class="small">of birds on NW wind</span>
+          </div>
+        </div>
+        <p class="ring-note"><b>Read:</b> your best mornings run cold, overcast, and falling water. Blind Guide flags them before you head out.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPOTS -->
+  <section id="spots">
+    <div class="wrap spots-grid">
+      <div class="reveal">
+        <p class="eyebrow">Your spots</p>
+        <h2 class="section-head display" style="margin-bottom:22px">Every blind on one map.</h2>
+        <p class="lede" style="margin-bottom:26px">Drop a pin on the marsh, the timber, the cut corn. Blind Guide keeps the history for each one, so you know which spots are still worth the walk in the dark.</p>
+        <div class="spot-list">
+          <div class="spot"><span class="nm"><span class="dot g"></span>North Pothole</span><span class="rate g">6.8</span></div>
+          <div class="spot"><span class="nm"><span class="dot g"></span>Timber Hole</span><span class="rate g">5.1</span></div>
+          <div class="spot"><span class="nm"><span class="dot b"></span>Cut Corn — East</span><span class="rate b">3.4</span></div>
+          <div class="spot"><span class="nm"><span class="dot b"></span>River Bend</span><span class="rate b">2.2</span></div>
+        </div>
+      </div>
+
+      <div class="mapframe reveal" role="img" aria-label="Map of saved hunting spots with productivity markers.">
+        <div class="map-meta"><span>Marsh tract</span><span>4 spots</span></div>
+        <svg viewBox="0 0 400 300" width="100%" style="border-radius:8px;background:#F1F2F4;display:block">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0V40" fill="none" stroke="#E4E5E3" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="400" height="300" fill="url(#grid)"/>
+          <!-- water bodies -->
+          <path d="M40 200 Q110 150 180 190 T340 200 L340 280 L40 280 Z" fill="#E9EBEC"/>
+          <path d="M60 60 Q120 40 170 70 Q210 95 180 130 Q130 150 90 120 Q55 95 60 60Z" fill="#E9EBEC"/>
+          <!-- route -->
+          <path d="M95 95 L150 210 L250 175 L320 215" fill="none" stroke="#797B7E" stroke-width="2" stroke-dasharray="3 6" opacity=".6"/>
+          <!-- pins: green = productive, blue = secondary -->
+          <g>
+            <circle cx="95" cy="95" r="7" fill="#1B5E45"/><circle cx="95" cy="95" r="13" fill="#1B5E45" opacity=".14"/>
+            <circle cx="150" cy="210" r="7" fill="#1B5E45"/><circle cx="150" cy="210" r="13" fill="#1B5E45" opacity=".14"/>
+            <circle cx="250" cy="175" r="6" fill="#1B4F6E"/><circle cx="250" cy="175" r="11" fill="#1B4F6E" opacity=".14"/>
+            <circle cx="320" cy="215" r="6" fill="#1B4F6E"/><circle cx="320" cy="215" r="11" fill="#1B4F6E" opacity=".14"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="pricing">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" style="justify-content:center">Pricing</p>
+        <h2 class="display">A free journal. A Pro forecast.</h2>
+        <p>The waterfowl journal is free — log your hunts and keep them for seasons. Go Pro when you want Blind Guide to read them back as forecasts.</p>
+      </div>
+      <div class="price-grid">
+        <div class="plan reveal">
+          <div class="plan-name"><h3>Free</h3></div>
+          <div class="price">$0<span>&nbsp;/ forever</span></div>
+          <p class="ptag">A full waterfowl journal — yours to keep, season after season.</p>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>A complete hunting journal</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Log birds, conditions &amp; water</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Saved spots &amp; maps</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 10 logged hunts</li>
+            <li class="off"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="#797B7E" stroke-width="1.6" stroke-linecap="round"/></svg>Flight forecasts &amp; analytics</li>
+            <li class="off"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="#797B7E" stroke-width="1.6" stroke-linecap="round"/></svg>CSV export</li>
+          </ul>
+          <a class="btn btn-ghost" href="https://app.blindguideapp.com/signup">Start free</a>
+        </div>
+
+        <div class="plan pro reveal">
+          <div class="plan-name"><h3>Pro</h3><span class="badge">For the full season</span></div>
+          <div class="price">$39<span>&nbsp;/ year</span></div>
+          <p class="ptag">Unlimited hunts, plus the forecast that reads them.</p>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Flight forecasts</b>&nbsp;— migration, moon &amp; weather</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Unlimited</b>&nbsp;logged hunts</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Advanced season analytics</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Automatic weather data</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#13141A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV export</li>
+          </ul>
+          <a class="btn btn-primary" href="https://app.blindguideapp.com/signup">Go Pro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing reveal">
+    <div class="wrap">
+      <h2 class="display">The marsh keeps no records. You should.</h2>
+      <p>Start your waterfowl journal this season — it's free, and it's yours to keep.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://app.blindguideapp.com/signup">Start your log <span class="arrow">→</span></a>
+        <a class="btn btn-ghost" href="https://app.blindguideapp.com">Open app</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="mark">BG</span>
+        <div class="wordmark">BLIND&nbsp;GUIDE</div>
+        <p>A field journal for waterfowl hunters. Log the hunt, learn the marsh.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#log">What you log</a>
+        <a href="#season">The season</a>
+        <a href="#spots">Spots</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="foot-col">
+        <h4>App</h4>
+        <a href="https://app.blindguideapp.com/signup">Sign up</a>
+        <a href="https://app.blindguideapp.com">Open app</a>
+        <a href="#">The Log — journal</a>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Blind Guide. Built by hunters, in Ohio.</span>
+      <span>blindguideapp.com</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // gentle scroll reveal
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}
+      });
+    },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+    els.forEach(function(e){io.observe(e)});
+  })();
+
+  // header: transparent over hero, frosted-solid once past it
+  (function(){
+    var header=document.querySelector('header');
+    var hero=document.querySelector('.hero');
+    function onScroll(){
+      var trigger = hero ? hero.offsetHeight*0.8 : 120;
+      header.classList.toggle('solid', window.scrollY > trigger);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll, {passive:true});
+  })();
+</script>
+</body>
+</html>
