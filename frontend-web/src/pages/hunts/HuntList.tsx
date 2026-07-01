@@ -9,6 +9,7 @@ interface Hunt {
   id: string
   name: string
   blind_name: string
+  location_type: string | null
   date: string
   weather_data: { temp?: number; condition?: string; wind_speed?: number } | null
   harvests: Array<{ species_name: string; count: number }>
@@ -144,21 +145,25 @@ export default function HuntList() {
                 <Link
                   key={hunt.id}
                   to={`/hunts/${hunt.id}`}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-bg transition-colors group"
+                  className="flex items-stretch hover:bg-bg transition-colors group"
                 >
-                  {/* Thumbnail */}
-                  {hunt.photos?.[0] ? (
-                    <img src={hunt.photos[0]} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-hairline" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-lg bg-bg flex-shrink-0 border border-hairline flex items-center justify-center">
-                      <svg className="w-5 h-5 text-muted/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      </svg>
-                    </div>
-                  )}
+                  {/* Location type stub */}
+                  <div className="w-16 flex-shrink-0 relative bg-green/10 border-r border-hairline overflow-hidden flex items-center justify-center">
+                    {hunt.location_type && (
+                      <img
+                        src={`/location-types/${hunt.location_type}.jpg`}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    )}
+                    <svg className="w-6 h-6 text-green/40 relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </div>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 px-4 py-3.5">
                     <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                       {format(new Date(hunt.date + 'T12:00:00'), 'MMM d, yyyy')}
                     </p>
@@ -169,7 +174,7 @@ export default function HuntList() {
                   </div>
 
                   {/* Bird count */}
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right flex-shrink-0 flex flex-col items-end justify-center pr-4">
                     <p className="font-display text-3xl text-green leading-none">{total}</p>
                     <p className="text-xs text-muted uppercase tracking-wider">birds</p>
                   </div>

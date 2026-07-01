@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { format } from 'date-fns'
-import { fetchBlinds, fetchSpecies, createHunt } from '../../utils/api'
+import { fetchLocations, fetchBlindsForLocation, fetchSpecies, createHunt } from '../../utils/api'
 import { compressImage } from '../../utils/compressImage'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
@@ -24,10 +24,16 @@ const greenIcon = new L.Icon({
   shadowSize: [41, 41],
 })
 
-interface Blind {
+interface LocationData {
   id: string
   name: string
-  location: { lat: number; lng: number }
+  location_type: string
+}
+
+interface BlindData {
+  id: string
+  name: string
+  location_id: string
 }
 
 interface Harvest {
@@ -44,20 +50,16 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
   return null
 }
 
-const BLIND_TYPES = ['ground', 'pit', 'panel', 'a-frame', 'layout', 'boat']
-
 export default function HuntCreate() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [blinds, setBlinds] = useState<Blind[]>([])
+  const [locations, setLocations] = useState<LocationData[]>([])
+  const [blinds, setBlinds] = useState<BlindData[]>([])
   const [allSpecies, setAllSpecies] = useState<string[]>([])
 
   const [huntName, setHuntName] = useState('')
+  const [selectedLocationId, setSelectedLocationId] = useState('')
   const [selectedBlindId, setSelectedBlindId] = useState('')
-  const [showNewBlind, setShowNewBlind] = useState(false)
-  const [newBlindName, setNewBlindName] = useState('')
-  const [newBlindDescription, setNewBlindDescription] = useState('')
-  const [newBlindType, setNewBlindType] = useState('ground')
   const [date, setDate] = useState<Date>(new Date())
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [notes, setNotes] = useState('')
@@ -73,9 +75,20 @@ export default function HuntCreate() {
 
   const loadData = async () => {
     try {
-      const [blindsData, speciesData] = await Promise.all([fetchBlinds(), fetchSpecies()])
-      setBlinds(blindsData)
+      const [locsData, speciesData] = await Promise.all([fetchLocations(), fetchSpecies()])
+      setLocations(locsData)
       setAllSpecies([...speciesData.ducks, ...speciesData.geese, ...speciesData.others])
+    } catch { /* ignore */ }
+  }
+
+  const handleLocationChange = async (locId: string) => {
+    setSelectedLocationId(locId)
+    setSelectedBlindId('')
+    setBlinds([])
+    if (!locId) return
+    try {
+      const data = await fetchBlindsForLocation(locId)
+      setBlinds(data)
     } catch { /* ignore */ }
   }
 
@@ -112,13 +125,13 @@ export default function HuntCreate() {
     setError('')
     if (!huntName) { setError('Hunt name is required'); return }
     if (!location) { setError('Location is required — use GPS or click the map'); return }
-    if (!showNewBlind && !selectedBlindId) { setError('Select a blind or create a new one'); return }
-    if (showNewBlind && (!newBlindName || !newBlindDescription)) { setError('Blind name and description are required'); return }
+    if (!selectedBlindId) { setError('Select a blind'); return }
 
     setLoading(true)
     try {
       const huntData: Record<string, unknown> = {
         name: huntName,
+        blind_id: selectedBlindId,
         date: format(date, 'yyyy-MM-dd'),
         location,
         notes,
@@ -129,13 +142,6 @@ export default function HuntCreate() {
           missed: h.missed,
           shot_not_recovered: h.shot_not_recovered,
         })),
-      }
-      if (showNewBlind) {
-        huntData.blind_name = newBlindName
-        huntData.blind_description = newBlindDescription
-        huntData.blind_type = newBlindType
-      } else {
-        huntData.blind_id = selectedBlindId
       }
       await createHunt(huntData)
       navigate('/hunts')
@@ -185,54 +191,28 @@ export default function HuntCreate() {
           />
         </div>
 
-        {/* Blind */}
-        <div>
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Blind / Spot</label>
-          <div className="flex gap-1 mb-3 bg-bg border border-hairline rounded-lg p-1">
-            <button
-              type="button"
-              onClick={() => setShowNewBlind(false)}
-              className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${!showNewBlind ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}
-            >
-              Existing
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowNewBlind(true)}
-              className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${showNewBlind ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}
-            >
-              New Blind
-            </button>
-          </div>
-
-          {!showNewBlind ? (
-            <select value={selectedBlindId} onChange={e => setSelectedBlindId(e.target.value)}>
-              <option value="">Select a blind…</option>
-              {blinds.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+        {/* Location → Blind */}
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Location</label>
+            <select value={selectedLocationId} onChange={e => handleLocationChange(e.target.value)}>
+              <option value="">Select a location…</option>
+              {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
             </select>
-          ) : (
-            <div className="space-y-3">
-              <input type="text" value={newBlindName} onChange={e => setNewBlindName(e.target.value)} placeholder="Blind name" />
-              <textarea value={newBlindDescription} onChange={e => setNewBlindDescription(e.target.value)} placeholder="Describe the setup" rows={2} className="resize-none" />
-              <div>
-                <p className="text-xs text-muted mb-2 font-semibold uppercase tracking-wider">Blind Type</p>
-                <div className="flex flex-wrap gap-2">
-                  {BLIND_TYPES.map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setNewBlindType(type)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                        newBlindType === type
-                          ? 'bg-ink border-ink text-white'
-                          : 'bg-surface border-hairline text-muted hover:border-ink hover:text-ink'
-                      }`}
-                    >
-                      {type === 'a-frame' ? 'A-Frame' : type.charAt(0).toUpperCase() + type.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {locations.length === 0 && (
+              <p className="text-xs text-muted mt-1.5">No locations yet — add one in the Locations tab first.</p>
+            )}
+          </div>
+          {selectedLocationId && (
+            <div>
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Blind</label>
+              <select value={selectedBlindId} onChange={e => setSelectedBlindId(e.target.value)}>
+                <option value="">Select a blind…</option>
+                {blinds.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+              {blinds.length === 0 && (
+                <p className="text-xs text-muted mt-1.5">No blinds at this location — add one in the Locations tab.</p>
+              )}
             </div>
           )}
         </div>

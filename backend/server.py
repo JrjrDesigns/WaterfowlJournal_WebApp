@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -64,21 +64,38 @@ class User(BaseModel):
     subscription_status: str = "free"
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class LocationCreate(BaseModel):
+    name: str
+    location_type: str  # marsh, cut-corn, swamp, flooded-timber, creek, river, lakeshore, open-water, coastal, field, reservoir, pothole, beaver-pond
+    center: Dict[str, float]  # {"lat": 0.0, "lng": 0.0}
+    photo_base64: Optional[str] = None
+
+class Location(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    location_type: str
+    center: Dict[str, float]
+    photo_base64: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class BlindCreate(BaseModel):
     name: str
-    description: str
-    location: Dict[str, float]  # {"lat": 0.0, "lng": 0.0}
+    location_id: str
+    lat: float
+    lng: float
     blind_type: str = "ground"  # ground, pit, panel, a-frame, layout, boat
-    photo_base64: Optional[str] = None
+    notes: str = ""
 
 class Blind(BaseModel):
     id: str
     user_id: str
+    location_id: str
     name: str
-    description: str
-    location: Dict[str, float]
-    blind_type: str = "ground"  # ground, pit, panel, a-frame, layout, boat
-    photo_base64: Optional[str] = None
+    lat: float
+    lng: float
+    blind_type: str = "ground"
+    notes: str = ""
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class HarvestData(BaseModel):
@@ -88,23 +105,22 @@ class HarvestData(BaseModel):
     shot_not_recovered: int = 0
 
 class HuntCreate(BaseModel):
-    name: str  # Hunt name/title
+    name: str
     blind_id: Optional[str] = None
-    blind_name: Optional[str] = None  # For creating new blind on the fly
-    blind_description: Optional[str] = None
-    blind_type: Optional[str] = "ground"  # For creating new blind on the fly
+    blind_name: Optional[str] = None
     date: str
     location: Dict[str, float]
     notes: str = ""
-    photos: List[str] = []  # base64 encoded
+    photos: List[str] = []
     harvests: List[HarvestData] = []
 
 class Hunt(BaseModel):
     id: str
     user_id: str
-    name: str  # Hunt name/title
+    name: str
     blind_id: Optional[str] = None
     blind_name: str
+    location_type: Optional[str] = None
     date: str
     location: Dict[str, float]
     weather_data: Optional[Dict[str, Any]] = None
@@ -311,64 +327,80 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "created_at": current_user.get("created_at", datetime.utcnow())
     }
 
-# ============ BLINDS ROUTES ============
+# ============ LOCATIONS ROUTES ============
 
-@api_router.get("/blinds", response_model=List[Blind])
-async def get_blinds(current_user: dict = Depends(get_current_user)):
+@api_router.get("/locations", response_model=List[Location])
+async def get_locations(current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
     return [
         {
-            "id": str(blind["_id"]),
-            "user_id": blind["user_id"],
-            "name": blind["name"],
-            "description": blind["description"],
-            "location": blind["location"],
-            "photo_base64": blind.get("photo_base64"),
-            "created_at": blind.get("created_at", datetime.utcnow())
+            "id": str(loc["_id"]),
+            "user_id": loc["user_id"],
+            "name": loc["name"],
+            "location_type": loc["location_type"],
+            "center": loc["center"],
+            "photo_base64": loc.get("photo_base64"),
+            "created_at": loc.get("created_at", datetime.utcnow())
         }
-        for blind in blinds
+        for loc in locations
     ]
 
-@api_router.post("/blinds", response_model=Blind)
-async def create_blind(blind_data: BlindCreate, current_user: dict = Depends(get_current_user)):
+@api_router.post("/locations", response_model=Location)
+async def create_location(loc_data: LocationCreate, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    blind_doc = {
+    doc = {
         "user_id": user_id,
-        "name": blind_data.name,
-        "description": blind_data.description,
-        "location": blind_data.location,
-        "photo_base64": blind_data.photo_base64,
+        "name": loc_data.name,
+        "location_type": loc_data.location_type,
+        "center": loc_data.center,
+        "photo_base64": loc_data.photo_base64,
         "created_at": datetime.utcnow()
     }
-    result = await db.blinds.insert_one(blind_doc)
-    blind_id = str(result.inserted_id)
-    
+    result = await db.locations.insert_one(doc)
     return {
-        "id": blind_id,
+        "id": str(result.inserted_id),
         "user_id": user_id,
-        **blind_data.dict()
+        "created_at": datetime.utcnow(),
+        **loc_data.dict()
     }
 
-@api_router.put("/blinds/{blind_id}", response_model=Blind)
-async def update_blind(blind_id: str, blind_data: BlindCreate, current_user: dict = Depends(get_current_user)):
+@api_router.delete("/locations/{location_id}")
+async def delete_location(location_id: str, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    
-    blind = await db.blinds.find_one({"_id": ObjectId(blind_id), "user_id": user_id})
-    if not blind:
-        raise HTTPException(status_code=404, detail="Blind not found")
-    
-    await db.blinds.update_one(
-        {"_id": ObjectId(blind_id)},
-        {"$set": blind_data.dict()}
-    )
-    
-    return {
-        "id": blind_id,
+    result = await db.locations.delete_one({"_id": ObjectId(location_id), "user_id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Location not found")
+    await db.blinds.delete_many({"location_id": location_id, "user_id": user_id})
+    return {"message": "Location deleted"}
+
+# ============ BLINDS ROUTES ============
+
+@api_router.get("/locations/{location_id}/blinds", response_model=List[Blind])
+async def get_blinds_for_location(location_id: str, current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    blinds = await db.blinds.find({"location_id": location_id, "user_id": user_id}).to_list(1000)
+    return [_blind_doc(b) for b in blinds]
+
+@api_router.post("/locations/{location_id}/blinds", response_model=Blind)
+async def create_blind(location_id: str, blind_data: BlindCreate, current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    loc = await db.locations.find_one({"_id": ObjectId(location_id), "user_id": user_id})
+    if not loc:
+        raise HTTPException(status_code=404, detail="Location not found")
+    doc = {
         "user_id": user_id,
-        "created_at": blind.get("created_at", datetime.utcnow()),
-        **blind_data.dict()
+        "location_id": location_id,
+        "name": blind_data.name,
+        "lat": blind_data.lat,
+        "lng": blind_data.lng,
+        "blind_type": blind_data.blind_type,
+        "notes": blind_data.notes,
+        "created_at": datetime.utcnow()
     }
+    result = await db.blinds.insert_one(doc)
+    doc["id"] = str(result.inserted_id)
+    return _blind_doc(doc)
 
 @api_router.delete("/blinds/{blind_id}")
 async def delete_blind(blind_id: str, current_user: dict = Depends(get_current_user)):
@@ -376,7 +408,26 @@ async def delete_blind(blind_id: str, current_user: dict = Depends(get_current_u
     result = await db.blinds.delete_one({"_id": ObjectId(blind_id), "user_id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Blind not found")
-    return {"message": "Blind deleted successfully"}
+    return {"message": "Blind deleted"}
+
+@api_router.get("/blinds", response_model=List[Blind])
+async def get_all_blinds(current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    return [_blind_doc(b) for b in blinds]
+
+def _blind_doc(b: dict) -> dict:
+    return {
+        "id": b.get("id") or str(b["_id"]),
+        "user_id": b["user_id"],
+        "location_id": b["location_id"],
+        "name": b["name"],
+        "lat": b["lat"],
+        "lng": b["lng"],
+        "blind_type": b.get("blind_type", "ground"),
+        "notes": b.get("notes", ""),
+        "created_at": b.get("created_at", datetime.utcnow())
+    }
 
 # ============ HUNTS ROUTES ============
 
@@ -413,6 +464,7 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
             "name": hunt.get("name", "Untitled Hunt"),
             "blind_id": hunt.get("blind_id"),
             "blind_name": hunt["blind_name"],
+            "location_type": hunt.get("location_type"),
             "date": hunt["date"],
             "location": hunt["location"],
             "weather_data": hunt.get("weather_data"),
@@ -446,28 +498,17 @@ async def get_hunt_years(current_user: dict = Depends(get_current_user)):
 async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
     
-    # If blind_id is provided, get blind name
     blind_name = hunt_data.blind_name or "Unknown Location"
     blind_id = hunt_data.blind_id
-    
+    location_type = None
+
     if hunt_data.blind_id:
         blind = await db.blinds.find_one({"_id": ObjectId(hunt_data.blind_id), "user_id": user_id})
         if blind:
             blind_name = blind["name"]
-    elif hunt_data.blind_name and hunt_data.blind_description:
-        # Create new blind on the fly
-        blind_doc = {
-            "user_id": user_id,
-            "name": hunt_data.blind_name,
-            "description": hunt_data.blind_description,
-            "location": hunt_data.location,
-            "blind_type": hunt_data.blind_type or "ground",
-            "photo_base64": None,
-            "created_at": datetime.utcnow()
-        }
-        result = await db.blinds.insert_one(blind_doc)
-        blind_id = str(result.inserted_id)
-        blind_name = hunt_data.blind_name
+            loc = await db.locations.find_one({"_id": ObjectId(blind["location_id"])})
+            if loc:
+                location_type = loc.get("location_type")
     
     # Fetch weather data
     weather_data = fetch_weather_data(
@@ -481,6 +522,7 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "name": hunt_data.name,
         "blind_id": blind_id,
         "blind_name": blind_name,
+        "location_type": location_type,
         "date": hunt_data.date,
         "location": hunt_data.location,
         "weather_data": weather_data,
@@ -491,13 +533,14 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
     }
     result = await db.hunts.insert_one(hunt_doc)
     hunt_id = str(result.inserted_id)
-    
+
     return {
         "id": hunt_id,
         "user_id": user_id,
         "name": hunt_data.name,
         "blind_id": blind_id,
         "blind_name": blind_name,
+        "location_type": location_type,
         "date": hunt_data.date,
         "location": hunt_data.location,
         "weather_data": weather_data,
@@ -530,6 +573,7 @@ async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user))
         "name": hunt.get("name", "Untitled Hunt"),
         "blind_id": hunt.get("blind_id"),
         "blind_name": hunt["blind_name"],
+        "location_type": hunt.get("location_type"),
         "date": hunt["date"],
         "location": hunt["location"],
         "weather_data": hunt.get("weather_data"),
@@ -630,6 +674,159 @@ async def get_species_list():
 @api_router.get("/")
 async def root():
     return {"message": "Waterfowl Hunting Journal API", "version": "1.0.0"}
+
+# ============ SUBSCRIPTION ROUTES ============
+
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID", "")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+@api_router.get("/subscription/status")
+async def get_subscription_status(current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    status = current_user.get("subscription_status", "free")
+    stripe_customer_id = current_user.get("stripe_customer_id")
+    return {
+        "user_id": user_id,
+        "subscription_status": status,
+        "is_pro": status in ("pro", "premium"),
+        "stripe_customer_id": stripe_customer_id,
+    }
+
+@api_router.post("/subscription/create-checkout-session")
+async def create_checkout_session(
+    request_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    import stripe as stripe_lib
+    stripe_lib.api_key = STRIPE_SECRET_KEY
+    user_id = str(current_user["_id"])
+    price_id = request_data.get("price_id", STRIPE_PRO_PRICE_ID)
+
+    try:
+        customer_id = current_user.get("stripe_customer_id")
+        if not customer_id:
+            customer = stripe_lib.Customer.create(
+                email=current_user["email"],
+                metadata={"user_id": user_id},
+            )
+            customer_id = customer.id
+            await db.users.update_one(
+                {"_id": current_user["_id"]},
+                {"$set": {"stripe_customer_id": customer_id}},
+            )
+
+        session = stripe_lib.checkout.Session.create(
+            customer=customer_id,
+            payment_method_types=["card"],
+            line_items=[{"price": price_id, "quantity": 1}],
+            mode="subscription",
+            success_url=f"{FRONTEND_URL}/profile?session_id={{CHECKOUT_SESSION_ID}}&success=1",
+            cancel_url=f"{FRONTEND_URL}/profile",
+            metadata={"user_id": user_id},
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/subscription/customer-portal")
+async def create_customer_portal(current_user: dict = Depends(get_current_user)):
+    import stripe as stripe_lib
+    stripe_lib.api_key = STRIPE_SECRET_KEY
+    customer_id = current_user.get("stripe_customer_id")
+    if not customer_id:
+        raise HTTPException(status_code=400, detail="No Stripe customer found")
+    try:
+        session = stripe_lib.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=f"{FRONTEND_URL}/profile",
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: Request):
+    import stripe as stripe_lib
+    stripe_lib.api_key = STRIPE_SECRET_KEY
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        event = stripe_lib.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if event["type"] == "customer.subscription.created":
+        sub = event["data"]["object"]
+        customer_id = sub["customer"]
+        user = await db.users.find_one({"stripe_customer_id": customer_id})
+        if user:
+            await db.users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"subscription_status": "pro"}},
+            )
+            logger.info(f"User {user['_id']} upgraded to pro")
+
+    elif event["type"] in ("customer.subscription.deleted", "customer.subscription.updated"):
+        sub = event["data"]["object"]
+        customer_id = sub["customer"]
+        new_status = "pro" if sub.get("status") == "active" else "free"
+        user = await db.users.find_one({"stripe_customer_id": customer_id})
+        if user:
+            await db.users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"subscription_status": new_status}},
+            )
+            logger.info(f"User {user['_id']} subscription status: {new_status}")
+
+    return {"received": True}
+
+# ============ EXPORT ROUTE ============
+
+@api_router.get("/hunts/export/csv")
+async def export_hunts_csv(current_user: dict = Depends(get_current_user)):
+    from fastapi.responses import StreamingResponse
+    import csv
+    import io
+
+    status = current_user.get("subscription_status", "free")
+    if status not in ("pro", "premium"):
+        raise HTTPException(status_code=403, detail="Pro subscription required for CSV export")
+
+    user_id = str(current_user["_id"])
+    hunts = await db.hunts.find({"user_id": user_id}).sort("date", -1).to_list(10000)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Date", "Hunt Name", "Blind", "Lat", "Lng", "Total Harvested", "Total Missed", "Total Lost", "Notes", "Condition", "Temp (F)", "Wind (mph)"])
+
+    for hunt in hunts:
+        weather = hunt.get("weather_data") or {}
+        total_h = sum(h.get("count", 0) for h in hunt.get("harvests", []))
+        total_m = sum(h.get("missed", 0) for h in hunt.get("harvests", []))
+        total_l = sum(h.get("shot_not_recovered", 0) for h in hunt.get("harvests", []))
+        writer.writerow([
+            hunt.get("date", ""),
+            hunt.get("name", ""),
+            hunt.get("blind_name", ""),
+            hunt.get("location", {}).get("lat", ""),
+            hunt.get("location", {}).get("lng", ""),
+            total_h,
+            total_m,
+            total_l,
+            hunt.get("notes", "").replace("\n", " "),
+            weather.get("condition", ""),
+            weather.get("temp", ""),
+            weather.get("wind_speed", ""),
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=hunts.csv"},
+    )
 
 # Include router
 app.include_router(api_router)

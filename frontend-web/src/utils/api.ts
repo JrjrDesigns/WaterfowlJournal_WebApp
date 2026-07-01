@@ -25,17 +25,28 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
   return response.json()
 }
 
-export const fetchBlinds = () => apiRequest('/api/blinds')
+// Locations
+export const fetchLocations = () => apiRequest('/api/locations')
 
-export const createBlind = (data: unknown) =>
-  apiRequest('/api/blinds', { method: 'POST', body: JSON.stringify(data) })
+export const createLocation = (data: unknown) =>
+  apiRequest('/api/locations', { method: 'POST', body: JSON.stringify(data) })
 
-export const updateBlind = (id: string, data: unknown) =>
-  apiRequest(`/api/blinds/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+export const deleteLocation = (id: string) =>
+  apiRequest(`/api/locations/${id}`, { method: 'DELETE' })
+
+// Blinds
+export const fetchBlindsForLocation = (locationId: string) =>
+  apiRequest(`/api/locations/${locationId}/blinds`)
+
+export const fetchAllBlinds = () => apiRequest('/api/blinds')
+
+export const createBlind = (locationId: string, data: unknown) =>
+  apiRequest(`/api/locations/${locationId}/blinds`, { method: 'POST', body: JSON.stringify(data) })
 
 export const deleteBlind = (id: string) =>
   apiRequest(`/api/blinds/${id}`, { method: 'DELETE' })
 
+// Hunts
 export const fetchHunts = (year?: number) => {
   const url = year ? `/api/hunts?year=${year}` : '/api/hunts'
   return apiRequest(url)
