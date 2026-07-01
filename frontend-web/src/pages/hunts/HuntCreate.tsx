@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { format } from 'date-fns'
 import { fetchLocations, fetchBlindsForLocation, fetchSpecies, createHunt } from '../../utils/api'
@@ -34,6 +34,8 @@ interface BlindData {
   id: string
   name: string
   location_id: string
+  lat: number
+  lng: number
 }
 
 interface Harvest {
@@ -41,13 +43,6 @@ interface Harvest {
   harvested: number
   missed: number
   shot_not_recovered: number
-}
-
-function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click(e) { onMapClick(e.latlng.lat, e.latlng.lng) },
-  })
-  return null
 }
 
 export default function HuntCreate() {
@@ -68,10 +63,7 @@ export default function HuntCreate() {
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    loadData()
-    getCurrentLocation()
-  }, [])
+  useEffect(() => { loadData() }, [])
 
   const loadData = async () => {
     try {
@@ -84,6 +76,7 @@ export default function HuntCreate() {
   const handleLocationChange = async (locId: string) => {
     setSelectedLocationId(locId)
     setSelectedBlindId('')
+    setLocation(null)
     setBlinds([])
     if (!locId) return
     try {
@@ -92,13 +85,11 @@ export default function HuntCreate() {
     } catch { /* ignore */ }
   }
 
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        pos => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => { /* user declined */ }
-      )
-    }
+  const handleBlindChange = (blindId: string) => {
+    setSelectedBlindId(blindId)
+    const blind = blinds.find(b => b.id === blindId)
+    if (blind) setLocation({ lat: blind.lat, lng: blind.lng })
+    else setLocation(null)
   }
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,8 +115,8 @@ export default function HuntCreate() {
     e.preventDefault()
     setError('')
     if (!huntName) { setError('Hunt name is required'); return }
-    if (!location) { setError('Location is required — use GPS or click the map'); return }
     if (!selectedBlindId) { setError('Select a blind'); return }
+    if (!location) { setError('Selected blind has no coordinates'); return }
 
     setLoading(true)
     try {
@@ -151,8 +142,6 @@ export default function HuntCreate() {
       setLoading(false)
     }
   }
-
-  const mapCenter: [number, number] = location ? [location.lat, location.lng] : [44, -93]
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -206,7 +195,7 @@ export default function HuntCreate() {
           {selectedLocationId && (
             <div>
               <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Blind</label>
-              <select value={selectedBlindId} onChange={e => setSelectedBlindId(e.target.value)}>
+              <select value={selectedBlindId} onChange={e => handleBlindChange(e.target.value)}>
                 <option value="">Select a blind…</option>
                 {blinds.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
@@ -215,50 +204,37 @@ export default function HuntCreate() {
               )}
             </div>
           )}
+          <p className="text-xs text-muted mt-2">
+            Hunting a new spot?{' '}
+            <button type="button" onClick={() => navigate('/locations')}
+              className="font-semibold text-ink underline underline-offset-2">
+              Add it in Locations first →
+            </button>
+          </p>
         </div>
 
-        {/* Location */}
-        <div>
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-            Location — click map to drop pin
-          </label>
-          <div className="h-56 rounded-xl overflow-hidden border border-hairline mb-3">
-            <MapContainer center={mapCenter} zoom={location ? 13 : 5} style={{ height: '100%', width: '100%' }}>
+        {/* Read-only map — shown once a blind is selected */}
+        {location && (
+          <div className="h-48 rounded-xl overflow-hidden border border-hairline pointer-events-none">
+            <MapContainer
+              center={[location.lat, location.lng]}
+              zoom={17}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+              dragging={false}
+              scrollWheelZoom={false}
+              doubleClickZoom={false}
+              touchZoom={false}
+            >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution='&copy; Esri'
+                maxZoom={19}
               />
-              <MapClickHandler onMapClick={(lat, lng) => setLocation({ lat, lng })} />
-              {location && <Marker position={[location.lat, location.lng]} icon={greenIcon} />}
+              <Marker position={[location.lat, location.lng]} icon={greenIcon} />
             </MapContainer>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 grid grid-cols-2 gap-2">
-              <input
-                type="number" step="any"
-                value={location?.lat ?? ''}
-                onChange={e => setLocation(prev => ({ lat: parseFloat(e.target.value) || 0, lng: prev?.lng ?? 0 }))}
-                placeholder="Latitude"
-              />
-              <input
-                type="number" step="any"
-                value={location?.lng ?? ''}
-                onChange={e => setLocation(prev => ({ lat: prev?.lat ?? 0, lng: parseFloat(e.target.value) || 0 }))}
-                placeholder="Longitude"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={getCurrentLocation}
-              className="flex-shrink-0 flex items-center gap-1 text-xs text-ink hover:text-muted font-semibold transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-              GPS
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Harvest */}
         <div>
