@@ -198,6 +198,34 @@ function WindStrips({ morning, evening, showMorning, showEvening }: {
   )
 }
 
+function tempColor(t: number): string {
+  if (t <= 0)  return '#E2E8F0'  // white-grey — freezing cold
+  if (t <= 32) return '#BAE6FD'  // sky blue — below freezing
+  if (t <= 45) return '#1B4F6E'  // app dark blue — cold
+  if (t <= 60) return '#F97316'  // orange — cool
+  return '#DC2626'               // red — warm
+}
+
+function TempRangeBar({ min, max }: { min: number; max: number }) {
+  const lo = tempColor(min)
+  const hi = tempColor(max)
+  const bg = lo === hi ? lo : `linear-gradient(to right, ${lo}, ${hi})`
+  return (
+    <div style={{ background: bg, borderRadius: 5, width: 56, height: 8, flexShrink: 0 }} />
+  )
+}
+
+function ThermometerIcon({ temp, size = 24 }: { temp: number; size?: number }) {
+  const fill = tempColor(temp)
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="10" y="3" width="4" height="12" rx="2" stroke="currentColor" strokeWidth={1.5} className="text-muted" />
+      <circle cx="12" cy="18" r="3.5" fill={fill} stroke="currentColor" strokeWidth={1.5} className="text-muted" />
+      <rect x="11" y="9" width="2" height="7" rx="1" fill={fill} />
+    </svg>
+  )
+}
+
 function Row({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex items-center justify-between py-2.5">
@@ -353,23 +381,50 @@ export default function HuntDetail() {
               <span className="text-xs font-semibold text-ink underline underline-offset-2">Unlock</span>
             </button>
           ) : hunt.weather_data ? (
-            <div className="divide-y divide-hairline pb-1">
-              {hunt.weather_data.condition && (
-                <div className="flex items-center justify-between py-2.5">
-                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">Sky</span>
-                  <span className="flex items-center gap-2 text-sm font-semibold text-ink">
-                    <ConditionIcon code={hunt.weather_data.weather_code} size={18} />
-                    {hunt.weather_data.condition}
-                  </span>
+            <>
+              {/* 3-up visual row */}
+              <div className="flex divide-x divide-hairline py-3">
+                {/* Sky */}
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-2">
+                  <ConditionIcon code={hunt.weather_data.weather_code} size={28} className="text-ink" />
+                  <span className="text-xs font-semibold text-ink text-center leading-tight">{hunt.weather_data.condition ?? '—'}</span>
+                  <span className="text-xs text-muted uppercase tracking-widest">Sky</span>
+                </div>
+
+                {/* Avg Temp */}
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-2">
+                  <ThermometerIcon temp={hunt.weather_data.temp ?? 50} size={28} />
+                  <span className="text-xs font-semibold text-ink">{hunt.weather_data.temp != null ? `${hunt.weather_data.temp}°` : '—'}</span>
+                  <span className="text-xs text-muted uppercase tracking-widest">Avg</span>
+                </div>
+
+                {/* High / Low */}
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-2">
+                  {hunt.weather_data.temp_max != null && hunt.weather_data.temp_min != null ? (
+                    <>
+                      <TempRangeBar min={hunt.weather_data.temp_min} max={hunt.weather_data.temp_max} />
+                      <span className="text-xs font-semibold text-ink tabular-nums">
+                        {hunt.weather_data.temp_max}° / {hunt.weather_data.temp_min}°
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-xs font-semibold text-ink">—</span>
+                  )}
+                  <span className="text-xs text-muted uppercase tracking-widest">Hi / Lo</span>
+                </div>
+              </div>
+
+              {/* Secondary rows */}
+              {(hunt.weather_data.precipitation != null || hunt.weather_data.sunrise || hunt.weather_data.sunset) && (
+                <div className="divide-y divide-hairline border-t border-hairline pb-1">
+                  {hunt.weather_data.precipitation != null && hunt.weather_data.precipitation > 0 && (
+                    <Row label="Precip" value={`${hunt.weather_data.precipitation}"`} />
+                  )}
+                  {hunt.weather_data.sunrise && <Row label="Sunrise" value={hunt.weather_data.sunrise} />}
+                  {hunt.weather_data.sunset && <Row label="Sunset" value={hunt.weather_data.sunset} />}
                 </div>
               )}
-              {hunt.weather_data.temp != null && <Row label="Temp" value={`${hunt.weather_data.temp}°F`} />}
-              {hunt.weather_data.temp_max != null && <Row label="High / Low" value={`${hunt.weather_data.temp_max}° / ${hunt.weather_data.temp_min}°`} />}
-              {hunt.weather_data.wind_speed != null && <Row label="Max Wind" value={`${hunt.weather_data.wind_speed} mph`} />}
-              {hunt.weather_data.precipitation != null && <Row label="Precip" value={`${hunt.weather_data.precipitation}"`} />}
-              {hunt.weather_data.sunrise && <Row label="Sunrise" value={hunt.weather_data.sunrise} />}
-              {hunt.weather_data.sunset && <Row label="Sunset" value={hunt.weather_data.sunset} />}
-            </div>
+            </>
           ) : (
             <p className="text-sm text-muted py-3">No weather data available.</p>
           )}
