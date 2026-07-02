@@ -201,7 +201,8 @@ export default function HuntList() {
                     <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                       {format(new Date(hunt.date + 'T12:00:00'), 'MMM d, yyyy')}
                     </p>
-                    <p className="text-sm font-semibold text-ink truncate mt-0.5">{hunt.blind_name || hunt.name}</p>
+                    <p className="text-sm font-semibold text-ink truncate mt-0.5">{hunt.name}</p>
+                    {hunt.blind_name && <p className="text-xs text-muted truncate">{hunt.blind_name}</p>}
                     {summary && (
                       <p className="text-xs text-muted mt-0.5 truncate flex items-center gap-1">
                         <ConditionIcon code={hunt.weather_data?.weather_code} />
