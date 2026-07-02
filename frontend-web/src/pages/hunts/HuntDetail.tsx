@@ -123,44 +123,47 @@ function windColor(speed: number): string {
   return '#DC2626'                    // red — very strong
 }
 
-function WindStrip({ entries, label }: { entries: WindEntry[]; label: string }) {
-  if (!entries.length) return null
+function WindColumn({ e }: { e: WindEntry }) {
+  const color = windColor(e.speed)
   return (
-    <div className="pt-3 pb-2">
-      <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-2 px-5">{label} Wind</p>
+    <div className="flex flex-col items-center gap-1 w-14 flex-shrink-0">
+      <span className="text-xs font-mono text-muted">{e.time}</span>
+      <svg width={22} height={22} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)` }}>
+        <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
+      </svg>
+      <span className="text-xs font-bold" style={{ color }}>{e.cardinal}</span>
+      <span className="text-xs font-semibold tabular-nums" style={{ color }}>{e.speed}</span>
+    </div>
+  )
+}
+
+function WindStrips({ morning, evening, showMorning, showEvening }: {
+  morning: WindEntry[]; evening: WindEntry[]; showMorning: boolean; showEvening: boolean
+}) {
+  const hasBoth = showMorning && morning.length > 0 && showEvening && evening.length > 0
+  return (
+    <div className="pt-3 pb-3">
       <div className="overflow-x-auto">
-        <div className="flex gap-0 min-w-max px-5">
-          {entries.map((e, i) => {
-            const color = windColor(e.speed)
-            return (
-              <div key={i} className="flex flex-col items-center gap-1 w-14 flex-shrink-0">
-                <span className="text-xs font-mono text-muted">{e.time}</span>
-                <svg
-                  width={22} height={22} viewBox="0 0 22 22"
-                  style={{ transform: `rotate(${e.direction}deg)` }}
-                >
-                  <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
-                </svg>
-                <span className="text-xs font-bold" style={{ color }}>{e.cardinal}</span>
-                <span className="text-xs font-semibold tabular-nums" style={{ color }}>{e.speed}</span>
-              </div>
-            )
-          })}
+        <div className="flex min-w-max px-5 gap-0">
+          {showMorning && morning.map((e, i) => <WindColumn key={`m${i}`} e={e} />)}
+          {hasBoth && (
+            <div className="flex flex-col items-center justify-center w-6 flex-shrink-0 gap-1 self-stretch">
+              <div className="w-px flex-1 bg-hairline" />
+              <span className="text-xs text-muted rotate-90 whitespace-nowrap" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: '9px', lineHeight: 1 }}>EVE</span>
+              <div className="w-px flex-1 bg-hairline" />
+            </div>
+          )}
+          {showEvening && evening.map((e, i) => <WindColumn key={`e${i}`} e={e} />)}
         </div>
       </div>
-      <div className="flex items-center gap-2 px-5 mt-2.5">
-        {([
-          { label: 'Calm', maxMph: 5,  color: '#797B7E' },
-          { label: 'Light', maxMph: 12, color: '#1B5E45' },
-          { label: 'Mod',   maxMph: 20, color: '#1B4F6E' },
-          { label: 'Strong',maxMph: 30, color: '#D97706' },
-          { label: 'Gale',  maxMph: 99, color: '#DC2626' },
-        ] as const).map(tier => (
-          <div key={tier.label} className="flex items-center gap-1">
-            <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: tier.color }} />
-            <span className="text-xs text-muted">{tier.label}</span>
-          </div>
-        ))}
+      <div className="flex items-center gap-2 px-5 mt-1">
+        {showMorning && morning.length > 0 && (
+          <span className="text-xs text-muted">← Morning</span>
+        )}
+        {hasBoth && <span className="flex-1" />}
+        {showEvening && evening.length > 0 && (
+          <span className="text-xs text-muted">{hasBoth ? 'Evening →' : '← Evening'}</span>
+        )}
       </div>
     </div>
   )
@@ -346,15 +349,12 @@ export default function HuntDetail() {
         {/* Wind strips — full-bleed horizontal scroll */}
         {isPro && hunt.weather_data && (hunt.is_morning || hunt.is_evening) && (
           <div className="border-b border-hairline">
-            {hunt.is_morning && hunt.weather_data.wind_morning && (
-              <WindStrip entries={hunt.weather_data.wind_morning} label="Morning" />
-            )}
-            {hunt.is_morning && hunt.is_evening && hunt.weather_data.wind_morning?.length && hunt.weather_data.wind_evening?.length ? (
-              <div className="mx-5 border-t border-hairline" />
-            ) : null}
-            {hunt.is_evening && hunt.weather_data.wind_evening && (
-              <WindStrip entries={hunt.weather_data.wind_evening} label="Evening" />
-            )}
+            <WindStrips
+              morning={hunt.weather_data.wind_morning ?? []}
+              evening={hunt.weather_data.wind_evening ?? []}
+              showMorning={hunt.is_morning}
+              showEvening={hunt.is_evening}
+            />
           </div>
         )}
 
