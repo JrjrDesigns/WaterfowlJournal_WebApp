@@ -115,31 +115,50 @@ function ConditionIcon({ code, size = 20, className = 'text-ink' }: { code: numb
   )
 }
 
-function WindArrow({ deg }: { deg: number }) {
-  return (
-    <svg
-      width={14} height={14} viewBox="0 0 14 14"
-      style={{ transform: `rotate(${deg}deg)`, display: 'inline-block', flexShrink: 0 }}
-    >
-      <path d="M7 1 L10 9 L7 7 L4 9 Z" fill="currentColor" />
-    </svg>
-  )
+function windColor(speed: number): string {
+  if (speed <= 5)  return '#797B7E'   // muted — calm
+  if (speed <= 12) return '#1B5E45'   // green — light
+  if (speed <= 20) return '#1B4F6E'   // blue — moderate
+  if (speed <= 30) return '#D97706'   // amber — strong
+  return '#DC2626'                    // red — very strong
 }
 
-function WindTable({ entries, label }: { entries: WindEntry[]; label: string }) {
+function WindStrip({ entries, label }: { entries: WindEntry[]; label: string }) {
   if (!entries.length) return null
   return (
-    <div>
-      <p className="text-xs font-semibold text-muted uppercase tracking-widest pt-3 pb-1">{label} Wind</p>
-      <div className="divide-y divide-hairline">
-        {entries.map((e, i) => (
-          <div key={i} className="flex items-center py-2">
-            <span className="text-xs font-mono text-muted w-12 flex-shrink-0">{e.time}</span>
-            <span className="flex items-center gap-1.5 flex-1 text-xs font-semibold text-ink">
-              <WindArrow deg={e.direction} />
-              {e.cardinal}
-            </span>
-            <span className="text-xs font-semibold text-ink tabular-nums">{e.speed} mph</span>
+    <div className="pt-3 pb-2">
+      <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-2 px-5">{label} Wind</p>
+      <div className="overflow-x-auto">
+        <div className="flex gap-0 min-w-max px-5">
+          {entries.map((e, i) => {
+            const color = windColor(e.speed)
+            return (
+              <div key={i} className="flex flex-col items-center gap-1 w-14 flex-shrink-0">
+                <span className="text-xs font-mono text-muted">{e.time}</span>
+                <svg
+                  width={22} height={22} viewBox="0 0 22 22"
+                  style={{ transform: `rotate(${e.direction}deg)` }}
+                >
+                  <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
+                </svg>
+                <span className="text-xs font-bold" style={{ color }}>{e.cardinal}</span>
+                <span className="text-xs font-semibold tabular-nums" style={{ color }}>{e.speed}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-5 mt-2.5">
+        {([
+          { label: 'Calm', maxMph: 5,  color: '#797B7E' },
+          { label: 'Light', maxMph: 12, color: '#1B5E45' },
+          { label: 'Mod',   maxMph: 20, color: '#1B4F6E' },
+          { label: 'Strong',maxMph: 30, color: '#D97706' },
+          { label: 'Gale',  maxMph: 99, color: '#DC2626' },
+        ] as const).map(tier => (
+          <div key={tier.label} className="flex items-center gap-1">
+            <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: tier.color }} />
+            <span className="text-xs text-muted">{tier.label}</span>
           </div>
         ))}
       </div>
@@ -291,7 +310,7 @@ export default function HuntDetail() {
         </div>
 
         {/* Conditions */}
-        <div className="px-5 border-b border-hairline">
+        <div className={`px-5 ${(isPro && hunt.weather_data && (hunt.is_morning || hunt.is_evening)) ? '' : 'border-b border-hairline'}`}>
           <p className="text-xs font-semibold text-muted uppercase tracking-widest pt-3 pb-1">Conditions</p>
           {!isPro ? (
             <button
@@ -302,7 +321,7 @@ export default function HuntDetail() {
               <span className="text-xs font-semibold text-ink underline underline-offset-2">Unlock</span>
             </button>
           ) : hunt.weather_data ? (
-            <div className="divide-y divide-hairline">
+            <div className="divide-y divide-hairline pb-1">
               {hunt.weather_data.condition && (
                 <div className="flex items-center justify-between py-2.5">
                   <span className="text-xs font-semibold text-muted uppercase tracking-wider">Sky</span>
@@ -318,17 +337,26 @@ export default function HuntDetail() {
               {hunt.weather_data.precipitation != null && <Row label="Precip" value={`${hunt.weather_data.precipitation}"`} />}
               {hunt.weather_data.sunrise && <Row label="Sunrise" value={hunt.weather_data.sunrise} />}
               {hunt.weather_data.sunset && <Row label="Sunset" value={hunt.weather_data.sunset} />}
-              {hunt.is_morning && hunt.weather_data.wind_morning && (
-                <WindTable entries={hunt.weather_data.wind_morning} label="Morning" />
-              )}
-              {hunt.is_evening && hunt.weather_data.wind_evening && (
-                <WindTable entries={hunt.weather_data.wind_evening} label="Evening" />
-              )}
             </div>
           ) : (
             <p className="text-sm text-muted py-3">No weather data available.</p>
           )}
         </div>
+
+        {/* Wind strips — full-bleed horizontal scroll */}
+        {isPro && hunt.weather_data && (hunt.is_morning || hunt.is_evening) && (
+          <div className="border-b border-hairline">
+            {hunt.is_morning && hunt.weather_data.wind_morning && (
+              <WindStrip entries={hunt.weather_data.wind_morning} label="Morning" />
+            )}
+            {hunt.is_morning && hunt.is_evening && hunt.weather_data.wind_morning?.length && hunt.weather_data.wind_evening?.length ? (
+              <div className="mx-5 border-t border-hairline" />
+            ) : null}
+            {hunt.is_evening && hunt.weather_data.wind_evening && (
+              <WindStrip entries={hunt.weather_data.wind_evening} label="Evening" />
+            )}
+          </div>
+        )}
 
         {/* Harvest */}
         {hunt.harvests.length > 0 && (
