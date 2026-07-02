@@ -123,46 +123,75 @@ function windColor(speed: number): string {
   return '#DC2626'                    // red — very strong
 }
 
-function WindColumn({ e }: { e: WindEntry }) {
-  const color = windColor(e.speed)
-  return (
-    <div className="flex flex-col items-center gap-1 w-14 flex-shrink-0">
-      <span className="text-xs font-mono text-muted">{e.time}</span>
-      <svg width={22} height={22} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)` }}>
-        <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
-      </svg>
-      <span className="text-xs font-bold" style={{ color }}>{e.cardinal}</span>
-      <span className="text-xs font-semibold tabular-nums" style={{ color }}>{e.speed}</span>
-    </div>
-  )
+function fmtHour(time: string): string {
+  const h = parseInt(time.slice(0, 2))
+  if (h === 0) return '12a'
+  if (h < 12) return `${h}a`
+  if (h === 12) return '12p'
+  return `${h - 12}p`
 }
 
 function WindStrips({ morning, evening, showMorning, showEvening }: {
   morning: WindEntry[]; evening: WindEntry[]; showMorning: boolean; showEvening: boolean
 }) {
-  const hasBoth = showMorning && morning.length > 0 && showEvening && evening.length > 0
+  const mEntries = showMorning ? morning : []
+  const eEntries = showEvening ? evening : []
+  const hasBoth = mEntries.length > 0 && eEntries.length > 0
+  if (!mEntries.length && !eEntries.length) return null
+
   return (
-    <div className="pt-3 pb-3">
-      <div className="overflow-x-auto">
-        <div className="flex min-w-max px-5 gap-0">
-          {showMorning && morning.map((e, i) => <WindColumn key={`m${i}`} e={e} />)}
-          {hasBoth && (
-            <div className="flex flex-col items-center justify-center w-6 flex-shrink-0 gap-1 self-stretch">
-              <div className="w-px flex-1 bg-hairline" />
-              <span className="text-xs text-muted rotate-90 whitespace-nowrap" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: '9px', lineHeight: 1 }}>EVE</span>
-              <div className="w-px flex-1 bg-hairline" />
-            </div>
-          )}
-          {showEvening && evening.map((e, i) => <WindColumn key={`e${i}`} e={e} />)}
+    <div className="pt-3 pb-3 px-5">
+      {/* Section labels — only when both present */}
+      {hasBoth && (
+        <div className="flex mb-2" style={{ marginRight: 9 }}>
+          <div className="text-center" style={{ flex: mEntries.length }}>
+            <span className="text-xs font-semibold text-muted uppercase tracking-widest">Morning</span>
+          </div>
+          <div style={{ width: 9 }} />
+          <div className="text-center" style={{ flex: eEntries.length }}>
+            <span className="text-xs font-semibold text-muted uppercase tracking-widest">Evening</span>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2 px-5 mt-1">
-        {showMorning && morning.length > 0 && (
-          <span className="text-xs text-muted">← Morning</span>
+      )}
+
+      {/* Grid row */}
+      <div className="flex items-stretch">
+        {mEntries.length > 0 && (
+          <div style={{ flex: mEntries.length, display: 'grid', gridTemplateColumns: `repeat(${mEntries.length}, 1fr)` }}>
+            {mEntries.map((e, i) => {
+              const color = windColor(e.speed)
+              return (
+                <div key={i} className="flex flex-col items-center gap-0.5 py-1">
+                  <span className="text-xs font-mono text-muted leading-none">{fmtHour(e.time)}</span>
+                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)`, flexShrink: 0 }}>
+                    <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
+                  </svg>
+                  <span className="text-xs font-bold leading-none" style={{ color }}>{e.cardinal}</span>
+                  <span className="text-xs font-semibold tabular-nums leading-none" style={{ color }}>{e.speed}</span>
+                </div>
+              )
+            })}
+          </div>
         )}
-        {hasBoth && <span className="flex-1" />}
-        {showEvening && evening.length > 0 && (
-          <span className="text-xs text-muted">{hasBoth ? 'Evening →' : '← Evening'}</span>
+
+        {hasBoth && <div className="w-px bg-hairline flex-shrink-0 mx-1" />}
+
+        {eEntries.length > 0 && (
+          <div style={{ flex: eEntries.length, display: 'grid', gridTemplateColumns: `repeat(${eEntries.length}, 1fr)` }}>
+            {eEntries.map((e, i) => {
+              const color = windColor(e.speed)
+              return (
+                <div key={i} className="flex flex-col items-center gap-0.5 py-1">
+                  <span className="text-xs font-mono text-muted leading-none">{fmtHour(e.time)}</span>
+                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)`, flexShrink: 0 }}>
+                    <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
+                  </svg>
+                  <span className="text-xs font-bold leading-none" style={{ color }}>{e.cardinal}</span>
+                  <span className="text-xs font-semibold tabular-nums leading-none" style={{ color }}>{e.speed}</span>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
     </div>
