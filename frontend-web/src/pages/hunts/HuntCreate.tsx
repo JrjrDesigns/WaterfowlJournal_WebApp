@@ -57,6 +57,8 @@ export default function HuntCreate() {
   const [selectedBlindId, setSelectedBlindId] = useState('')
   const [date, setDate] = useState<Date>(new Date())
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [isMorning, setIsMorning] = useState(false)
+  const [isEvening, setIsEvening] = useState(false)
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<string[]>([])
   const [harvests, setHarvests] = useState<Harvest[]>([])
@@ -127,6 +129,8 @@ export default function HuntCreate() {
         location,
         notes,
         photos,
+        is_morning: isMorning,
+        is_evening: isEvening,
         harvests: harvests.map(h => ({
           species_name: h.species,
           count: h.harvested,
@@ -178,6 +182,42 @@ export default function HuntCreate() {
             className="!bg-white !border !border-hairline !text-ink !rounded-lg !px-3 !py-2 !w-full"
             wrapperClassName="w-full"
           />
+        </div>
+
+        {/* Hunt Time */}
+        <div>
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunt Time</label>
+          <div className="flex gap-3">
+            {([
+              { key: 'morning', label: 'Morning', checked: isMorning, set: setIsMorning },
+              { key: 'evening', label: 'Evening', checked: isEvening, set: setIsEvening },
+            ] as const).map(({ key, label, checked, set }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => set(!checked)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
+                  checked
+                    ? 'bg-ink text-white border-ink'
+                    : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
+                }`}
+              >
+                <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-white border-white' : 'border-current'}`}>
+                  {checked && (
+                    <svg className="w-3 h-3 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+          {(isMorning || isEvening) && (
+            <p className="text-xs text-muted mt-1.5">
+              Wind data will be logged for {[isMorning && 'sunrise→noon', isEvening && '~4 hrs pre-sunset→sunset'].filter(Boolean).join(' and ')}.
+            </p>
+          )}
         </div>
 
         {/* Location → Blind */}

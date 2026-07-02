@@ -113,6 +113,8 @@ class HuntCreate(BaseModel):
     notes: str = ""
     photos: List[str] = []
     harvests: List[HarvestData] = []
+    is_morning: bool = False
+    is_evening: bool = False
 
 class Hunt(BaseModel):
     id: str
@@ -127,6 +129,8 @@ class Hunt(BaseModel):
     notes: str = ""
     photos: List[str] = []
     harvests: List[HarvestData] = []
+    is_morning: bool = False
+    is_evening: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Statistics(BaseModel):
@@ -174,45 +178,56 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise credentials_exception
     return user
 
-def fetch_weather_data(lat: float, lng: float, date_str: str):
+def _deg_to_cardinal(deg: float) -> str:
+    dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    return dirs[round(deg / 45) % 8]
+
+def _filter_wind_window(times, speeds, directions, start_hour: int, end_hour: int) -> list:
+    result = []
+    for t, sp, di in zip(times, speeds, directions):
+        h = int(t[11:13])  # "YYYY-MM-DDTHH:MM" → hour int
+        if start_hour <= h <= end_hour:
+            result.append({
+                "time": t[11:16],
+                "speed": round(sp, 1) if sp is not None else 0,
+                "direction": round(di) if di is not None else 0,
+                "cardinal": _deg_to_cardinal(di) if di is not None else "N"
+            })
+    return result
+
+def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool = False, is_evening: bool = False):
     """Fetch weather data from Open-Meteo API (free, supports historical data)"""
     try:
         from datetime import datetime, timedelta
-        
-        # Parse the hunt date
+
         hunt_date = datetime.strptime(date_str, "%Y-%m-%d").date()
         today = datetime.now().date()
-        
-        # Determine which API endpoint to use
-        # Historical API: for dates in the past
-        # Forecast API: for dates within next ~16 days
         days_difference = (hunt_date - today).days
-        
+
         if days_difference < 0:
-            # Historical data (past dates)
             url = "https://archive-api.open-meteo.com/v1/archive"
         else:
-            # Current or future forecast
             url = "https://api.open-meteo.com/v1/forecast"
-        
+
         params = {
             "latitude": lat,
             "longitude": lng,
-            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode",
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode,sunrise,sunset",
+            "hourly": "windspeed_10m,winddirection_10m",
             "temperature_unit": "fahrenheit",
             "windspeed_unit": "mph",
             "timezone": "auto",
             "start_date": date_str,
             "end_date": date_str
         }
-        
+
         response = requests.get(url, params=params, timeout=10)
-        
+
         if response.status_code == 200:
             data = response.json()
             daily = data.get("daily", {})
-            
-            # Weather code mapping (WMO Weather interpretation codes)
+            hourly = data.get("hourly", {})
+
             weather_codes = {
                 0: "Clear sky",
                 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -225,41 +240,63 @@ def fetch_weather_data(lat: float, lng: float, date_str: str):
                 85: "Slight snow showers", 86: "Heavy snow showers",
                 95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail"
             }
-            
+
             temp_max = daily.get("temperature_2m_max", [None])[0]
             temp_min = daily.get("temperature_2m_min", [None])[0]
             precipitation = daily.get("precipitation_sum", [0])[0]
             wind_speed = daily.get("windspeed_10m_max", [0])[0]
             weather_code = daily.get("weathercode", [0])[0]
-            
-            # Calculate average temp
+            sunrise_str = (daily.get("sunrise", [""])[0] or "")
+            sunset_str = (daily.get("sunset", [""])[0] or "")
+
             avg_temp = round((temp_max + temp_min) / 2, 1) if temp_max and temp_min else None
-            
             condition = weather_codes.get(weather_code, "Unknown")
-            
+
+            # Parse sunrise/sunset hours for wind windows
+            sunrise_hour = int(sunrise_str[11:13]) if len(sunrise_str) >= 13 else 6
+            sunset_hour = int(sunset_str[11:13]) if len(sunset_str) >= 13 else 19
+            evening_start = max(sunrise_hour, sunset_hour - 5)
+
+            times = hourly.get("time", [])
+            speeds = hourly.get("windspeed_10m", [])
+            directions = hourly.get("winddirection_10m", [])
+
+            wind_morning = _filter_wind_window(times, speeds, directions, sunrise_hour, 12)
+            wind_evening = _filter_wind_window(times, speeds, directions, evening_start, sunset_hour)
+
             return {
                 "temp": avg_temp or 0,
                 "temp_max": temp_max or 0,
                 "temp_min": temp_min or 0,
                 "condition": condition,
+                "weather_code": weather_code,
                 "wind_speed": wind_speed or 0,
                 "precipitation": precipitation or 0,
-                "description": f"{condition}, {precipitation}\" precip" if precipitation else condition
+                "description": f"{condition}, {precipitation}\" precip" if precipitation else condition,
+                "sunrise": sunrise_str[11:16] if len(sunrise_str) >= 16 else "",
+                "sunset": sunset_str[11:16] if len(sunset_str) >= 16 else "",
+                "wind_morning": wind_morning,
+                "wind_evening": wind_evening,
             }
         else:
             logger.error(f"Open-Meteo API error: {response.status_code} - {response.text}")
-            
+
     except Exception as e:
         logger.error(f"Open-Meteo API error: {e}")
-    
+
     return {
         "temp": 0,
         "temp_max": 0,
         "temp_min": 0,
         "condition": "Unknown",
+        "weather_code": 0,
         "wind_speed": 0,
         "precipitation": 0,
-        "description": "Weather data unavailable"
+        "description": "Weather data unavailable",
+        "sunrise": "",
+        "sunset": "",
+        "wind_morning": [],
+        "wind_evening": [],
     }
 
 # ============ AUTH ROUTES ============
@@ -471,6 +508,8 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
             "notes": hunt.get("notes", ""),
             "photos": hunt.get("photos", []),
             "harvests": transformed_harvests,
+            "is_morning": hunt.get("is_morning", False),
+            "is_evening": hunt.get("is_evening", False),
             "created_at": hunt.get("created_at", datetime.utcnow())
         })
     
@@ -514,9 +553,11 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
     weather_data = fetch_weather_data(
         hunt_data.location["lat"],
         hunt_data.location["lng"],
-        hunt_data.date
+        hunt_data.date,
+        is_morning=hunt_data.is_morning,
+        is_evening=hunt_data.is_evening,
     )
-    
+
     hunt_doc = {
         "user_id": user_id,
         "name": hunt_data.name,
@@ -529,6 +570,8 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "notes": hunt_data.notes,
         "photos": hunt_data.photos,
         "harvests": [h.dict() for h in hunt_data.harvests],
+        "is_morning": hunt_data.is_morning,
+        "is_evening": hunt_data.is_evening,
         "created_at": datetime.utcnow()
     }
     result = await db.hunts.insert_one(hunt_doc)
@@ -547,6 +590,8 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "notes": hunt_data.notes,
         "photos": hunt_data.photos,
         "harvests": hunt_data.harvests,
+        "is_morning": hunt_data.is_morning,
+        "is_evening": hunt_data.is_evening,
         "created_at": datetime.utcnow()
     }
 
@@ -580,6 +625,8 @@ async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user))
         "notes": hunt.get("notes", ""),
         "photos": hunt.get("photos", []),
         "harvests": transformed_harvests,
+        "is_morning": hunt.get("is_morning", False),
+        "is_evening": hunt.get("is_evening", False),
         "created_at": hunt.get("created_at", datetime.utcnow())
     }
 

@@ -22,6 +22,13 @@ const greenIcon = new L.Icon({
   shadowSize: [41, 41],
 })
 
+interface WindEntry {
+  time: string
+  speed: number
+  direction: number
+  cardinal: string
+}
+
 interface Hunt {
   id: string
   name: string
@@ -30,14 +37,21 @@ interface Hunt {
   blind_name: string
   notes: string
   photos: string[]
+  is_morning: boolean
+  is_evening: boolean
   weather_data: {
     temp?: number
     temp_max?: number
     temp_min?: number
     condition?: string
+    weather_code?: number
     wind_speed?: number
     precipitation?: number
     description?: string
+    sunrise?: string
+    sunset?: string
+    wind_morning?: WindEntry[]
+    wind_evening?: WindEntry[]
   } | null
   harvests: Array<{
     species_name: string
@@ -45,6 +59,92 @@ interface Hunt {
     missed: number
     shot_not_recovered: number
   }>
+}
+
+function wmoCategory(code: number | undefined): string {
+  if (code == null) return 'clear'
+  if (code <= 1) return 'clear'
+  if (code <= 3) return 'cloudy'
+  if (code <= 48) return 'fog'
+  if (code <= 67 || (code >= 80 && code <= 82)) return 'rain'
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow'
+  if (code >= 95) return 'thunder'
+  return 'clear'
+}
+
+function ConditionIcon({ code, size = 20, className = 'text-ink' }: { code: number | undefined; size?: number; className?: string }) {
+  const cat = wmoCategory(code)
+  const s = size
+  const props = { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, className }
+  if (cat === 'clear') return (
+    <svg {...props}>
+      <circle cx="12" cy="12" r="5" fill="currentColor" fillOpacity={0.15} />
+      <line x1="12" y1="2" x2="12" y2="4" /><line x1="12" y1="20" x2="12" y2="22" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="2" y1="12" x2="4" y2="12" /><line x1="20" y1="12" x2="22" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  )
+  if (cat === 'cloudy') return (
+    <svg {...props}>
+      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="currentColor" fillOpacity={0.12} />
+    </svg>
+  )
+  if (cat === 'fog') return (
+    <svg {...props}>
+      <line x1="3" y1="10" x2="21" y2="10" /><line x1="3" y1="14" x2="21" y2="14" /><line x1="5" y1="18" x2="19" y2="18" />
+    </svg>
+  )
+  if (cat === 'rain') return (
+    <svg {...props}>
+      <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25" fill="currentColor" fillOpacity={0.1} />
+      <line x1="8" y1="19" x2="8" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="16" y1="19" x2="16" y2="21" />
+    </svg>
+  )
+  if (cat === 'snow') return (
+    <svg {...props}>
+      <line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="12" x2="22" y2="12" />
+      <polyline points="17 7 12 12 7 7" /><polyline points="7 17 12 12 17 17" />
+    </svg>
+  )
+  return (
+    <svg {...props}>
+      <path d="M19 16.9A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 3 15.9" fill="currentColor" fillOpacity={0.1} />
+      <polyline points="13 11 9 17 15 17 11 23" fill="currentColor" fillOpacity={0.15} />
+    </svg>
+  )
+}
+
+function WindArrow({ deg }: { deg: number }) {
+  return (
+    <svg
+      width={14} height={14} viewBox="0 0 14 14"
+      style={{ transform: `rotate(${deg}deg)`, display: 'inline-block', flexShrink: 0 }}
+    >
+      <path d="M7 1 L10 9 L7 7 L4 9 Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function WindTable({ entries, label }: { entries: WindEntry[]; label: string }) {
+  if (!entries.length) return null
+  return (
+    <div>
+      <p className="text-xs font-semibold text-muted uppercase tracking-widest pt-3 pb-1">{label} Wind</p>
+      <div className="divide-y divide-hairline">
+        {entries.map((e, i) => (
+          <div key={i} className="flex items-center py-2">
+            <span className="text-xs font-mono text-muted w-12 flex-shrink-0">{e.time}</span>
+            <span className="flex items-center gap-1.5 flex-1 text-xs font-semibold text-ink">
+              <WindArrow deg={e.direction} />
+              {e.cardinal}
+            </span>
+            <span className="text-xs font-semibold text-ink tabular-nums">{e.speed} mph</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function Row({ label, value }: { label: string; value: string | number }) {
@@ -203,11 +303,27 @@ export default function HuntDetail() {
             </button>
           ) : hunt.weather_data ? (
             <div className="divide-y divide-hairline">
+              {hunt.weather_data.condition && (
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">Sky</span>
+                  <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+                    <ConditionIcon code={hunt.weather_data.weather_code} size={18} />
+                    {hunt.weather_data.condition}
+                  </span>
+                </div>
+              )}
               {hunt.weather_data.temp != null && <Row label="Temp" value={`${hunt.weather_data.temp}°F`} />}
               {hunt.weather_data.temp_max != null && <Row label="High / Low" value={`${hunt.weather_data.temp_max}° / ${hunt.weather_data.temp_min}°`} />}
-              {hunt.weather_data.wind_speed != null && <Row label="Wind" value={`${hunt.weather_data.wind_speed} mph`} />}
-              {hunt.weather_data.condition && <Row label="Sky" value={hunt.weather_data.condition} />}
+              {hunt.weather_data.wind_speed != null && <Row label="Max Wind" value={`${hunt.weather_data.wind_speed} mph`} />}
               {hunt.weather_data.precipitation != null && <Row label="Precip" value={`${hunt.weather_data.precipitation}"`} />}
+              {hunt.weather_data.sunrise && <Row label="Sunrise" value={hunt.weather_data.sunrise} />}
+              {hunt.weather_data.sunset && <Row label="Sunset" value={hunt.weather_data.sunset} />}
+              {hunt.is_morning && hunt.weather_data.wind_morning && (
+                <WindTable entries={hunt.weather_data.wind_morning} label="Morning" />
+              )}
+              {hunt.is_evening && hunt.weather_data.wind_evening && (
+                <WindTable entries={hunt.weather_data.wind_evening} label="Evening" />
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted py-3">No weather data available.</p>
