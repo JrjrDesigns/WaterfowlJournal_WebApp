@@ -35,6 +35,7 @@ interface Hunt {
   date: string
   location: { lat: number; lng: number }
   blind_name: string
+  location_type: string | null
   notes: string
   photos: string[]
   is_morning: boolean
@@ -351,21 +352,25 @@ export default function HuntDetail() {
       {/* Log entry card */}
       <div className="bg-surface border border-hairline rounded-xl overflow-hidden mb-4">
 
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-hairline">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="font-display text-3xl text-ink tracking-wider leading-none">{hunt.name}</h1>
-              <p className="text-sm text-muted mt-1">{hunt.blind_name}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                {format(new Date(hunt.date + 'T12:00:00'), 'MMM d, yyyy')}
-              </p>
-              <p className="text-xs text-muted font-mono mt-0.5">
-                {hunt.location.lat.toFixed(4)}°, {hunt.location.lng.toFixed(4)}°
-              </p>
-            </div>
+        {/* Hero */}
+        <div className="relative h-44 bg-ink overflow-hidden border-b border-hairline">
+          {hunt.location_type && (
+            <img
+              src={`/location-types/${hunt.location_type}.jpg`}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          )}
+          {/* gradient: transparent top → dark ink bottom */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(19,20,26,0.15) 0%, rgba(19,20,26,0.75) 100%)' }} />
+          {/* Text sits on top of gradient */}
+          <div className="absolute inset-0 flex flex-col justify-end px-5 pb-4">
+            <p className="text-xs font-semibold text-white/70 uppercase tracking-widest mb-0.5">
+              {format(new Date(hunt.date + 'T12:00:00'), 'MMM d, yyyy')}
+            </p>
+            <h1 className="font-display text-4xl text-white tracking-wider leading-none">{hunt.name}</h1>
+            <p className="text-sm text-white/70 mt-1">{hunt.blind_name}</p>
           </div>
         </div>
 

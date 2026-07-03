@@ -62,7 +62,7 @@ function typeLabel(t: string) {
 function LocationTypeStub({ type }: { type: string }) {
   const imgSrc = `/location-types/${type}.jpg`
   return (
-    <div className="w-20 flex-shrink-0 bg-green/10 flex items-center justify-center border-r border-hairline overflow-hidden relative">
+    <div className="w-28 flex-shrink-0 bg-green/10 flex items-center justify-center border-r border-hairline overflow-hidden relative">
       <img
         src={imgSrc}
         alt={type}
