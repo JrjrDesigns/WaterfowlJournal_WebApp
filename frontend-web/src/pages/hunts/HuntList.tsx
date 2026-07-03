@@ -182,7 +182,7 @@ export default function HuntList() {
                   className="flex items-stretch hover:bg-bg transition-colors group"
                 >
                   {/* Location type stub */}
-                  <div className="w-16 flex-shrink-0 relative bg-green/10 border-r border-hairline overflow-hidden flex items-center justify-center">
+                  <div className="w-24 flex-shrink-0 relative bg-green/10 border-r border-hairline overflow-hidden flex items-center justify-center">
                     {hunt.location_type && (
                       <img
                         src={`/location-types/${hunt.location_type}.jpg`}
