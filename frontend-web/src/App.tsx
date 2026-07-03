@@ -7,6 +7,7 @@ import Register from './pages/auth/Register'
 import HuntList from './pages/hunts/HuntList'
 import HuntCreate from './pages/hunts/HuntCreate'
 import HuntDetail from './pages/hunts/HuntDetail'
+import HuntEdit from './pages/hunts/HuntEdit'
 import Locations from './pages/Locations'
 import Stats from './pages/Stats'
 import Profile from './pages/Profile'
@@ -46,6 +47,7 @@ function AppRoutes() {
         <Route path="/hunts" element={<HuntList />} />
         <Route path="/hunts/create" element={<HuntCreate />} />
         <Route path="/hunts/:id" element={<HuntDetail />} />
+        <Route path="/hunts/:id/edit" element={<HuntEdit />} />
         <Route path="/locations" element={<Locations />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/profile" element={<Profile />} />

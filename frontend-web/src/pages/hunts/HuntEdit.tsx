@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
-import { format } from 'date-fns'
-import { fetchLocations, fetchBlindsForLocation, fetchSpecies, createHunt } from '../../utils/api'
+import { format, parse } from 'date-fns'
+import { fetchHunt, fetchLocations, fetchBlindsForLocation, fetchSpecies, updateHunt } from '../../utils/api'
 import { compressImage } from '../../utils/compressImage'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
@@ -24,30 +24,15 @@ const greenIcon = new L.Icon({
   shadowSize: [41, 41],
 })
 
-interface LocationData {
-  id: string
-  name: string
-  location_type: string
-}
+interface LocationData { id: string; name: string; location_type: string }
+interface BlindData { id: string; name: string; location_id: string; lat: number; lng: number }
+interface Harvest { species: string; harvested: number; missed: number; shot_not_recovered: number }
 
-interface BlindData {
-  id: string
-  name: string
-  location_id: string
-  lat: number
-  lng: number
-}
-
-interface Harvest {
-  species: string
-  harvested: number
-  missed: number
-  shot_not_recovered: number
-}
-
-export default function HuntCreate() {
+export default function HuntEdit() {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [locations, setLocations] = useState<LocationData[]>([])
   const [blinds, setBlinds] = useState<BlindData[]>([])
   const [allSpecies, setAllSpecies] = useState<string[]>([])
@@ -65,14 +50,53 @@ export default function HuntCreate() {
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadInitialData() }, [])
 
-  const loadData = async () => {
+  const loadInitialData = async () => {
     try {
-      const [locsData, speciesData] = await Promise.all([fetchLocations(), fetchSpecies()])
+      const [hunt, locsData, speciesData] = await Promise.all([
+        fetchHunt(id!),
+        fetchLocations(),
+        fetchSpecies(),
+      ])
+
       setLocations(locsData)
       setAllSpecies([...speciesData.ducks, ...speciesData.geese, ...speciesData.others])
-    } catch { /* ignore */ }
+
+      // Pre-populate fields
+      setHuntName(hunt.name)
+      setDate(parse(hunt.date, 'yyyy-MM-dd', new Date()))
+      setLocation(hunt.location)
+      setIsMorning(hunt.is_morning ?? false)
+      setIsEvening(hunt.is_evening ?? false)
+      setNotes(hunt.notes ?? '')
+      setPhotos(hunt.photos ?? [])
+      setHarvests((hunt.harvests ?? []).map((h: { species_name: string; count: number; missed: number; shot_not_recovered: number }) => ({
+        species: h.species_name,
+        harvested: h.count,
+        missed: h.missed,
+        shot_not_recovered: h.shot_not_recovered,
+      })))
+
+      // Restore location + blind selection
+      if (hunt.blind_id) {
+        setSelectedBlindId(hunt.blind_id)
+        // find the location_id for this blind
+        const allBlinds = await Promise.all(locsData.map((l: LocationData) => fetchBlindsForLocation(l.id)))
+        for (let i = 0; i < locsData.length; i++) {
+          const match = allBlinds[i].find((b: BlindData) => b.id === hunt.blind_id)
+          if (match) {
+            setSelectedLocationId(locsData[i].id)
+            setBlinds(allBlinds[i])
+            break
+          }
+        }
+      }
+    } catch {
+      navigate(`/hunts/${id}`)
+    } finally {
+      setInitialLoading(false)
+    }
   }
 
   const handleLocationChange = async (locId: string) => {
@@ -105,7 +129,7 @@ export default function HuntCreate() {
     setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0 }])
   }
 
-  const updateHarvest = (i: number, field: keyof Harvest, value: string | number) => {
+  const updateHarvestEntry = (i: number, field: keyof Harvest, value: string | number) => {
     setHarvests(prev => {
       const next = [...prev]
       next[i] = { ...next[i], [field]: value }
@@ -122,7 +146,7 @@ export default function HuntCreate() {
 
     setLoading(true)
     try {
-      const huntData: Record<string, unknown> = {
+      await updateHunt(id!, {
         name: huntName,
         blind_id: selectedBlindId,
         date: format(date, 'yyyy-MM-dd'),
@@ -137,33 +161,37 @@ export default function HuntCreate() {
           missed: h.missed,
           shot_not_recovered: h.shot_not_recovered,
         })),
-      }
-      await createHunt(huntData)
-      navigate('/hunts')
+      })
+      navigate(`/hunts/${id}`)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create hunt')
+      setError(err instanceof Error ? err.message : 'Failed to save changes')
     } finally {
       setLoading(false)
     }
   }
 
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-ink" />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/hunts')} className="text-muted hover:text-ink transition-colors">
+        <button onClick={() => navigate(`/hunts/${id}`)} className="text-muted hover:text-ink transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="font-display text-3xl text-ink tracking-wider leading-none">LOG HUNT</h1>
+        <h1 className="font-display text-3xl text-ink tracking-wider leading-none">EDIT HUNT</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-            {error}
-          </div>
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>
         )}
 
         {/* Hunt Name */}
@@ -197,9 +225,7 @@ export default function HuntCreate() {
                 type="button"
                 onClick={() => set(!checked)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
-                  checked
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
+                  checked ? 'bg-ink text-white border-ink' : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
                 }`}
               >
                 <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-white border-white' : 'border-current'}`}>
@@ -213,11 +239,6 @@ export default function HuntCreate() {
               </button>
             ))}
           </div>
-          {(isMorning || isEvening) && (
-            <p className="text-xs text-muted mt-1.5">
-              Wind data will be logged for {[isMorning && 'sunrise→noon', isEvening && '~4 hrs pre-sunset→sunset'].filter(Boolean).join(' and ')}.
-            </p>
-          )}
         </div>
 
         {/* Location → Blind */}
@@ -228,9 +249,6 @@ export default function HuntCreate() {
               <option value="">Select a location…</option>
               {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
             </select>
-            {locations.length === 0 && (
-              <p className="text-xs text-muted mt-1.5">No locations yet — add one in the Locations tab first.</p>
-            )}
           </div>
           {selectedLocationId && (
             <div>
@@ -239,38 +257,14 @@ export default function HuntCreate() {
                 <option value="">Select a blind…</option>
                 {blinds.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
-              {blinds.length === 0 && (
-                <p className="text-xs text-muted mt-1.5">No blinds at this location — add one in the Locations tab.</p>
-              )}
             </div>
           )}
-          <p className="text-xs text-muted mt-2">
-            Hunting a new spot?{' '}
-            <button type="button" onClick={() => navigate('/locations')}
-              className="font-semibold text-ink underline underline-offset-2">
-              Add it in Locations first →
-            </button>
-          </p>
         </div>
 
-        {/* Read-only map — shown once a blind is selected */}
         {location && (
           <div className="h-48 rounded-xl overflow-hidden border border-hairline pointer-events-none">
-            <MapContainer
-              center={[location.lat, location.lng]}
-              zoom={17}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={false}
-              dragging={false}
-              scrollWheelZoom={false}
-              doubleClickZoom={false}
-              touchZoom={false}
-            >
-              <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                attribution='&copy; Esri'
-                maxZoom={19}
-              />
+            <MapContainer center={[location.lat, location.lng]} zoom={17} style={{ height: '100%', width: '100%' }} zoomControl={false} dragging={false} scrollWheelZoom={false} doubleClickZoom={false} touchZoom={false}>
+              <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution='&copy; Esri' maxZoom={19} />
               <Marker position={[location.lat, location.lng]} icon={greenIcon} />
             </MapContainer>
           </div>
@@ -312,7 +306,7 @@ export default function HuntCreate() {
                       </svg>
                     </button>
                   </div>
-                  <select value={harvest.species} onChange={e => updateHarvest(i, 'species', e.target.value)} className="mb-3">
+                  <select value={harvest.species} onChange={e => updateHarvestEntry(i, 'species', e.target.value)} className="mb-3">
                     {allSpecies.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                   <div className="grid grid-cols-3 gap-2">
@@ -324,7 +318,7 @@ export default function HuntCreate() {
                         <input
                           type="number" min="0"
                           value={harvest[field]}
-                          onChange={e => updateHarvest(i, field, parseInt(e.target.value) || 0)}
+                          onChange={e => updateHarvestEntry(i, field, parseInt(e.target.value) || 0)}
                           className="text-center"
                         />
                       </div>
@@ -382,7 +376,7 @@ export default function HuntCreate() {
           disabled={loading}
           className="w-full bg-ink hover:bg-black disabled:opacity-50 text-white font-semibold py-4 rounded-xl transition-colors text-sm"
         >
-          {loading ? 'Saving…' : 'Record Hunt'}
+          {loading ? 'Saving…' : 'Save Changes'}
         </button>
       </form>
     </div>

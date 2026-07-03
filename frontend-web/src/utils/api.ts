@@ -59,6 +59,9 @@ export const fetchHuntYears = () => apiRequest('/api/hunts/years')
 export const createHunt = (data: unknown) =>
   apiRequest('/api/hunts', { method: 'POST', body: JSON.stringify(data) })
 
+export const updateHunt = (id: string, data: unknown) =>
+  apiRequest(`/api/hunts/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+
 export const deleteHunt = (id: string) =>
   apiRequest(`/api/hunts/${id}`, { method: 'DELETE' })
 

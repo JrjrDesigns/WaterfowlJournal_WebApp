@@ -595,6 +595,66 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "created_at": datetime.utcnow()
     }
 
+@api_router.put("/hunts/{hunt_id}", response_model=Hunt)
+async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    existing = await db.hunts.find_one({"_id": ObjectId(hunt_id), "user_id": user_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Hunt not found")
+
+    blind_name = hunt_data.blind_name or existing.get("blind_name", "Unknown Location")
+    blind_id = hunt_data.blind_id
+    location_type = existing.get("location_type")
+
+    if hunt_data.blind_id:
+        blind = await db.blinds.find_one({"_id": ObjectId(hunt_data.blind_id), "user_id": user_id})
+        if blind:
+            blind_name = blind["name"]
+            loc = await db.locations.find_one({"_id": ObjectId(blind["location_id"])})
+            if loc:
+                location_type = loc.get("location_type")
+
+    weather_data = fetch_weather_data(
+        hunt_data.location["lat"],
+        hunt_data.location["lng"],
+        hunt_data.date,
+        is_morning=hunt_data.is_morning,
+        is_evening=hunt_data.is_evening,
+    )
+
+    await db.hunts.update_one({"_id": ObjectId(hunt_id)}, {"$set": {
+        "name": hunt_data.name,
+        "blind_id": blind_id,
+        "blind_name": blind_name,
+        "location_type": location_type,
+        "date": hunt_data.date,
+        "location": hunt_data.location,
+        "weather_data": weather_data,
+        "notes": hunt_data.notes,
+        "photos": hunt_data.photos,
+        "harvests": [h.dict() for h in hunt_data.harvests],
+        "is_morning": hunt_data.is_morning,
+        "is_evening": hunt_data.is_evening,
+    }})
+
+    return {
+        "id": hunt_id,
+        "user_id": user_id,
+        "name": hunt_data.name,
+        "blind_id": blind_id,
+        "blind_name": blind_name,
+        "location_type": location_type,
+        "date": hunt_data.date,
+        "location": hunt_data.location,
+        "weather_data": weather_data,
+        "notes": hunt_data.notes,
+        "photos": hunt_data.photos,
+        "harvests": hunt_data.harvests,
+        "is_morning": hunt_data.is_morning,
+        "is_evening": hunt_data.is_evening,
+        "created_at": existing.get("created_at", datetime.utcnow()),
+    }
+
 @api_router.get("/hunts/{hunt_id}", response_model=Hunt)
 async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
