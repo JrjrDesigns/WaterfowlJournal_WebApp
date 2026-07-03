@@ -59,6 +59,7 @@ interface Hunt {
     count: number
     missed: number
     shot_not_recovered: number
+    seen: number
   }>
 }
 
@@ -466,6 +467,12 @@ export default function HuntDetail() {
                 <div key={i} className="flex items-center justify-between py-2.5">
                   <span className="text-sm font-semibold text-ink">{h.species_name}</span>
                   <div className="flex items-center gap-5">
+                    {h.seen > 0 && (
+                      <div className="text-right">
+                        <p className="font-display text-xl text-muted leading-none">{h.seen}</p>
+                        <p className="text-xs text-muted/70 uppercase tracking-wider">seen</p>
+                      </div>
+                    )}
                     {h.missed > 0 && (
                       <div className="text-right">
                         <p className="font-display text-xl text-muted leading-none">{h.missed}</p>

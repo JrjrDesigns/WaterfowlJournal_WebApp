@@ -103,6 +103,7 @@ class HarvestData(BaseModel):
     count: int = 0
     missed: int = 0
     shot_not_recovered: int = 0
+    seen: int = 0
 
 class HuntCreate(BaseModel):
     name: str
@@ -492,7 +493,8 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
                 "species_name": harvest.get("species_name") or harvest.get("species", "Unknown"),
                 "count": harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0),
                 "missed": harvest.get("missed", 0),
-                "shot_not_recovered": harvest.get("shot_not_recovered", 0)
+                "shot_not_recovered": harvest.get("shot_not_recovered", 0),
+                "seen": harvest.get("seen", 0)
             })
         
         result.append({

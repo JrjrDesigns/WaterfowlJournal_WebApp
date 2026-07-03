@@ -43,6 +43,7 @@ interface Harvest {
   harvested: number
   missed: number
   shot_not_recovered: number
+  seen: number
 }
 
 export default function HuntCreate() {
@@ -102,7 +103,7 @@ export default function HuntCreate() {
   }
 
   const addHarvest = () => {
-    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0 }])
+    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0 }])
   }
 
   const updateHarvest = (i: number, field: keyof Harvest, value: string | number) => {
@@ -136,6 +137,7 @@ export default function HuntCreate() {
           count: h.harvested,
           missed: h.missed,
           shot_not_recovered: h.shot_not_recovered,
+          seen: h.seen,
         })),
       }
       await createHunt(huntData)
@@ -315,8 +317,8 @@ export default function HuntCreate() {
                   <select value={harvest.species} onChange={e => updateHarvest(i, 'species', e.target.value)} className="mb-3">
                     {allSpecies.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['harvested', 'missed', 'shot_not_recovered'] as const).map(field => (
+                  <div className="grid grid-cols-4 gap-2">
+                    {(['seen', 'harvested', 'missed', 'shot_not_recovered'] as const).map(field => (
                       <div key={field}>
                         <p className="text-xs text-muted mb-1 font-semibold capitalize">
                           {field === 'shot_not_recovered' ? 'Lost' : field}

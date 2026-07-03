@@ -26,7 +26,7 @@ const greenIcon = new L.Icon({
 
 interface LocationData { id: string; name: string; location_type: string }
 interface BlindData { id: string; name: string; location_id: string; lat: number; lng: number }
-interface Harvest { species: string; harvested: number; missed: number; shot_not_recovered: number }
+interface Harvest { species: string; harvested: number; missed: number; shot_not_recovered: number; seen: number }
 
 export default function HuntEdit() {
   const { id } = useParams<{ id: string }>()
@@ -71,11 +71,12 @@ export default function HuntEdit() {
       setIsEvening(hunt.is_evening ?? false)
       setNotes(hunt.notes ?? '')
       setPhotos(hunt.photos ?? [])
-      setHarvests((hunt.harvests ?? []).map((h: { species_name: string; count: number; missed: number; shot_not_recovered: number }) => ({
+      setHarvests((hunt.harvests ?? []).map((h: { species_name: string; count: number; missed: number; shot_not_recovered: number; seen?: number }) => ({
         species: h.species_name,
         harvested: h.count,
         missed: h.missed,
         shot_not_recovered: h.shot_not_recovered,
+        seen: h.seen ?? 0,
       })))
 
       // Restore location + blind selection
@@ -126,7 +127,7 @@ export default function HuntEdit() {
   }
 
   const addHarvest = () => {
-    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0 }])
+    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0 }])
   }
 
   const updateHarvestEntry = (i: number, field: keyof Harvest, value: string | number) => {
@@ -160,6 +161,7 @@ export default function HuntEdit() {
           count: h.harvested,
           missed: h.missed,
           shot_not_recovered: h.shot_not_recovered,
+          seen: h.seen,
         })),
       })
       navigate(`/hunts/${id}`)
@@ -309,8 +311,8 @@ export default function HuntEdit() {
                   <select value={harvest.species} onChange={e => updateHarvestEntry(i, 'species', e.target.value)} className="mb-3">
                     {allSpecies.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['harvested', 'missed', 'shot_not_recovered'] as const).map(field => (
+                  <div className="grid grid-cols-4 gap-2">
+                    {(['seen', 'harvested', 'missed', 'shot_not_recovered'] as const).map(field => (
                       <div key={field}>
                         <p className="text-xs text-muted mb-1 font-semibold capitalize">
                           {field === 'shot_not_recovered' ? 'Lost' : field}
