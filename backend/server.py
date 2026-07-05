@@ -992,12 +992,27 @@ def _weather_events(temp_max, prev_temp_max, temp_min, weather_code, precip):
 
 # --- Freeze-up model -------------------------------------------------------
 # Sustained sub-freezing weather locks still water while moving water stays
-# open, concentrating birds. We look at a trailing window of daily highs.
-FREEZE_LOOKBACK = 5          # past days to fetch for trailing freeze analysis
-FREEZE_WINDOW = 5           # days (incl. current) considered for lock state
+# open, concentrating birds. Shallow still water locks first; big open water
+# (reservoirs, lakes) holds out roughly a week longer before it too ices over.
+# We count "frozen" days (daily HIGH never rose above freezing) in two trailing
+# windows: a short one for shallow water, a long one for big water.
 FREEZE_HIGH_TEMP = 32       # a day whose HIGH stays ≤ this never thawed
-FREEZE_LOCKED_DAYS = 4      # ≥ this many frozen days in window → still water locked
-FREEZE_PARTIAL_DAYS = 2     # ≥ this many → water starting to lock
+SHALLOW_WINDOW = 5          # days (incl. current) for shallow-water lock
+SHALLOW_LOCK_DAYS = 4       # ≥ this many frozen days → shallow water locked
+SHALLOW_PARTIAL_DAYS = 2    # ≥ this many → shallow water starting to lock
+BIG_WINDOW = 12             # longer window: big water lags shallow by ~a week
+BIG_LOCK_DAYS = 10          # ≥ this many frozen days → big water locked too
+BIG_PARTIAL_DAYS = 7        # ≥ this many → big water starting to lock
+FREEZE_LOOKBACK = BIG_WINDOW - 1  # past days to fetch to seed the long window
+
+# Score deltas
+MOVING_LOCK_BUMP = 22       # rivers/creeks: only open water around
+MOVING_PARTIAL_BUMP = 10
+SHALLOW_LOCK_PEN = -32
+SHALLOW_PARTIAL_PEN = -14
+BIG_LOCK_PEN = -28          # deep freeze: even reservoirs iced
+BIG_PARTIAL_PEN = -10
+BIG_HOLDS_OPEN_BUMP = 6     # shallow locked but big water still open → birds pile in
 
 # Location types grouped by how freeze-up affects them.
 MOVING_WATER = {"creek", "river"}
@@ -1006,24 +1021,10 @@ BIG_OPEN_WATER = {"open-water", "reservoir", "lakeshore", "coastal"}
 SHALLOW_STILL_WATER = {"marsh", "swamp", "flooded-timber", "pothole", "beaver-pond", "cut-corn"}
 # dry fields ("field") are dry ground — freeze-up doesn't lock them.
 
-# Score adjustments by (freeze state, water group).
-FREEZE_ADJUST = {
-    "locked": {"moving": 22, "big_open": 6, "shallow": -32, "field": 0},
-    "freezing": {"moving": 10, "big_open": 2, "shallow": -14, "field": 0},
-}
 
-
-def _freeze_state(trailing_highs):
-    """Given recent daily highs (incl. current day, oldest→newest), classify lock state."""
-    highs = [h for h in trailing_highs if h is not None]
-    if not highs:
-        return "open"
-    frozen_days = sum(1 for h in highs if h <= FREEZE_HIGH_TEMP)
-    if frozen_days >= FREEZE_LOCKED_DAYS:
-        return "locked"
-    if frozen_days >= FREEZE_PARTIAL_DAYS:
-        return "freezing"
-    return "open"
+def _frozen_days(trailing_highs):
+    """Count days whose HIGH stayed at/below freezing (oldest→newest, current last)."""
+    return sum(1 for h in trailing_highs if h is not None and h <= FREEZE_HIGH_TEMP)
 
 
 def _water_group(location_type):
@@ -1036,20 +1037,42 @@ def _water_group(location_type):
     return "field"
 
 
-def _freeze_adjustment(location_type, freeze_state):
-    """Score delta + descriptive event for how freeze-up affects this water type."""
-    if freeze_state == "open":
-        return {"delta": 0, "event": None}
+def _freeze_adjustment(location_type, frozen_recent, frozen_extended):
+    """Score delta + event for freeze-up, by water type.
+
+    frozen_recent: frozen days in the short window (shallow water)
+    frozen_extended: frozen days in the long window (big water)
+    """
     group = _water_group(location_type)
-    delta = FREEZE_ADJUST.get(freeze_state, {}).get(group, 0)
-    event = None
-    if group == "moving" and delta > 0:
-        event = {"type": "open_water", "label": "Open water"}
-    elif group == "big_open" and freeze_state == "locked":
-        event = {"type": "open_water", "label": "Holds open"}
-    elif group == "shallow" and delta < 0:
-        event = {"type": "iced", "label": "Likely iced"}
-    return {"delta": delta, "event": event}
+    shallow_locked = frozen_recent >= SHALLOW_LOCK_DAYS
+    shallow_partial = frozen_recent >= SHALLOW_PARTIAL_DAYS
+
+    if group == "moving":
+        if shallow_locked:
+            return {"delta": MOVING_LOCK_BUMP, "event": {"type": "open_water", "label": "Open water"}}
+        if shallow_partial:
+            return {"delta": MOVING_PARTIAL_BUMP, "event": {"type": "open_water", "label": "Open water"}}
+        return {"delta": 0, "event": None}
+
+    if group == "shallow":
+        if shallow_locked:
+            return {"delta": SHALLOW_LOCK_PEN, "event": {"type": "iced", "label": "Likely iced"}}
+        if shallow_partial:
+            return {"delta": SHALLOW_PARTIAL_PEN, "event": None}
+        return {"delta": 0, "event": None}
+
+    if group == "big_open":
+        # Deep, prolonged freeze locks big water too (checked first).
+        if frozen_extended >= BIG_LOCK_DAYS:
+            return {"delta": BIG_LOCK_PEN, "event": {"type": "iced", "label": "Likely iced"}}
+        if frozen_extended >= BIG_PARTIAL_DAYS:
+            return {"delta": BIG_PARTIAL_PEN, "event": {"type": "iced", "label": "Icing up"}}
+        # Still open while shallow water has locked → birds concentrate here.
+        if shallow_locked:
+            return {"delta": BIG_HOLDS_OPEN_BUMP, "event": {"type": "open_water", "label": "Holds open"}}
+        return {"delta": 0, "event": None}
+
+    return {"delta": 0, "event": None}  # dry field
 
 
 def _pressure_trend(delta: float) -> str:
@@ -1233,11 +1256,12 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
             prev_p = day_mean_press.get(dates[i - 1]) if i > 0 else None
             press_delta = (mean_p - prev_p) if (mean_p is not None and prev_p is not None) else None
 
-            # Trailing window of daily highs (incl. today) for freeze-up state
-            window = highs_raw[max(0, i - FREEZE_WINDOW + 1): i + 1]
-            freeze_state = _freeze_state(window)
+            # Trailing windows of daily highs (incl. today) for freeze-up state:
+            # short window drives shallow water, long window drives big water.
+            frozen_recent = _frozen_days(highs_raw[max(0, i - SHALLOW_WINDOW + 1): i + 1])
+            frozen_extended = _frozen_days(highs_raw[max(0, i - BIG_WINDOW + 1): i + 1])
 
-            # Only surface today onward; past days exist solely to seed the window
+            # Only surface today onward; past days exist solely to seed the windows
             if d >= today:
                 out.append({
                     "date": d,
@@ -1251,7 +1275,8 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
                     "wind_direction": round(wind_dir),
                     "wind_cardinal": _deg_to_cardinal(wind_dir),
                     "pressure_trend": _pressure_trend(press_delta) if press_delta is not None else "steady",
-                    "freeze_state": freeze_state,
+                    "frozen_recent": frozen_recent,
+                    "frozen_extended": frozen_extended,
                     "sunrise": sunrise[11:16] if len(sunrise) >= 16 else "",
                     "sunset": sunset[11:16] if len(sunset) >= 16 else "",
                     "_prev_temp": prev_temp,
@@ -1300,8 +1325,9 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 score = (0.55 * base + 0.45 * mig["score"])
             score = min(100, score + evt["bonus"])
 
-            # Freeze-up: still water locks, moving/big water concentrates birds
-            fz = _freeze_adjustment(loc.get("location_type"), day["freeze_state"])
+            # Freeze-up: shallow water locks first, big water lags ~a week
+            fz = _freeze_adjustment(loc.get("location_type"),
+                                    day["frozen_recent"], day["frozen_extended"])
             score = max(0, min(100, score + fz["delta"]))
             events = evt["events"] + ([fz["event"]] if fz["event"] else [])
 
