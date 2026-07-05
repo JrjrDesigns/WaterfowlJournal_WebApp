@@ -1002,8 +1002,9 @@ FREEZE_PARTIAL_DAYS = 2     # ≥ this many → water starting to lock
 # Location types grouped by how freeze-up affects them.
 MOVING_WATER = {"creek", "river"}
 BIG_OPEN_WATER = {"open-water", "reservoir", "lakeshore", "coastal"}
-SHALLOW_STILL_WATER = {"marsh", "swamp", "flooded-timber", "pothole", "beaver-pond"}
-# fields (cut-corn, field) are dry ground — freeze-up doesn't lock them.
+# cut-corn is typically flooded corn — shallow still water that locks like a marsh.
+SHALLOW_STILL_WATER = {"marsh", "swamp", "flooded-timber", "pothole", "beaver-pond", "cut-corn"}
+# dry fields ("field") are dry ground — freeze-up doesn't lock them.
 
 # Score adjustments by (freeze state, water group).
 FREEZE_ADJUST = {
