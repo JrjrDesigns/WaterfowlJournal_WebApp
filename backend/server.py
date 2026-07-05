@@ -960,6 +960,35 @@ HISTORY_MIN_HUNTS = 5         # below this, lean on generic prior instead of his
 
 NORTH_CARDINALS = {"N", "NE", "NW"}
 
+SNOW_CODES = {71, 73, 75, 77, 85, 86}
+RAIN_CODES = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82}
+STORM_CODES = {95, 96, 99}
+FREEZE_TEMP = 20              # °F daily low → freeze-up driver
+# Score bonuses for notable weather events (capped so they can't run away).
+EVENT_BONUS = {"strong_front": 12, "cold_front": 8, "snow": 10, "rain": 4, "freeze": 6, "storm": 4}
+EVENT_BONUS_CAP = 18
+
+
+def _weather_events(temp_max, prev_temp_max, temp_min, weather_code, precip):
+    """Human-readable weather-event tags + a capped score bonus for prime movers."""
+    events = []
+    if prev_temp_max is not None and temp_max is not None:
+        drop = prev_temp_max - temp_max
+        if drop >= MIG_TEMP_DROP_STRONG:
+            events.append({"type": "strong_front", "label": "Strong front"})
+        elif drop >= MIG_TEMP_DROP_MOD:
+            events.append({"type": "cold_front", "label": "Cold front"})
+    if weather_code in SNOW_CODES:
+        events.append({"type": "snow", "label": "Snow"})
+    elif weather_code in STORM_CODES:
+        events.append({"type": "storm", "label": "Storm"})
+    elif weather_code in RAIN_CODES or (precip or 0) >= 0.1:
+        events.append({"type": "rain", "label": "Rain"})
+    if temp_min is not None and temp_min <= FREEZE_TEMP:
+        events.append({"type": "freeze", "label": "Freeze"})
+    bonus = min(EVENT_BONUS_CAP, sum(EVENT_BONUS.get(e["type"], 0) for e in events))
+    return {"events": events, "bonus": bonus}
+
 
 def _pressure_trend(delta: float) -> str:
     if delta <= -MIG_PRESSURE_FALL:
@@ -1180,9 +1209,12 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
         days = fetch_forecast_data(lat, lng, 7)
         loc_days = []
         for day in days:
+            prev_temp = day.pop("_prev_temp")
+            press_delta = day.pop("_press_delta")
             moon = _moon_phase(day["date"])
-            mig = _migration_index(day["temp_max"], day.pop("_prev_temp"),
-                                   day["wind_cardinal"], day.pop("_press_delta"))
+            mig = _migration_index(day["temp_max"], prev_temp, day["wind_cardinal"], press_delta)
+            evt = _weather_events(day["temp_max"], prev_temp, day["temp_min"],
+                                  day["weather_code"], day["precipitation"])
             base = _base_conditions_score(day["wind_speed"], day["weather_code"], day["temp_max"])
             hist = _history_match_score(profile, day["wind_speed"], day["temp_max"],
                                         day["weather_code"], moon["name"]) if use_history else None
@@ -1194,8 +1226,14 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             else:
                 # No usable history: reweight migration + base to fill history's share
                 score = (0.55 * base + 0.45 * mig["score"])
+            score = min(100, score + evt["bonus"])
 
-            factors = list(mig["factors"])
+            # Narrative: lead with weather events, then wind / pressure / history.
+            factors = [e["label"] for e in evt["events"]]
+            if day["wind_cardinal"] in NORTH_CARDINALS:
+                factors.append(f"{day['wind_cardinal']} wind")
+            if press_delta is not None and press_delta <= -MIG_PRESSURE_FALL:
+                factors.append("falling pressure")
             if hist is not None and hist >= 65:
                 factors.append("matches your best hunts")
             if not factors and base >= 65:
@@ -1207,6 +1245,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "moon_phase_name": moon["name"],
                 "moon_illumination": moon["illumination"],
                 "migration": mig,
+                "events": evt["events"],
                 "hunt_score": round(score),
                 "factors": factors[:3],
             }
@@ -1221,6 +1260,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "wind_speed": day["wind_speed"],
                 "temp_max": day["temp_max"],
                 "weather_code": day["weather_code"],
+                "events": evt["events"],
                 "factors": factors[:3],
             })
 

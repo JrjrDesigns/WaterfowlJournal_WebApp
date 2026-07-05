@@ -23,8 +23,14 @@ interface ForecastDay {
   moon_phase_name: string
   moon_illumination: number
   migration: { score: number; level: 'low' | 'med' | 'high'; factors: string[] }
+  events: WeatherEvent[]
   hunt_score: number
   factors: string[]
+}
+
+interface WeatherEvent {
+  type: 'strong_front' | 'cold_front' | 'snow' | 'rain' | 'freeze' | 'storm'
+  label: string
 }
 
 interface ForecastLocation {
@@ -44,6 +50,7 @@ interface BestBet {
   wind_speed: number
   temp_max: number | null
   weather_code: number
+  events: WeatherEvent[]
   factors: string[]
 }
 
@@ -147,6 +154,48 @@ function MoonIcon({ phase, size = 16 }: { phase: number; size?: number }) {
     litPath = `M ${top} A ${r},${r} 0 0,0 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
   }
   return <svg width={size} height={size}><circle cx={cx} cy={cy} r={r} fill={shadow} /><path d={litPath} fill={lit} /></svg>
+}
+
+const EVENT_STYLE: Record<WeatherEvent['type'], { color: string; bg: string }> = {
+  strong_front: { color: '#1B4F6E', bg: '#1B4F6E14' },
+  cold_front: { color: '#1B4F6E', bg: '#1B4F6E14' },
+  snow: { color: '#3B6E9E', bg: '#3B6E9E14' },
+  rain: { color: '#1B5E45', bg: '#1B5E4514' },
+  freeze: { color: '#6B7280', bg: '#6B728014' },
+  storm: { color: '#B45309', bg: '#B4530914' },
+}
+
+function EventIcon({ type }: { type: WeatherEvent['type'] }) {
+  const p = { width: 11, height: 11, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  if (type === 'snow') return (
+    <svg {...p}><line x1="12" y1="3" x2="12" y2="21" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="5.6" y1="5.6" x2="18.4" y2="18.4" /><line x1="18.4" y1="5.6" x2="5.6" y2="18.4" /></svg>
+  )
+  if (type === 'rain') return (
+    <svg {...p}><line x1="8" y1="13" x2="7" y2="20" /><line x1="12" y1="13" x2="11" y2="21" /><line x1="16" y1="13" x2="15" y2="20" /><path d="M19 15a4 4 0 00-1-7.87A6 6 0 006 8.5" /></svg>
+  )
+  if (type === 'freeze') return (
+    <svg {...p}><line x1="12" y1="2" x2="12" y2="22" /><line x1="3" y1="7" x2="21" y2="17" /><line x1="3" y1="17" x2="21" y2="7" /></svg>
+  )
+  if (type === 'storm') return (
+    <svg {...p}><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="currentColor" stroke="none" /></svg>
+  )
+  // cold_front / strong_front — down arrow (falling temps)
+  return (
+    <svg {...p}><line x1="12" y1="4" x2="12" y2="20" /><polyline points="6 14 12 20 18 14" /></svg>
+  )
+}
+
+function EventPill({ event }: { event: WeatherEvent }) {
+  const s = EVENT_STYLE[event.type]
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold whitespace-nowrap"
+      style={{ color: s.color, backgroundColor: s.bg }}
+    >
+      <EventIcon type={event.type} />
+      {event.label}
+    </span>
+  )
 }
 
 function scoreColor(score: number): string {
@@ -288,9 +337,15 @@ export default function Forecast() {
                     {b.location_name}
                     <span className="text-muted font-normal"> · {format(new Date(b.date + 'T12:00:00'), 'EEE, MMM d')}</span>
                   </p>
-                  <p className="text-xs text-muted truncate">
-                    {b.factors.length > 0 ? b.factors.join(' · ') : `${b.wind_cardinal} ${b.wind_speed}mph`}
-                  </p>
+                  {b.events.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {b.events.map((e, j) => <EventPill key={j} event={e} />)}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted truncate">
+                      {b.factors.length > 0 ? b.factors.join(' · ') : `${b.wind_cardinal} ${b.wind_speed}mph`}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <ConditionIcon code={b.weather_code} size={18} className="text-muted" />
@@ -344,48 +399,57 @@ export default function Forecast() {
                 {loc.days.map(day => {
                   const isBest = bestDay?.date === day.date && day.hunt_score >= 45
                   return (
-                    <div key={day.date} className={`flex items-center gap-3 px-5 py-3 ${isBest ? 'bg-green/[0.04]' : ''}`}>
-                      {/* Day */}
-                      <div className="w-10 flex-shrink-0">
-                        <p className="text-xs font-semibold text-ink leading-none">{format(new Date(day.date + 'T12:00:00'), 'EEE')}</p>
-                        <p className="text-xs text-muted mt-0.5">{format(new Date(day.date + 'T12:00:00'), 'M/d')}</p>
-                      </div>
-                      {/* Sky + temp */}
-                      <div className="flex items-center gap-2 w-24 flex-shrink-0">
-                        <ConditionIcon code={day.weather_code} size={20} className="text-ink" />
-                        <div>
-                          <p className="text-xs font-semibold text-ink tabular-nums leading-none">
-                            {day.temp_max}°<span className="text-muted font-normal">/{day.temp_min}°</span>
-                          </p>
-                          {day.precip_prob > 20 && (
-                            <p className="text-xs text-blue mt-0.5">{day.precip_prob}%</p>
-                          )}
+                    <div key={day.date} className={`px-5 py-3 ${isBest ? 'bg-green/[0.04]' : ''}`}>
+                      <div className="flex items-center gap-3">
+                        {/* Day */}
+                        <div className="w-10 flex-shrink-0">
+                          <p className="text-xs font-semibold text-ink leading-none">{format(new Date(day.date + 'T12:00:00'), 'EEE')}</p>
+                          <p className="text-xs text-muted mt-0.5">{format(new Date(day.date + 'T12:00:00'), 'M/d')}</p>
                         </div>
+                        {/* Sky + temp */}
+                        <div className="flex items-center gap-2 w-24 flex-shrink-0">
+                          <ConditionIcon code={day.weather_code} size={20} className="text-ink" />
+                          <div>
+                            <p className="text-xs font-semibold text-ink tabular-nums leading-none">
+                              {day.temp_max}°<span className="text-muted font-normal">/{day.temp_min}°</span>
+                            </p>
+                            {day.precip_prob > 20 && (
+                              <p className="text-xs text-blue mt-0.5">{day.precip_prob}%</p>
+                            )}
+                          </div>
+                        </div>
+                        {/* Wind */}
+                        <div className="flex items-center gap-1 w-16 flex-shrink-0">
+                          <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
+                          <span className="text-xs font-semibold tabular-nums" style={{ color: windColor(day.wind_speed) }}>
+                            {day.wind_cardinal} {day.wind_speed}
+                          </span>
+                        </div>
+                        {/* Moon + pressure */}
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <MoonIcon phase={day.moon_phase} size={15} />
+                          <PressureTrend trend={day.pressure_trend} />
+                        </div>
+                        {/* Migration */}
+                        <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
+                          <span
+                            className="text-xs font-semibold uppercase tracking-wide"
+                            style={{ color: MIG_COLOR[day.migration.level] }}
+                            title={`Migration: ${day.migration.factors.join(', ') || 'no front'}`}
+                          >
+                            {MIG_LABEL[day.migration.level]}
+                          </span>
+                        </div>
+                        {/* Score */}
+                        <ScoreBadge score={day.hunt_score} size="sm" />
                       </div>
-                      {/* Wind */}
-                      <div className="flex items-center gap-1 w-16 flex-shrink-0">
-                        <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
-                        <span className="text-xs font-semibold tabular-nums" style={{ color: windColor(day.wind_speed) }}>
-                          {day.wind_cardinal} {day.wind_speed}
-                        </span>
-                      </div>
-                      {/* Moon + pressure */}
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <MoonIcon phase={day.moon_phase} size={15} />
-                        <PressureTrend trend={day.pressure_trend} />
-                      </div>
-                      {/* Migration */}
-                      <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
-                        <span
-                          className="text-xs font-semibold uppercase tracking-wide"
-                          style={{ color: MIG_COLOR[day.migration.level] }}
-                          title={`Migration: ${day.migration.factors.join(', ') || 'no front'}`}
-                        >
-                          {MIG_LABEL[day.migration.level]}
-                        </span>
-                      </div>
-                      {/* Score */}
-                      <ScoreBadge score={day.hunt_score} size="sm" />
+
+                      {/* Event pills */}
+                      {day.events.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2 pl-[52px]">
+                          {day.events.map((e, i) => <EventPill key={i} event={e} />)}
+                        </div>
+                      )}
                     </div>
                   )
                 })}
