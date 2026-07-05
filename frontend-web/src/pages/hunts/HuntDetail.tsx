@@ -53,6 +53,9 @@ interface Hunt {
     sunset?: string
     wind_morning?: WindEntry[]
     wind_evening?: WindEntry[]
+    moon_phase?: number
+    moon_phase_name?: string
+    moon_illumination?: number
   } | null
   harvests: Array<{
     species_name: string
@@ -224,6 +227,49 @@ function ThermometerIcon({ temp, size = 24 }: { temp: number; size?: number }) {
       <rect x="10" y="3" width="4" height="12" rx="2" stroke="currentColor" strokeWidth={1.5} className="text-muted" />
       <circle cx="12" cy="18" r="3.5" fill={fill} stroke="currentColor" strokeWidth={1.5} className="text-muted" />
       <rect x="11" y="9" width="2" height="7" rx="1" fill={fill} />
+    </svg>
+  )
+}
+
+function MoonPhaseIcon({ phase, size = 28 }: { phase: number; size?: number }) {
+  const r = (size - 4) / 2
+  const cx = size / 2
+  const cy = size / 2
+  const lit = '#FEF9EE'
+  const shadow = '#2D2F35'
+
+  if (phase < 0.02 || phase > 0.98) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill={shadow} stroke="#797B7E" strokeWidth={0.5} />
+      </svg>
+    )
+  }
+  if (phase > 0.48 && phase < 0.52) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill={lit} />
+      </svg>
+    )
+  }
+
+  const waxing = phase < 0.5
+  const termRx = Math.abs(Math.cos(Math.PI * 2 * phase)) * r
+  const top = `${cx},${cy - r}`
+  const bottom = `${cx},${cy + r}`
+  let litPath: string
+  if (waxing) {
+    const sweep2 = phase > 0.25 ? 0 : 1
+    litPath = `M ${top} A ${r},${r} 0 0,1 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
+  } else {
+    const sweep2 = phase < 0.75 ? 1 : 0
+    litPath = `M ${top} A ${r},${r} 0 0,0 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
+  }
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={cx} cy={cy} r={r} fill={shadow} stroke="#797B7E" strokeWidth={0.5} />
+      <path d={litPath} fill={lit} />
     </svg>
   )
 }
@@ -428,6 +474,17 @@ export default function HuntDetail() {
                   )}
                   <span className="text-xs text-muted uppercase tracking-widest">Hi / Lo</span>
                 </div>
+
+                {/* Moon */}
+                {hunt.weather_data.moon_phase != null && (
+                  <div className="flex-1 flex flex-col items-center gap-1.5 px-2">
+                    <MoonPhaseIcon phase={hunt.weather_data.moon_phase} size={28} />
+                    <span className="text-xs font-semibold text-ink text-center leading-tight">
+                      {hunt.weather_data.moon_phase_name?.replace('Waxing ', '').replace('Waning ', '') ?? '—'}
+                    </span>
+                    <span className="text-xs text-muted uppercase tracking-widest">Moon</span>
+                  </div>
+                )}
               </div>
 
               {/* Secondary rows */}

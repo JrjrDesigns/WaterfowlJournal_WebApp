@@ -183,6 +183,33 @@ def _deg_to_cardinal(deg: float) -> str:
     dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     return dirs[round(deg / 45) % 8]
 
+def _moon_phase(date_str: str) -> dict:
+    import math
+    from datetime import date as date_type
+    hunt_date = date_type.fromisoformat(date_str)
+    known_new_moon = date_type(2000, 1, 6)
+    days_since = (hunt_date - known_new_moon).days
+    lunar_cycle = 29.53058867
+    phase = (days_since % lunar_cycle) / lunar_cycle
+    if phase < 0.033 or phase >= 0.967:
+        name = "New Moon"
+    elif phase < 0.192:
+        name = "Waxing Crescent"
+    elif phase < 0.258:
+        name = "First Quarter"
+    elif phase < 0.467:
+        name = "Waxing Gibbous"
+    elif phase < 0.533:
+        name = "Full Moon"
+    elif phase < 0.692:
+        name = "Waning Gibbous"
+    elif phase < 0.758:
+        name = "Last Quarter"
+    else:
+        name = "Waning Crescent"
+    illumination = round((1 - math.cos(2 * math.pi * phase)) / 2 * 100)
+    return {"phase": round(phase, 4), "name": name, "illumination": illumination}
+
 def _filter_wind_window(times, speeds, directions, start_hour: int, end_hour: int) -> list:
     result = []
     for t, sp, di in zip(times, speeds, directions):
@@ -265,6 +292,7 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
             wind_morning = _filter_wind_window(times, speeds, directions, sunrise_hour, 12)
             wind_evening = _filter_wind_window(times, speeds, directions, evening_start, sunset_hour)
 
+            moon = _moon_phase(date_str)
             return {
                 "temp": avg_temp or 0,
                 "temp_max": temp_max or 0,
@@ -278,6 +306,9 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
                 "sunset": sunset_str[11:16] if len(sunset_str) >= 16 else "",
                 "wind_morning": wind_morning,
                 "wind_evening": wind_evening,
+                "moon_phase": moon["phase"],
+                "moon_phase_name": moon["name"],
+                "moon_illumination": moon["illumination"],
             }
         else:
             logger.error(f"Open-Meteo API error: {response.status_code} - {response.text}")
@@ -285,6 +316,7 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
     except Exception as e:
         logger.error(f"Open-Meteo API error: {e}")
 
+    moon = _moon_phase(date_str)
     return {
         "temp": 0,
         "temp_max": 0,
@@ -298,6 +330,9 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
         "sunset": "",
         "wind_morning": [],
         "wind_evening": [],
+        "moon_phase": moon["phase"],
+        "moon_phase_name": moon["name"],
+        "moon_illumination": moon["illumination"],
     }
 
 # ============ AUTH ROUTES ============
