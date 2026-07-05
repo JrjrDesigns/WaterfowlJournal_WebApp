@@ -743,65 +743,203 @@ SPECIES_CATEGORIES = {
     "others": ["Coot", "Rail", "Snipe", "Dove", "Other"]
 }
 
-@api_router.get("/statistics", response_model=Statistics)
+def _temp_bucket(t: float) -> str:
+    if t <= 20: return "≤20°"
+    if t <= 32: return "21–32°"
+    if t <= 45: return "33–45°"
+    if t <= 60: return "46–60°"
+    return "60°+"
+
+def _wind_bucket(w: float) -> str:
+    if w <= 5: return "Calm (≤5)"
+    if w <= 12: return "Light (6–12)"
+    if w <= 20: return "Moderate (13–20)"
+    if w <= 30: return "Strong (21–30)"
+    return "Very strong (31+)"
+
+def _sky_category(code) -> str:
+    if code is None: return "Unknown"
+    if code <= 1: return "Clear"
+    if code <= 3: return "Cloudy"
+    if code <= 48: return "Fog"
+    if code <= 67 or 80 <= code <= 82: return "Rain"
+    if 71 <= code <= 77 or code in (85, 86): return "Snow"
+    if code >= 95: return "Storm"
+    return "Unknown"
+
+MOON_ORDER = ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
+              "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"]
+TEMP_ORDER = ["≤20°", "21–32°", "33–45°", "46–60°", "60°+"]
+WIND_ORDER = ["Calm (≤5)", "Light (6–12)", "Moderate (13–20)", "Strong (21–30)", "Very strong (31+)"]
+DOW_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+@api_router.get("/statistics")
 async def get_statistics(year: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    
-    # Build query filter
+
     query_filter = {"user_id": user_id}
-    
-    # Add year filter if provided
     if year:
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
-        query_filter["date"] = {"$gte": start_date, "$lte": end_date}
-    
+        query_filter["date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+
     hunts = await db.hunts.find(query_filter).to_list(10000)
-    
+
+    # Resolve blind → location name once
+    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    locations = await db.locations.find({"user_id": user_id}).to_list(1000)
+    loc_names = {str(l["_id"]): l.get("name", "Unknown") for l in locations}
+    blind_to_loc = {str(b["_id"]): loc_names.get(str(b.get("location_id")), "Unknown") for b in blinds}
+
     total_hunts = len(hunts)
     total_harvested = 0
     total_missed = 0
     total_shot_not_recovered = 0
+    total_seen = 0
     ducks_total = 0
     geese_total = 0
     others_total = 0
     by_species = {}
-    
-    for hunt in hunts:
+
+    hunts_with_birds = 0
+    by_blind = {}          # name -> {hunts, harvested}
+    by_location = {}       # name -> {hunts, harvested}
+    by_location_type = {}  # type -> {hunts, harvested}
+    time_split = {"morning": {"hunts": 0, "harvested": 0}, "evening": {"hunts": 0, "harvested": 0}}
+    by_month = {}          # "YYYY-MM" -> {hunts, harvested}
+    by_dow = {d: {"hunts": 0, "harvested": 0} for d in DOW_NAMES}
+    by_moon = {}
+    by_sky = {}
+    by_temp = {}
+    by_wind = {}
+    best_day = None        # {date, name, harvested}
+    species_by_location = {}  # location -> {species: harvested}
+
+    for hunt in sorted(hunts, key=lambda h: h.get("date", "")):
+        hunt_harvested = 0
         for harvest in hunt.get("harvests", []):
             species = harvest.get("species_name") or harvest.get("species", "Unknown")
-            count = harvest.get("count") or harvest.get("harvested", 0)
+            count = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
             missed = harvest.get("missed", 0)
             shot_not_recovered = harvest.get("shot_not_recovered", 0)
-            
+            seen = harvest.get("seen", 0)
+
             total_harvested += count
             total_missed += missed
             total_shot_not_recovered += shot_not_recovered
-            
-            # Categorize
+            total_seen += seen
+            hunt_harvested += count
+
             if species in SPECIES_CATEGORIES["ducks"]:
                 ducks_total += count
             elif species in SPECIES_CATEGORIES["geese"]:
                 geese_total += count
             else:
                 others_total += count
-            
-            # Track by species
+
             if species not in by_species:
-                by_species[species] = {"harvested": 0, "missed": 0, "shot_not_recovered": 0}
+                by_species[species] = {"harvested": 0, "missed": 0, "shot_not_recovered": 0, "seen": 0}
             by_species[species]["harvested"] += count
             by_species[species]["missed"] += missed
             by_species[species]["shot_not_recovered"] += shot_not_recovered
-    
+            by_species[species]["seen"] = by_species[species].get("seen", 0) + seen
+
+        if hunt_harvested > 0:
+            hunts_with_birds += 1
+
+        if best_day is None or hunt_harvested > best_day["harvested"]:
+            best_day = {"date": hunt.get("date"), "name": hunt.get("name", ""), "harvested": hunt_harvested}
+
+        def bump(d, key):
+            if key not in d:
+                d[key] = {"hunts": 0, "harvested": 0}
+            d[key]["hunts"] += 1
+            d[key]["harvested"] += hunt_harvested
+
+        blind_name = hunt.get("blind_name") or "Unknown"
+        bump(by_blind, blind_name)
+
+        loc_name = blind_to_loc.get(str(hunt.get("blind_id")), "Unknown")
+        bump(by_location, loc_name)
+        if loc_name != "Unknown":
+            sp_map = species_by_location.setdefault(loc_name, {})
+            for harvest in hunt.get("harvests", []):
+                sp = harvest.get("species_name") or harvest.get("species", "Unknown")
+                c = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
+                if c:
+                    sp_map[sp] = sp_map.get(sp, 0) + c
+
+        if hunt.get("location_type"):
+            bump(by_location_type, hunt["location_type"])
+
+        if hunt.get("is_morning"):
+            time_split["morning"]["hunts"] += 1
+            time_split["morning"]["harvested"] += hunt_harvested
+        if hunt.get("is_evening"):
+            time_split["evening"]["hunts"] += 1
+            time_split["evening"]["harvested"] += hunt_harvested
+
+        date_str = hunt.get("date", "")
+        if len(date_str) >= 7:
+            bump(by_month, date_str[:7])
+        try:
+            dow = DOW_NAMES[datetime.strptime(date_str, "%Y-%m-%d").weekday()]
+            bump(by_dow, dow)
+        except (ValueError, TypeError):
+            pass
+
+        wd = hunt.get("weather_data") or {}
+        moon_name = wd.get("moon_phase_name")
+        if not moon_name and date_str:
+            try:
+                moon_name = _moon_phase(date_str)["name"]
+            except ValueError:
+                moon_name = None
+        if moon_name:
+            bump(by_moon, moon_name)
+
+        if wd.get("condition") not in (None, "Unknown"):
+            bump(by_sky, _sky_category(wd.get("weather_code")))
+            if wd.get("temp") is not None:
+                bump(by_temp, _temp_bucket(wd["temp"]))
+            if wd.get("wind_speed") is not None:
+                bump(by_wind, _wind_bucket(wd["wind_speed"]))
+
+    def top_by(d, key):
+        if not d:
+            return None
+        name, v = max(d.items(), key=lambda kv: kv[1][key])
+        return {"name": name, **v}
+
+    def ordered(d, order):
+        return [{"name": k, **d[k]} for k in order if k in d]
+
+    total_shots = total_harvested + total_missed + total_shot_not_recovered
+
     return {
         "total_hunts": total_hunts,
         "total_harvested": total_harvested,
         "total_missed": total_missed,
         "total_shot_not_recovered": total_shot_not_recovered,
+        "total_seen": total_seen,
         "ducks_total": ducks_total,
         "geese_total": geese_total,
         "others_total": others_total,
-        "by_species": by_species
+        "by_species": by_species,
+        "success_rate": round(hunts_with_birds / total_hunts * 100, 1) if total_hunts else 0,
+        "avg_birds_per_hunt": round(total_harvested / total_hunts, 1) if total_hunts else 0,
+        "shot_efficiency": round(total_harvested / total_shots * 100, 1) if total_shots else 0,
+        "best_blind": top_by(by_blind, "harvested"),
+        "most_used_blind": top_by(by_blind, "hunts"),
+        "best_location": top_by({k: v for k, v in by_location.items() if k != "Unknown"}, "harvested"),
+        "best_location_type": top_by(by_location_type, "harvested"),
+        "best_day": best_day if best_day and best_day["harvested"] > 0 else None,
+        "time_split": time_split,
+        "by_month": [{"month": k, **v} for k, v in sorted(by_month.items())],
+        "by_day_of_week": [{"name": d, **by_dow[d]} for d in DOW_NAMES if by_dow[d]["hunts"] > 0],
+        "by_moon_phase": ordered(by_moon, MOON_ORDER),
+        "by_sky": [{"name": k, **v} for k, v in sorted(by_sky.items(), key=lambda kv: -kv[1]["harvested"])],
+        "by_temp": ordered(by_temp, TEMP_ORDER),
+        "by_wind": ordered(by_wind, WIND_ORDER),
+        "species_by_location": species_by_location,
     }
 
 # ============ UTILITY ROUTES ============
