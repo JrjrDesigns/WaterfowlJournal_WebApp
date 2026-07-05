@@ -990,6 +990,67 @@ def _weather_events(temp_max, prev_temp_max, temp_min, weather_code, precip):
     return {"events": events, "bonus": bonus}
 
 
+# --- Freeze-up model -------------------------------------------------------
+# Sustained sub-freezing weather locks still water while moving water stays
+# open, concentrating birds. We look at a trailing window of daily highs.
+FREEZE_LOOKBACK = 5          # past days to fetch for trailing freeze analysis
+FREEZE_WINDOW = 5           # days (incl. current) considered for lock state
+FREEZE_HIGH_TEMP = 32       # a day whose HIGH stays ≤ this never thawed
+FREEZE_LOCKED_DAYS = 4      # ≥ this many frozen days in window → still water locked
+FREEZE_PARTIAL_DAYS = 2     # ≥ this many → water starting to lock
+
+# Location types grouped by how freeze-up affects them.
+MOVING_WATER = {"creek", "river"}
+BIG_OPEN_WATER = {"open-water", "reservoir", "lakeshore", "coastal"}
+SHALLOW_STILL_WATER = {"marsh", "swamp", "flooded-timber", "pothole", "beaver-pond"}
+# fields (cut-corn, field) are dry ground — freeze-up doesn't lock them.
+
+# Score adjustments by (freeze state, water group).
+FREEZE_ADJUST = {
+    "locked": {"moving": 22, "big_open": 6, "shallow": -32, "field": 0},
+    "freezing": {"moving": 10, "big_open": 2, "shallow": -14, "field": 0},
+}
+
+
+def _freeze_state(trailing_highs):
+    """Given recent daily highs (incl. current day, oldest→newest), classify lock state."""
+    highs = [h for h in trailing_highs if h is not None]
+    if not highs:
+        return "open"
+    frozen_days = sum(1 for h in highs if h <= FREEZE_HIGH_TEMP)
+    if frozen_days >= FREEZE_LOCKED_DAYS:
+        return "locked"
+    if frozen_days >= FREEZE_PARTIAL_DAYS:
+        return "freezing"
+    return "open"
+
+
+def _water_group(location_type):
+    if location_type in MOVING_WATER:
+        return "moving"
+    if location_type in BIG_OPEN_WATER:
+        return "big_open"
+    if location_type in SHALLOW_STILL_WATER:
+        return "shallow"
+    return "field"
+
+
+def _freeze_adjustment(location_type, freeze_state):
+    """Score delta + descriptive event for how freeze-up affects this water type."""
+    if freeze_state == "open":
+        return {"delta": 0, "event": None}
+    group = _water_group(location_type)
+    delta = FREEZE_ADJUST.get(freeze_state, {}).get(group, 0)
+    event = None
+    if group == "moving" and delta > 0:
+        event = {"type": "open_water", "label": "Open water"}
+    elif group == "big_open" and freeze_state == "locked":
+        event = {"type": "open_water", "label": "Holds open"}
+    elif group == "shallow" and delta < 0:
+        event = {"type": "iced", "label": "Likely iced"}
+    return {"delta": delta, "event": event}
+
+
 def _pressure_trend(delta: float) -> str:
     if delta <= -MIG_PRESSURE_FALL:
         return "falling"
@@ -1123,6 +1184,7 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
             "windspeed_unit": "mph",
             "timezone": "auto",
             "forecast_days": days,
+            "past_days": FREEZE_LOOKBACK,
         }
         resp = requests.get(url, params=params, timeout=12)
         if resp.status_code != 200:
@@ -1151,6 +1213,8 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
         }
 
         dates = daily.get("time", [])
+        highs_raw = daily.get("temperature_2m_max", [])
+        today = datetime.now().date().isoformat()
         out = []
         prev_temp = None
         for i, d in enumerate(dates):
@@ -1168,23 +1232,30 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
             prev_p = day_mean_press.get(dates[i - 1]) if i > 0 else None
             press_delta = (mean_p - prev_p) if (mean_p is not None and prev_p is not None) else None
 
-            out.append({
-                "date": d,
-                "temp_max": round(temp_max) if temp_max is not None else None,
-                "temp_min": round(temp_min) if temp_min is not None else None,
-                "weather_code": code,
-                "condition": weather_codes.get(code, "Unknown"),
-                "precipitation": round(g("precipitation_sum", 0) or 0, 2),
-                "precip_prob": g("precipitation_probability_max", 0) or 0,
-                "wind_speed": round(wind_max, 1),
-                "wind_direction": round(wind_dir),
-                "wind_cardinal": _deg_to_cardinal(wind_dir),
-                "pressure_trend": _pressure_trend(press_delta) if press_delta is not None else "steady",
-                "sunrise": sunrise[11:16] if len(sunrise) >= 16 else "",
-                "sunset": sunset[11:16] if len(sunset) >= 16 else "",
-                "_prev_temp": prev_temp,
-                "_press_delta": press_delta,
-            })
+            # Trailing window of daily highs (incl. today) for freeze-up state
+            window = highs_raw[max(0, i - FREEZE_WINDOW + 1): i + 1]
+            freeze_state = _freeze_state(window)
+
+            # Only surface today onward; past days exist solely to seed the window
+            if d >= today:
+                out.append({
+                    "date": d,
+                    "temp_max": round(temp_max) if temp_max is not None else None,
+                    "temp_min": round(temp_min) if temp_min is not None else None,
+                    "weather_code": code,
+                    "condition": weather_codes.get(code, "Unknown"),
+                    "precipitation": round(g("precipitation_sum", 0) or 0, 2),
+                    "precip_prob": g("precipitation_probability_max", 0) or 0,
+                    "wind_speed": round(wind_max, 1),
+                    "wind_direction": round(wind_dir),
+                    "wind_cardinal": _deg_to_cardinal(wind_dir),
+                    "pressure_trend": _pressure_trend(press_delta) if press_delta is not None else "steady",
+                    "freeze_state": freeze_state,
+                    "sunrise": sunrise[11:16] if len(sunrise) >= 16 else "",
+                    "sunset": sunset[11:16] if len(sunset) >= 16 else "",
+                    "_prev_temp": prev_temp,
+                    "_press_delta": press_delta,
+                })
             prev_temp = temp_max
         return out
     except Exception as e:
@@ -1228,8 +1299,13 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 score = (0.55 * base + 0.45 * mig["score"])
             score = min(100, score + evt["bonus"])
 
-            # Narrative: lead with weather events, then wind / pressure / history.
-            factors = [e["label"] for e in evt["events"]]
+            # Freeze-up: still water locks, moving/big water concentrates birds
+            fz = _freeze_adjustment(loc.get("location_type"), day["freeze_state"])
+            score = max(0, min(100, score + fz["delta"]))
+            events = evt["events"] + ([fz["event"]] if fz["event"] else [])
+
+            # Narrative: lead with weather/water events, then wind / pressure / history.
+            factors = [e["label"] for e in events]
             if day["wind_cardinal"] in NORTH_CARDINALS:
                 factors.append(f"{day['wind_cardinal']} wind")
             if press_delta is not None and press_delta <= -MIG_PRESSURE_FALL:
@@ -1245,7 +1321,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "moon_phase_name": moon["name"],
                 "moon_illumination": moon["illumination"],
                 "migration": mig,
-                "events": evt["events"],
+                "events": events,
                 "hunt_score": round(score),
                 "factors": factors[:3],
             }
@@ -1260,7 +1336,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "wind_speed": day["wind_speed"],
                 "temp_max": day["temp_max"],
                 "weather_code": day["weather_code"],
-                "events": evt["events"],
+                "events": events,
                 "factors": factors[:3],
             })
 

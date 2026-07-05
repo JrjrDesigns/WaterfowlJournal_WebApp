@@ -29,7 +29,7 @@ interface ForecastDay {
 }
 
 interface WeatherEvent {
-  type: 'strong_front' | 'cold_front' | 'snow' | 'rain' | 'freeze' | 'storm'
+  type: 'strong_front' | 'cold_front' | 'snow' | 'rain' | 'freeze' | 'storm' | 'open_water' | 'iced'
   label: string
 }
 
@@ -163,6 +163,8 @@ const EVENT_STYLE: Record<WeatherEvent['type'], { color: string; bg: string }> =
   rain: { color: '#1B5E45', bg: '#1B5E4514' },
   freeze: { color: '#6B7280', bg: '#6B728014' },
   storm: { color: '#B45309', bg: '#B4530914' },
+  open_water: { color: '#1B5E45', bg: '#1B5E4514' },
+  iced: { color: '#9CA3AF', bg: '#9CA3AF1F' },
 }
 
 function EventIcon({ type }: { type: WeatherEvent['type'] }) {
@@ -178,6 +180,12 @@ function EventIcon({ type }: { type: WeatherEvent['type'] }) {
   )
   if (type === 'storm') return (
     <svg {...p}><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="currentColor" stroke="none" /></svg>
+  )
+  if (type === 'open_water') return (
+    <svg {...p}><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z" fill="currentColor" fillOpacity={0.18} /></svg>
+  )
+  if (type === 'iced') return (
+    <svg {...p}><line x1="12" y1="3" x2="12" y2="21" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="5.6" y1="5.6" x2="18.4" y2="18.4" /><line x1="18.4" y1="5.6" x2="5.6" y2="18.4" /></svg>
   )
   // cold_front / strong_front — down arrow (falling temps)
   return (
