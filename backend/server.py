@@ -1075,6 +1075,155 @@ def _freeze_adjustment(location_type, frozen_recent, frozen_extended):
     return {"delta": 0, "event": None}  # dry field
 
 
+# --- Migration timing model ------------------------------------------------
+# "Typical timing" — the seasonal calendar of when birds are usually in the
+# area. Two sources, blended by how much real data backs each:
+#   1. Generic flyway/latitude curve (works day one, no user data).
+#   2. The user's own history binned by half-month (birds SEEN preferred,
+#      harvested as fallback). Personalizes as data accumulates.
+# Coverage-based confidence de-emphasizes any source that isn't well-supported.
+TIMING_CONFIDENT_HUNTS = 18   # personal curve fully trusted at this many hunts
+TIMING_MIN_BINS = 3           # need this many populated half-months to personalize
+SEEN_CONFIDENT_HUNTS = 8      # "seen" fully trusted at this many hunts-with-seen
+TIMING_BONUS_MAX = 10
+TIMING_BONUS_MIN = -6
+# Season half-months, in migration order (Sep → Feb).
+SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
+
+
+def _doy(date_str: str) -> int:
+    from datetime import date as _d
+    return _d.fromisoformat(date_str).timetuple().tm_yday
+
+
+def _circular_day_dist(a: int, b: int) -> int:
+    diff = abs(a - b)
+    return min(diff, 365 - diff)
+
+
+def _flyway(lng: float) -> str:
+    if lng < -114:
+        return "Pacific"
+    if lng < -95:
+        return "Central"
+    if lng < -82:
+        return "Mississippi"
+    return "Atlantic"
+
+
+def _generic_migration_timing(lat: float, date_str: str) -> float:
+    """0–100 typical migration intensity from latitude + calendar (no user data)."""
+    import math
+    doy = _doy(date_str)
+    lat_c = max(25.0, min(50.0, lat))
+    # Peak shifts later as you go south (~2.6 days per degree of latitude).
+    peak = 305 + (47 - lat_c) * 2.6
+    main = 100 * math.exp(-(_circular_day_dist(doy, round(peak)) ** 2) / (2 * 20 ** 2))
+    # Small early-September teal pulse.
+    teal = 40 * math.exp(-(_circular_day_dist(doy, 258) ** 2) / (2 * 12 ** 2))
+    return min(100.0, max(main, teal))
+
+
+def _season_bin(date_str: str):
+    from datetime import date as _d
+    d = _d.fromisoformat(date_str)
+    pos = SEASON_MONTH_ORDER.get(d.month)
+    if pos is None:
+        return None
+    return pos * 2 + (0 if d.day <= 15 else 1)
+
+
+async def _migration_timing_profile(user_id: str):
+    """Bin the user's hunts by half-month; track birds seen vs harvested."""
+    hunts = await db.hunts.find({"user_id": user_id}).to_list(10000)
+    bins = {}  # bin -> {seen, harv, hunts}
+    seen_hunts = 0
+    total = 0
+    for hunt in hunts:
+        b = _season_bin(hunt.get("date", "")) if hunt.get("date") else None
+        if b is None:
+            continue
+        seen = sum(h.get("seen", 0) for h in hunt.get("harvests", []))
+        harv = sum((h.get("count") if h.get("count") is not None else h.get("harvested", 0))
+                   for h in hunt.get("harvests", []))
+        rec = bins.setdefault(b, {"seen": 0, "harv": 0, "hunts": 0})
+        rec["seen"] += seen
+        rec["harv"] += harv
+        rec["hunts"] += 1
+        total += 1
+        if seen > 0:
+            seen_hunts += 1
+
+    def norm_curve(metric):
+        vals = {b: r[metric] / r["hunts"] for b, r in bins.items() if r["hunts"] > 0}
+        if len(vals) < 2:
+            return {}
+        lo, hi = min(vals.values()), max(vals.values())
+        if hi <= lo:
+            return {b: 50.0 for b in vals}
+        return {b: (v - lo) / (hi - lo) * 100 for b, v in vals.items()}
+
+    return {
+        "seen_norm": norm_curve("seen"),
+        "harv_norm": norm_curve("harv"),
+        "populated_bins": len(bins),
+        "total_hunts": total,
+        "seen_hunts": seen_hunts,
+        "has_seen": seen_hunts > 0,
+    }
+
+
+def _blended_timing(date_str: str, lat: float, lng: float, profile: dict) -> dict:
+    """Blend generic calendar with personal history by data confidence."""
+    generic = _generic_migration_timing(lat, date_str)
+    b = _season_bin(date_str)
+
+    personal_conf = 0.0
+    personal_val = None
+    if profile["populated_bins"] >= TIMING_MIN_BINS and b is not None:
+        seen_v = profile["seen_norm"].get(b)
+        harv_v = profile["harv_norm"].get(b)
+        if profile["has_seen"] and seen_v is not None:
+            seen_conf = min(1.0, profile["seen_hunts"] / SEEN_CONFIDENT_HUNTS)
+            if harv_v is not None:
+                personal_val = seen_conf * seen_v + (1 - seen_conf) * harv_v
+            else:
+                personal_val = seen_v
+        elif harv_v is not None:
+            personal_val = harv_v
+        if personal_val is not None:
+            personal_conf = min(1.0, profile["total_hunts"] / TIMING_CONFIDENT_HUNTS)
+
+    if personal_val is not None and personal_conf > 0:
+        score = personal_conf * personal_val + (1 - personal_conf) * generic
+        source = "personal" if personal_conf >= 0.5 else "mixed"
+    else:
+        score = generic
+        source = "typical"
+
+    # Direction: is the season building toward peak or tapering off?
+    from datetime import date as _d, timedelta
+    ahead = (_d.fromisoformat(date_str) + timedelta(days=10)).isoformat()
+    slope = _generic_migration_timing(lat, ahead) - generic
+
+    if score >= 70 and abs(slope) < 8:
+        label = "Peak"
+    elif slope >= 5:
+        label = "Building"
+    elif slope <= -5:
+        label = "Tapering"
+    elif score < 30:
+        label = "Slow"
+    else:
+        label = "Active"
+
+    return {"score": round(score), "label": label, "source": source, "flyway": _flyway(lng)}
+
+
+def _timing_bonus(score: float) -> int:
+    return round(max(TIMING_BONUS_MIN, min(TIMING_BONUS_MAX, (score - 55) * 0.22)))
+
+
 def _pressure_trend(delta: float) -> str:
     if delta <= -MIG_PRESSURE_FALL:
         return "falling"
@@ -1295,6 +1444,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
     locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
     profile = await _user_condition_profile(user_id)
     use_history = profile["sample"] >= HISTORY_MIN_HUNTS
+    timing_profile = await _migration_timing_profile(user_id)
 
     results = []
     best_bets = []
@@ -1331,12 +1481,20 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             score = max(0, min(100, score + fz["delta"]))
             events = evt["events"] + ([fz["event"]] if fz["event"] else [])
 
-            # Narrative: lead with weather/water events, then wind / pressure / history.
+            # Seasonal migration timing (typical calendar, personalized by history)
+            timing = _blended_timing(day["date"], lat, lng, timing_profile)
+            score = max(0, min(100, score + _timing_bonus(timing["score"])))
+
+            # Narrative: lead with weather/water events, then wind / pressure / timing.
             factors = [e["label"] for e in events]
             if day["wind_cardinal"] in NORTH_CARDINALS:
                 factors.append(f"{day['wind_cardinal']} wind")
             if press_delta is not None and press_delta <= -MIG_PRESSURE_FALL:
                 factors.append("falling pressure")
+            if timing["label"] == "Peak":
+                factors.append("peak migration")
+            elif timing["label"] == "Building":
+                factors.append("migration building")
             if hist is not None and hist >= 65:
                 factors.append("matches your best hunts")
             if not factors and base >= 65:
@@ -1348,6 +1506,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "moon_phase_name": moon["name"],
                 "moon_illumination": moon["illumination"],
                 "migration": mig,
+                "timing": timing,
                 "events": events,
                 "hunt_score": round(score),
                 "factors": factors[:3],
@@ -1371,6 +1530,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             "location_id": str(loc["_id"]),
             "location_name": loc["name"],
             "location_type": loc.get("location_type"),
+            "timing": loc_days[0]["timing"] if loc_days else None,
             "days": loc_days,
         })
 

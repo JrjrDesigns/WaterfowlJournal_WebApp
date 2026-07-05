@@ -23,9 +23,17 @@ interface ForecastDay {
   moon_phase_name: string
   moon_illumination: number
   migration: { score: number; level: 'low' | 'med' | 'high'; factors: string[] }
+  timing: TimingInfo
   events: WeatherEvent[]
   hunt_score: number
   factors: string[]
+}
+
+interface TimingInfo {
+  score: number
+  label: 'Peak' | 'Building' | 'Tapering' | 'Active' | 'Slow'
+  source: 'personal' | 'mixed' | 'typical'
+  flyway: string
 }
 
 interface WeatherEvent {
@@ -37,6 +45,7 @@ interface ForecastLocation {
   location_id: string
   location_name: string
   location_type: string | null
+  timing: TimingInfo | null
   days: ForecastDay[]
 }
 
@@ -242,6 +251,29 @@ function PressureTrend({ trend }: { trend: 'falling' | 'steady' | 'rising' }) {
 const MIG_LABEL = { high: 'High', med: 'Med', low: 'Low' }
 const MIG_COLOR = { high: '#1B5E45', med: '#D97706', low: '#797B7E' }
 
+const TIMING_COLOR: Record<TimingInfo['label'], string> = {
+  Peak: '#1B5E45', Building: '#1B5E45', Active: '#1B4F6E', Tapering: '#D97706', Slow: '#797B7E',
+}
+const SOURCE_NOTE: Record<TimingInfo['source'], string> = {
+  personal: 'from your logs', mixed: 'your logs + typical', typical: 'typical timing',
+}
+
+function TimingChip({ timing }: { timing: TimingInfo }) {
+  const color = TIMING_COLOR[timing.label]
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+      style={{ color, backgroundColor: `${color}14` }}
+      title={`Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`}
+    >
+      <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12h4l3 8 4-16 3 8h4" />
+      </svg>
+      {timing.label} migration
+    </span>
+  )
+}
+
 export default function Forecast() {
   const [data, setData] = useState<ForecastResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -395,6 +427,11 @@ export default function Forecast() {
                     <> · best {format(new Date(bestDay.date + 'T12:00:00'), 'EEE')}</>
                   )}
                 </p>
+                {loc.timing && (
+                  <div className="mt-1.5">
+                    <TimingChip timing={loc.timing} />
+                  </div>
+                )}
               </div>
               {bestDay && <ScoreBadge score={bestDay.hunt_score} size="sm" />}
               <svg className={`w-4 h-4 text-muted flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -472,8 +509,8 @@ export default function Forecast() {
       })}
 
       <p className="text-xs text-muted text-center px-6 mt-2">
-        Hunt Score blends {data.uses_history ? 'your hunt history, ' : ''}migration pressure, and conditions.
-        Forecasts beyond ~5 days are less reliable.
+        Hunt Score blends {data.uses_history ? 'your hunt history, ' : ''}seasonal migration timing,
+        cold-front pressure, and conditions. Forecasts beyond ~5 days are less reliable.
       </p>
     </div>
   )

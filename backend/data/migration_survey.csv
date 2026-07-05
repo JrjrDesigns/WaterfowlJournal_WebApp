@@ -1,0 +1,18 @@
+# Ohio (and beyond) aerial waterfowl survey data — reference for migration-timing model.
+# One row per aerial survey, per location. Stack multiple seasons in the same file;
+# the model averages across years by half-month, so more seasons = smoother curve.
+#
+# Columns:
+#   location        Wildlife area / marsh name (free text)
+#   latitude        Decimal degrees N (e.g., 41.62). If unsure, leave blank + I'll
+#                   approximate from the location name (you can correct it).
+#   longitude       Decimal degrees (negative for W, e.g., -83.21). Used for flyway.
+#   survey_date     YYYY-MM-DD of the aerial count
+#   total_waterfowl Total birds counted (ducks; include geese only if you note it)
+#   notes           Optional (species mix, weather, "ice", partial count, etc.)
+#
+# Goal: 8-10 locations spanning as much LATITUDE as possible (Lake Erie ~41.5N down
+# to southern Ohio ~39N) — the latitude spread matters more than the number of sites.
+# Delete these comment lines and the example row before sending back if you like.
+location,latitude,longitude,survey_date,total_waterfowl,notes
+Ottawa NWR,41.62,-83.21,2023-11-01,18500,example row — replace me
