@@ -32,15 +32,24 @@ const tabs = [
     ),
   },
   {
-    to: '/profile',
-    label: 'Profile',
+    to: '/forecast',
+    label: 'Forecast',
     icon: (active: boolean) => (
       <svg className={`w-5 h-5 ${active ? 'text-ink' : 'text-muted'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2.5 : 2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2.5 : 2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
       </svg>
     ),
   },
 ]
+
+function GearIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  )
+}
 
 function BrandMark({ className = 'w-7 h-7' }: { className?: string }) {
   return (
@@ -92,20 +101,30 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* User footer */}
-        <div className="px-4 py-4 border-t border-hairline">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-ink rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-white">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-ink text-xs font-semibold truncate">{user?.name}</p>
-              <p className="text-muted text-xs truncate">{user?.email}</p>
-            </div>
-          </div>
-        </div>
+        {/* User footer → Profile */}
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `px-4 py-4 border-t border-hairline flex items-center gap-3 transition-colors ${
+              isActive ? 'bg-ink/[0.05]' : 'hover:bg-ink/[0.03]'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <div className="w-8 h-8 bg-ink rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-white">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-ink text-xs font-semibold truncate">{user?.name}</p>
+                <p className="text-muted text-xs truncate">{user?.email}</p>
+              </div>
+              <GearIcon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-ink' : 'text-muted'}`} />
+            </>
+          )}
+        </NavLink>
       </aside>
 
       {/* Mobile sidebar overlay */}
@@ -160,7 +179,9 @@ export default function Layout() {
             </svg>
           </button>
           <span className="font-display text-xl text-ink tracking-wider">BLIND GUIDE</span>
-          <div className="w-6" />
+          <NavLink to="/profile" className={({ isActive }) => isActive ? 'text-ink' : 'text-muted hover:text-ink'}>
+            <GearIcon className="w-6 h-6" />
+          </NavLink>
         </div>
 
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0">

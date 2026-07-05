@@ -942,6 +942,303 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
         "species_by_location": species_by_location,
     }
 
+# ============ FORECAST ROUTES ============
+#
+# Tunable model constants — adjust these to change how days are scored.
+# Migration index: cold-front proxy (temp drop + N wind + falling pressure).
+MIG_TEMP_DROP_STRONG = 15.0   # °F drop vs prior day → full temp points
+MIG_TEMP_DROP_MOD = 8.0       # °F drop → partial temp points
+MIG_TEMP_PTS = 40
+MIG_WIND_PTS = 30
+MIG_PRESSURE_PTS = 30
+MIG_PRESSURE_FALL = 2.0       # hPa daily-mean drop counts as "falling"
+# Hunt Score blend weights (must sum to 1.0)
+SCORE_W_HISTORY = 0.5
+SCORE_W_MIGRATION = 0.3
+SCORE_W_BASE = 0.2
+HISTORY_MIN_HUNTS = 5         # below this, lean on generic prior instead of history
+
+NORTH_CARDINALS = {"N", "NE", "NW"}
+
+
+def _pressure_trend(delta: float) -> str:
+    if delta <= -MIG_PRESSURE_FALL:
+        return "falling"
+    if delta >= MIG_PRESSURE_FALL:
+        return "rising"
+    return "steady"
+
+
+def _migration_index(temp_max, prev_temp_max, wind_cardinal, pressure_delta):
+    pts = 0
+    factors = []
+    if prev_temp_max is not None and temp_max is not None:
+        drop = prev_temp_max - temp_max
+        if drop >= MIG_TEMP_DROP_STRONG:
+            pts += MIG_TEMP_PTS
+            factors.append(f"{round(drop)}° temp drop")
+        elif drop >= MIG_TEMP_DROP_MOD:
+            pts += int(MIG_TEMP_PTS * 0.6)
+            factors.append(f"{round(drop)}° temp drop")
+    if wind_cardinal in NORTH_CARDINALS:
+        pts += MIG_WIND_PTS
+        factors.append(f"{wind_cardinal} wind")
+    if pressure_delta is not None and pressure_delta <= -MIG_PRESSURE_FALL:
+        pts += MIG_PRESSURE_PTS
+        factors.append("falling pressure")
+    level = "high" if pts > 65 else "med" if pts >= 35 else "low"
+    return {"score": pts, "level": level, "factors": factors}
+
+
+def _base_conditions_score(wind_speed, weather_code, temp_max):
+    """Generic duck-hunting prior, 0–100. Wind + overcast + cold + light precip = good."""
+    score = 40.0
+    if wind_speed is not None:
+        if 10 <= wind_speed <= 25:
+            score += 25
+        elif 6 <= wind_speed < 10 or 25 < wind_speed <= 32:
+            score += 12
+        elif wind_speed <= 3:
+            score -= 15  # dead-calm bluebird
+    if weather_code is not None:
+        if weather_code in (2, 3, 45, 48):       # cloudy / overcast / fog
+            score += 15
+        elif weather_code in (51, 53, 61, 63, 71, 73, 80, 85):  # light precip / snow
+            score += 20
+        elif weather_code <= 1:                   # clear
+            score -= 10
+    if temp_max is not None:
+        if temp_max <= 40:
+            score += 10
+        elif temp_max >= 65:
+            score -= 10
+    return max(0, min(100, score))
+
+
+async def _user_condition_profile(user_id: str):
+    """Avg birds/hunt per condition bucket from the user's full history."""
+    hunts = await db.hunts.find({"user_id": user_id}).to_list(10000)
+    buckets = {"wind": {}, "temp": {}, "sky": {}, "moon": {}}
+    total_birds = 0
+    sample = 0
+    for hunt in hunts:
+        birds = sum(
+            (h.get("count") if h.get("count") is not None else h.get("harvested", 0))
+            for h in hunt.get("harvests", [])
+        )
+        total_birds += birds
+        sample += 1
+        wd = hunt.get("weather_data") or {}
+
+        def add(cat, key):
+            if key is None:
+                return
+            b = buckets[cat].setdefault(key, {"birds": 0, "hunts": 0})
+            b["birds"] += birds
+            b["hunts"] += 1
+
+        if wd.get("condition") not in (None, "Unknown"):
+            if wd.get("wind_speed") is not None:
+                add("wind", _wind_bucket(wd["wind_speed"]))
+            if wd.get("temp") is not None:
+                add("temp", _temp_bucket(wd["temp"]))
+            add("sky", _sky_category(wd.get("weather_code")))
+        moon_name = wd.get("moon_phase_name")
+        if not moon_name and hunt.get("date"):
+            try:
+                moon_name = _moon_phase(hunt["date"])["name"]
+            except ValueError:
+                moon_name = None
+        add("moon", moon_name)
+
+    overall_avg = (total_birds / sample) if sample else 0
+    avgs = {cat: {k: v["birds"] / v["hunts"] for k, v in d.items() if v["hunts"] > 0}
+            for cat, d in buckets.items()}
+    return {"avgs": avgs, "overall_avg": overall_avg, "sample": sample}
+
+
+def _history_match_score(profile, wind_speed, temp, weather_code, moon_name):
+    """0–100: how much this day's buckets resemble the user's productive conditions."""
+    overall = profile["overall_avg"]
+    if overall <= 0:
+        return None
+    avgs = profile["avgs"]
+    lookups = [
+        avgs["wind"].get(_wind_bucket(wind_speed)) if wind_speed is not None else None,
+        avgs["temp"].get(_temp_bucket(temp)) if temp is not None else None,
+        avgs["sky"].get(_sky_category(weather_code)) if weather_code is not None else None,
+        avgs["moon"].get(moon_name) if moon_name else None,
+    ]
+    ratios = [v / overall for v in lookups if v is not None]
+    if not ratios:
+        return None
+    # ratio 1.0 = average day → 50; 2x average → 100; 0 → 0
+    return max(0, min(100, (sum(ratios) / len(ratios)) * 50))
+
+
+def fetch_forecast_data(lat: float, lng: float, days: int = 7):
+    """Fetch multi-day forecast from Open-Meteo. Returns list of per-day dicts."""
+    try:
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": lat,
+            "longitude": lng,
+            "daily": ",".join([
+                "temperature_2m_max", "temperature_2m_min", "weathercode",
+                "windspeed_10m_max", "winddirection_10m_dominant",
+                "precipitation_sum", "precipitation_probability_max",
+                "sunrise", "sunset",
+            ]),
+            "hourly": "surface_pressure",
+            "temperature_unit": "fahrenheit",
+            "windspeed_unit": "mph",
+            "timezone": "auto",
+            "forecast_days": days,
+        }
+        resp = requests.get(url, params=params, timeout=12)
+        if resp.status_code != 200:
+            logger.error(f"Open-Meteo forecast error: {resp.status_code} - {resp.text}")
+            return []
+        data = resp.json()
+        daily = data.get("daily", {})
+        hourly = data.get("hourly", {})
+
+        # Daily-mean surface pressure for trend
+        press_by_day = {}
+        for t, p in zip(hourly.get("time", []), hourly.get("surface_pressure", [])):
+            if p is None:
+                continue
+            d = t[:10]
+            press_by_day.setdefault(d, []).append(p)
+        day_mean_press = {d: sum(v) / len(v) for d, v in press_by_day.items() if v}
+
+        weather_codes = {
+            0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+            45: "Foggy", 48: "Rime fog", 51: "Light drizzle", 53: "Drizzle", 55: "Dense drizzle",
+            61: "Slight rain", 63: "Rain", 65: "Heavy rain", 71: "Slight snow", 73: "Snow",
+            75: "Heavy snow", 77: "Snow grains", 80: "Rain showers", 81: "Rain showers",
+            82: "Violent showers", 85: "Snow showers", 86: "Heavy snow showers",
+            95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm",
+        }
+
+        dates = daily.get("time", [])
+        out = []
+        prev_temp = None
+        for i, d in enumerate(dates):
+            def g(key, default=None):
+                arr = daily.get(key, [])
+                return arr[i] if i < len(arr) else default
+            temp_max = g("temperature_2m_max")
+            temp_min = g("temperature_2m_min")
+            code = g("weathercode", 0)
+            wind_max = g("windspeed_10m_max", 0) or 0
+            wind_dir = g("winddirection_10m_dominant", 0) or 0
+            sunrise = g("sunrise", "") or ""
+            sunset = g("sunset", "") or ""
+            mean_p = day_mean_press.get(d)
+            prev_p = day_mean_press.get(dates[i - 1]) if i > 0 else None
+            press_delta = (mean_p - prev_p) if (mean_p is not None and prev_p is not None) else None
+
+            out.append({
+                "date": d,
+                "temp_max": round(temp_max) if temp_max is not None else None,
+                "temp_min": round(temp_min) if temp_min is not None else None,
+                "weather_code": code,
+                "condition": weather_codes.get(code, "Unknown"),
+                "precipitation": round(g("precipitation_sum", 0) or 0, 2),
+                "precip_prob": g("precipitation_probability_max", 0) or 0,
+                "wind_speed": round(wind_max, 1),
+                "wind_direction": round(wind_dir),
+                "wind_cardinal": _deg_to_cardinal(wind_dir),
+                "pressure_trend": _pressure_trend(press_delta) if press_delta is not None else "steady",
+                "sunrise": sunrise[11:16] if len(sunrise) >= 16 else "",
+                "sunset": sunset[11:16] if len(sunset) >= 16 else "",
+                "_prev_temp": prev_temp,
+                "_press_delta": press_delta,
+            })
+            prev_temp = temp_max
+        return out
+    except Exception as e:
+        logger.error(f"Open-Meteo forecast error: {e}")
+        return []
+
+
+@api_router.get("/forecast")
+async def get_forecast(current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
+    profile = await _user_condition_profile(user_id)
+    use_history = profile["sample"] >= HISTORY_MIN_HUNTS
+
+    results = []
+    best_bets = []
+    for loc in locations:
+        center = loc.get("center") or {}
+        lat, lng = center.get("lat"), center.get("lng")
+        if lat is None or lng is None:
+            continue
+        days = fetch_forecast_data(lat, lng, 7)
+        loc_days = []
+        for day in days:
+            moon = _moon_phase(day["date"])
+            mig = _migration_index(day["temp_max"], day.pop("_prev_temp"),
+                                   day["wind_cardinal"], day.pop("_press_delta"))
+            base = _base_conditions_score(day["wind_speed"], day["weather_code"], day["temp_max"])
+            hist = _history_match_score(profile, day["wind_speed"], day["temp_max"],
+                                        day["weather_code"], moon["name"]) if use_history else None
+
+            if hist is not None:
+                score = (SCORE_W_HISTORY * hist
+                         + SCORE_W_MIGRATION * mig["score"]
+                         + SCORE_W_BASE * base)
+            else:
+                # No usable history: reweight migration + base to fill history's share
+                score = (0.55 * base + 0.45 * mig["score"])
+
+            factors = list(mig["factors"])
+            if hist is not None and hist >= 65:
+                factors.append("matches your best hunts")
+            if not factors and base >= 65:
+                factors.append("solid conditions")
+
+            enriched = {
+                **day,
+                "moon_phase": moon["phase"],
+                "moon_phase_name": moon["name"],
+                "moon_illumination": moon["illumination"],
+                "migration": mig,
+                "hunt_score": round(score),
+                "factors": factors[:3],
+            }
+            loc_days.append(enriched)
+            best_bets.append({
+                "location_id": str(loc["_id"]),
+                "location_name": loc["name"],
+                "location_type": loc.get("location_type"),
+                "date": day["date"],
+                "hunt_score": round(score),
+                "wind_cardinal": day["wind_cardinal"],
+                "wind_speed": day["wind_speed"],
+                "temp_max": day["temp_max"],
+                "weather_code": day["weather_code"],
+                "factors": factors[:3],
+            })
+
+        results.append({
+            "location_id": str(loc["_id"]),
+            "location_name": loc["name"],
+            "location_type": loc.get("location_type"),
+            "days": loc_days,
+        })
+
+    best_bets.sort(key=lambda b: b["hunt_score"], reverse=True)
+    return {
+        "locations": results,
+        "best_bets": best_bets[:5],
+        "uses_history": use_history,
+        "history_sample": profile["sample"],
+    }
+
 # ============ UTILITY ROUTES ============
 
 @api_router.get("/species")

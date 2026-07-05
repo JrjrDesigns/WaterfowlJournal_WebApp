@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 interface Props {
   onClose: () => void
-  reason?: 'hunt_limit' | 'stats' | 'weather' | 'export'
+  reason?: 'hunt_limit' | 'stats' | 'weather' | 'export' | 'forecast'
 }
 
 const FEATURES = [
@@ -19,6 +19,7 @@ const titles: Record<string, string> = {
   stats: 'Advanced Stats — Pro',
   weather: 'Weather Data — Pro',
   export: 'Data Export — Pro',
+  forecast: 'Hunt Forecast — Pro',
 }
 
 const descriptions: Record<string, string> = {
@@ -26,6 +27,7 @@ const descriptions: Record<string, string> = {
   stats: 'Full analytics and charts are available on Pro.',
   weather: 'Automatic weather data on your hunts is a Pro feature.',
   export: 'Exporting your hunt history as CSV requires Pro.',
+  forecast: 'The 7-day scored hunt forecast for every location is a Pro feature.',
 }
 
 export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) {

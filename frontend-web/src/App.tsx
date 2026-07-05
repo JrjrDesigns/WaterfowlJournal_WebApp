@@ -10,6 +10,7 @@ import HuntDetail from './pages/hunts/HuntDetail'
 import HuntEdit from './pages/hunts/HuntEdit'
 import Locations from './pages/Locations'
 import Stats from './pages/Stats'
+import Forecast from './pages/Forecast'
 import Profile from './pages/Profile'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -50,6 +51,7 @@ function AppRoutes() {
         <Route path="/hunts/:id/edit" element={<HuntEdit />} />
         <Route path="/locations" element={<Locations />} />
         <Route path="/stats" element={<Stats />} />
+        <Route path="/forecast" element={<Forecast />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="/" element={<Navigate to="/hunts" replace />} />

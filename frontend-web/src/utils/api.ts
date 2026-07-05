@@ -70,6 +70,8 @@ export const fetchStatistics = (year?: number) => {
   return apiRequest(url)
 }
 
+export const fetchForecast = () => apiRequest('/api/forecast')
+
 export const fetchSpecies = () => apiRequest('/api/species')
 
 export const fetchSubscriptionStatus = () => apiRequest('/api/subscription/status')
