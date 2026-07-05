@@ -1078,7 +1078,7 @@ def _freeze_adjustment(location_type, frozen_recent, frozen_extended):
 # --- Migration timing model ------------------------------------------------
 # "Typical timing" — the seasonal calendar of when birds are usually in the
 # area. Two sources, blended by how much real data backs each:
-#   1. Generic flyway/latitude curve (works day one, no user data).
+#   1. Generic latitude curve (works day one, no user data).
 #   2. The user's own history binned by half-month (birds SEEN preferred,
 #      harvested as fallback). Personalizes as data accumulates.
 # Coverage-based confidence de-emphasizes any source that isn't well-supported.
@@ -1090,15 +1090,19 @@ TIMING_BONUS_MIN = -6
 # Season half-months, in migration order (Sep → Feb).
 SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 
-
-def _doy(date_str: str) -> int:
-    from datetime import date as _d
-    return _d.fromisoformat(date_str).timetuple().tm_yday
-
-
-def _circular_day_dist(a: int, b: int) -> int:
-    diff = abs(a - b)
-    return min(diff, 365 - diff)
+# Empirical migration-intensity curves fitted from ~40 years of Ohio aerial
+# waterfowl surveys (1985–2025, dabblers + divers), normalized 0–100 across the
+# 10 half-months Sep-1 … Jan-2. Each anchor is a representative latitude; the
+# model interpolates between anchors by latitude and between half-months by date.
+# Ohio spans ~39–41.6°N — latitudes far outside this clamp to the nearest anchor
+# and are approximate until survey data from other latitudes/flyways is added.
+#                        Sep1 Sep2 Oct1 Oct2 Nov1 Nov2 Dec1 Dec2 Jan1 Jan2
+MIGRATION_CURVES = [
+    (39.0, [13, 13, 21, 27, 40, 58, 68, 74, 86, 100]),   # southern OH — late/wintering
+    (40.6, [20, 28, 47, 69, 92, 100, 89, 75, 67, 71]),   # north-central OH
+    (41.6, [18, 26, 48, 87, 100, 98, 73, 58, 37, 28]),   # Lake Erie marshes — early
+]
+_DAYS_IN_MONTH = {9: 30, 10: 31, 11: 30, 12: 31, 1: 31}
 
 
 def _flyway(lng: float) -> str:
@@ -1111,17 +1115,42 @@ def _flyway(lng: float) -> str:
     return "Atlantic"
 
 
+def _bin_coordinate(date_str: str):
+    """Map a date to a continuous half-month index 0..9 (Sep-1 … Jan-2), or None."""
+    from datetime import date as _d
+    d = _d.fromisoformat(date_str)
+    pos = SEASON_MONTH_ORDER.get(d.month)
+    if pos is None or d.month == 2:   # Feb+ handled as off-season here
+        return None
+    frac = (d.day - 1) / _DAYS_IN_MONTH[d.month]   # 0..~1 within the month
+    return max(0.0, min(9.0, pos * 2 + frac * 2))
+
+
+def _curve_at(curve, x: float) -> float:
+    lo = int(x)
+    if lo >= 9:
+        return float(curve[9])
+    return curve[lo] + (curve[lo + 1] - curve[lo]) * (x - lo)
+
+
 def _generic_migration_timing(lat: float, date_str: str) -> float:
-    """0–100 typical migration intensity from latitude + calendar (no user data)."""
-    import math
-    doy = _doy(date_str)
-    lat_c = max(25.0, min(50.0, lat))
-    # Peak shifts later as you go south (~2.6 days per degree of latitude).
-    peak = 305 + (47 - lat_c) * 2.6
-    main = 100 * math.exp(-(_circular_day_dist(doy, round(peak)) ** 2) / (2 * 20 ** 2))
-    # Small early-September teal pulse.
-    teal = 40 * math.exp(-(_circular_day_dist(doy, 258) ** 2) / (2 * 12 ** 2))
-    return min(100.0, max(main, teal))
+    """0–100 typical migration intensity, interpolated from the Ohio curves."""
+    x = _bin_coordinate(date_str)
+    if x is None:
+        return 8.0   # off-season (Feb–Aug)
+    lo_lat, lo_curve = MIGRATION_CURVES[0]
+    hi_lat, hi_curve = MIGRATION_CURVES[-1]
+    if lat <= lo_lat:
+        return _curve_at(lo_curve, x)
+    if lat >= hi_lat:
+        return _curve_at(hi_curve, x)
+    for i in range(len(MIGRATION_CURVES) - 1):
+        a_lat, a_curve = MIGRATION_CURVES[i]
+        b_lat, b_curve = MIGRATION_CURVES[i + 1]
+        if a_lat <= lat <= b_lat:
+            t = (lat - a_lat) / (b_lat - a_lat)
+            return _curve_at(a_curve, x) * (1 - t) + _curve_at(b_curve, x) * t
+    return _curve_at(hi_curve, x)
 
 
 def _season_bin(date_str: str):

@@ -1,3 +1,9 @@
+# NOTE: Ohio is already calibrated and baked into server.py (MIGRATION_CURVES),
+# derived from surveys/ohio_1985-2025.csv via build_migration_curves.py.
+# This template is for adding NEW states/latitudes (MO, ND, WA, NC, TN, ...).
+# Any per-survey count export works — this simple schema or a richer per-species
+# one like the Ohio file; the build script can be adapted to it.
+#
 # Ohio (and beyond) aerial waterfowl survey data — reference for migration-timing model.
 # One row per aerial survey, per location. Stack multiple seasons in the same file;
 # the model averages across years by half-month, so more seasons = smoother curve.
