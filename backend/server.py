@@ -1096,12 +1096,20 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # and between half-months by date. Sources (all Mississippi flyway):
 #   - Ohio: ~40 yrs of ODNR aerial surveys, 1985–2025 (39.0/40.6/41.6°N)
 #   - Kentucky: 9 seasons of KDFWR ground counts, 2016–2025 (37.2°N)
-# Covers ~37–41.6°N. Other flyways currently reuse these curves; latitudes
+#   - Arkansas: 35 AGFC aerial survey reports, 2015–2026, Mississippi Alluvial
+#     Valley (Delta) region total (34.7°N). AGFC only surveys Nov–Jan; Sep/Oct
+#     are extrapolated from Kentucky's early-season shape rescaled to match
+#     Arkansas's own measured Nov-1 value, and Dec-2 is linearly interpolated
+#     between the measured Dec-1 and Jan-1 points (flagged inline below).
+# Covers ~34.7–41.6°N. Other flyways currently reuse these curves; latitudes
 # outside the range clamp to the nearest anchor. Note the wintering-latitude
-# (37°N) curve peaks late (Jan) and plateaus — arrivals there are freeze-pulse
-# driven, not a clean fall migration wave.
+# anchors (34.7–37.2°N) peak late (Jan) and plateau rather than showing a
+# single sharp peak — arrivals there are freeze-pulse driven / terminus
+# behavior, not a clean fall migration wave.
 #                        Sep1 Sep2 Oct1 Oct2 Nov1 Nov2 Dec1 Dec2 Jan1 Jan2
 MIGRATION_CURVES = [
+    #                                            ↓extrapolated↓        ↓interp↓
+    (34.7, [15,  19,  29,  39,  63,  65,  81,  90, 100,  93]),   # Arkansas Delta — terminus
     (37.2, [3,   4,   6,   8,   13,  47,  78,  79,  96, 100]),   # western KY — wintering
     (39.0, [13, 13,  21,  27,  40,  58,  68,  74,  86, 100]),   # southern OH — late
     (40.6, [20, 28,  47,  69,  92, 100,  89,  75,  67,  71]),   # north-central OH
