@@ -101,6 +101,7 @@ class Blind(BaseModel):
 class HarvestData(BaseModel):
     species_name: str
     count: int = 0
+    mine: Optional[int] = None  # birds personally shot; None = not tracked separately (solo hunt or unknown attribution), treat as == count
     missed: int = 0
     shot_not_recovered: int = 0
     seen: int = 0
@@ -116,6 +117,7 @@ class HuntCreate(BaseModel):
     harvests: List[HarvestData] = []
     is_morning: bool = False
     is_evening: bool = False
+    party: List[str] = []  # names of other hunters present, not including the logging user
 
 class Hunt(BaseModel):
     id: str
@@ -132,6 +134,7 @@ class Hunt(BaseModel):
     harvests: List[HarvestData] = []
     is_morning: bool = False
     is_evening: bool = False
+    party: List[str] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Statistics(BaseModel):
@@ -609,6 +612,7 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "harvests": [h.dict() for h in hunt_data.harvests],
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
+        "party": hunt_data.party,
         "created_at": datetime.utcnow()
     }
     result = await db.hunts.insert_one(hunt_doc)
@@ -629,6 +633,7 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "harvests": hunt_data.harvests,
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
+        "party": hunt_data.party,
         "created_at": datetime.utcnow()
     }
 
@@ -672,6 +677,7 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
         "harvests": [h.dict() for h in hunt_data.harvests],
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
+        "party": hunt_data.party,
     }})
 
     return {
@@ -689,6 +695,7 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
         "harvests": hunt_data.harvests,
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
+        "party": hunt_data.party,
         "created_at": existing.get("created_at", datetime.utcnow()),
     }
 
@@ -702,13 +709,16 @@ async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user))
     # Transform harvest data to match new schema
     transformed_harvests = []
     for harvest in hunt.get("harvests", []):
+        count = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
         transformed_harvests.append({
             "species_name": harvest.get("species_name") or harvest.get("species", "Unknown"),
-            "count": harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0),
+            "count": count,
+            "mine": harvest.get("mine") if harvest.get("mine") is not None else count,
             "missed": harvest.get("missed", 0),
-            "shot_not_recovered": harvest.get("shot_not_recovered", 0)
+            "shot_not_recovered": harvest.get("shot_not_recovered", 0),
+            "seen": harvest.get("seen", 0),
         })
-    
+
     return {
         "id": str(hunt["_id"]),
         "user_id": hunt["user_id"],
@@ -724,6 +734,7 @@ async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user))
         "harvests": transformed_harvests,
         "is_morning": hunt.get("is_morning", False),
         "is_evening": hunt.get("is_evening", False),
+        "party": hunt.get("party", []),
         "created_at": hunt.get("created_at", datetime.utcnow())
     }
 
@@ -813,34 +824,53 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
     best_day = None        # {date, name, harvested}
     species_by_location = {}  # location -> {species: harvested}
 
+    # Group-hunt (party) aggregates — kept separate from the personal stats above.
+    group_hunts = 0
+    group_total_harvested = 0
+    group_party_size_sum = 0
+    group_by_species = {}
+
     for hunt in sorted(hunts, key=lambda h: h.get("date", "")):
-        hunt_harvested = 0
+        party = hunt.get("party") or []
+        is_group_hunt = len(party) > 0
+        hunt_harvested = 0        # personal (mine) total for this hunt
+        hunt_group_harvested = 0  # full party total for this hunt
         for harvest in hunt.get("harvests", []):
             species = harvest.get("species_name") or harvest.get("species", "Unknown")
             count = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
+            mine = harvest.get("mine") if harvest.get("mine") is not None else count
             missed = harvest.get("missed", 0)
             shot_not_recovered = harvest.get("shot_not_recovered", 0)
             seen = harvest.get("seen", 0)
 
-            total_harvested += count
+            total_harvested += mine
             total_missed += missed
             total_shot_not_recovered += shot_not_recovered
             total_seen += seen
-            hunt_harvested += count
+            hunt_harvested += mine
+            hunt_group_harvested += count
 
             if species in SPECIES_CATEGORIES["ducks"]:
-                ducks_total += count
+                ducks_total += mine
             elif species in SPECIES_CATEGORIES["geese"]:
-                geese_total += count
+                geese_total += mine
             else:
-                others_total += count
+                others_total += mine
 
             if species not in by_species:
                 by_species[species] = {"harvested": 0, "missed": 0, "shot_not_recovered": 0, "seen": 0}
-            by_species[species]["harvested"] += count
+            by_species[species]["harvested"] += mine
             by_species[species]["missed"] += missed
             by_species[species]["shot_not_recovered"] += shot_not_recovered
             by_species[species]["seen"] = by_species[species].get("seen", 0) + seen
+
+            if is_group_hunt and count:
+                group_by_species[species] = group_by_species.get(species, 0) + count
+
+        if is_group_hunt:
+            group_hunts += 1
+            group_total_harvested += hunt_group_harvested
+            group_party_size_sum += len(party) + 1
 
         if hunt_harvested > 0:
             hunts_with_birds += 1
@@ -864,8 +894,9 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
             for harvest in hunt.get("harvests", []):
                 sp = harvest.get("species_name") or harvest.get("species", "Unknown")
                 c = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
-                if c:
-                    sp_map[sp] = sp_map.get(sp, 0) + c
+                m = harvest.get("mine") if harvest.get("mine") is not None else c
+                if m:
+                    sp_map[sp] = sp_map.get(sp, 0) + m
 
         if hunt.get("location_type"):
             bump(by_location_type, hunt["location_type"])
@@ -940,6 +971,12 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
         "by_temp": ordered(by_temp, TEMP_ORDER),
         "by_wind": ordered(by_wind, WIND_ORDER),
         "species_by_location": species_by_location,
+        "group": {
+            "hunts": group_hunts,
+            "total_harvested": group_total_harvested,
+            "avg_party_size": round(group_party_size_sum / group_hunts, 1) if group_hunts else 0,
+            "by_species": group_by_species,
+        } if group_hunts > 0 else None,
     }
 
 # ============ FORECAST ROUTES ============
@@ -1723,11 +1760,15 @@ async def export_hunts_csv(current_user: dict = Depends(get_current_user)):
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Date", "Hunt Name", "Blind", "Lat", "Lng", "Total Harvested", "Total Missed", "Total Lost", "Notes", "Condition", "Temp (F)", "Wind (mph)"])
+    writer.writerow(["Date", "Hunt Name", "Blind", "Lat", "Lng", "Party", "Total Harvested", "My Harvest", "Total Missed", "Total Lost", "Notes", "Condition", "Temp (F)", "Wind (mph)"])
 
     for hunt in hunts:
         weather = hunt.get("weather_data") or {}
         total_h = sum(h.get("count", 0) for h in hunt.get("harvests", []))
+        total_mine = sum(
+            (h.get("mine") if h.get("mine") is not None else h.get("count", 0))
+            for h in hunt.get("harvests", [])
+        )
         total_m = sum(h.get("missed", 0) for h in hunt.get("harvests", []))
         total_l = sum(h.get("shot_not_recovered", 0) for h in hunt.get("harvests", []))
         writer.writerow([
@@ -1736,7 +1777,9 @@ async def export_hunts_csv(current_user: dict = Depends(get_current_user)):
             hunt.get("blind_name", ""),
             hunt.get("location", {}).get("lat", ""),
             hunt.get("location", {}).get("lng", ""),
+            ", ".join(hunt.get("party", [])),
             total_h,
+            total_mine,
             total_m,
             total_l,
             hunt.get("notes", "").replace("\n", " "),

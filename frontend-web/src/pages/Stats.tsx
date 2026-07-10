@@ -34,6 +34,12 @@ interface Statistics {
   by_sky: Bucket[]
   by_temp: Bucket[]
   by_wind: Bucket[]
+  group: {
+    hunts: number
+    total_harvested: number
+    avg_party_size: number
+    by_species: Record<string, number>
+  } | null
 }
 
 const TOOLTIP_STYLE = {
@@ -350,6 +356,32 @@ export default function Stats() {
               )}
             </div>
           </div>
+
+          {/* Group Hunts */}
+          {stats.group && stats.group.hunts > 0 && (
+            <Card title="Group Hunts">
+              <div className="flex items-stretch justify-center divide-x divide-hairline mb-4">
+                <StatCol label="Hunts" value={stats.group.hunts} color="text-ink" />
+                <StatCol label="Party Birds" value={stats.group.total_harvested} />
+                <StatCol label="Avg Party Size" value={stats.group.avg_party_size} color="text-blue" />
+              </div>
+              {Object.keys(stats.group.by_species).length > 0 && (
+                <ResponsiveContainer width="100%" height={Math.max(120, Object.keys(stats.group.by_species).length * 36)}>
+                  <BarChart
+                    data={Object.entries(stats.group.by_species).sort(([, a], [, b]) => b - a).map(([name, harvested]) => ({ name, harvested }))}
+                    layout="vertical"
+                    margin={{ top: 0, right: 0, left: 10, bottom: 0 }}
+                  >
+                    <XAxis type="number" tick={{ fill: '#797B7E', fontSize: 11, fontFamily: '"Work Sans"' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fill: '#797B7E', fontSize: 11, fontFamily: '"Work Sans"' }} axisLine={false} tickLine={false} width={80} />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                    <Bar dataKey="harvested" fill="#1B5E45" radius={[0, 4, 4, 0]} name="Party Total" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+              <p className="text-xs text-muted mt-3">Full party bag on hunts logged with others — not just your birds.</p>
+            </Card>
+          )}
 
           {/* Morning vs Evening */}
           {hasTimeSplit && (

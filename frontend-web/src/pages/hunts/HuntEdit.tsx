@@ -26,7 +26,7 @@ const greenIcon = new L.Icon({
 
 interface LocationData { id: string; name: string; location_type: string }
 interface BlindData { id: string; name: string; location_id: string; lat: number; lng: number }
-interface Harvest { species: string; harvested: number; missed: number; shot_not_recovered: number; seen: number }
+interface Harvest { species: string; harvested: number; missed: number; shot_not_recovered: number; seen: number; mine: number }
 
 export default function HuntEdit() {
   const { id } = useParams<{ id: string }>()
@@ -47,6 +47,8 @@ export default function HuntEdit() {
   const [notes, setNotes] = useState('')
   const [photos, setPhotos] = useState<string[]>([])
   const [harvests, setHarvests] = useState<Harvest[]>([])
+  const [party, setParty] = useState<string[]>([])
+  const [partyInput, setPartyInput] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -71,13 +73,15 @@ export default function HuntEdit() {
       setIsEvening(hunt.is_evening ?? false)
       setNotes(hunt.notes ?? '')
       setPhotos(hunt.photos ?? [])
-      setHarvests((hunt.harvests ?? []).map((h: { species_name: string; count: number; missed: number; shot_not_recovered: number; seen?: number }) => ({
+      setHarvests((hunt.harvests ?? []).map((h: { species_name: string; count: number; mine?: number; missed: number; shot_not_recovered: number; seen?: number }) => ({
         species: h.species_name,
         harvested: h.count,
         missed: h.missed,
         shot_not_recovered: h.shot_not_recovered,
         seen: h.seen ?? 0,
+        mine: h.mine ?? h.count,
       })))
+      setParty(hunt.party ?? [])
 
       // Restore location + blind selection
       if (hunt.blind_id) {
@@ -127,7 +131,7 @@ export default function HuntEdit() {
   }
 
   const addHarvest = () => {
-    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0 }])
+    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0, mine: 0 }])
   }
 
   const updateHarvestEntry = (i: number, field: keyof Harvest, value: string | number) => {
@@ -136,6 +140,17 @@ export default function HuntEdit() {
       next[i] = { ...next[i], [field]: value }
       return next
     })
+  }
+
+  const addPartyMember = () => {
+    const name = partyInput.trim()
+    if (!name || party.includes(name)) return
+    setParty(prev => [...prev, name])
+    setPartyInput('')
+  }
+
+  const removePartyMember = (name: string) => {
+    setParty(prev => prev.filter(p => p !== name))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,9 +171,11 @@ export default function HuntEdit() {
         photos,
         is_morning: isMorning,
         is_evening: isEvening,
+        party,
         harvests: harvests.map(h => ({
           species_name: h.species,
           count: h.harvested,
+          mine: party.length > 0 ? h.mine : undefined,
           missed: h.missed,
           shot_not_recovered: h.shot_not_recovered,
           seen: h.seen,
@@ -241,6 +258,45 @@ export default function HuntEdit() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Hunting Party */}
+        <div>
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunting With</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={partyInput}
+              onChange={e => setPartyInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addPartyMember() } }}
+              placeholder="Add a hunter's name…"
+              className="flex-1"
+            />
+            <button
+              type="button"
+              onClick={addPartyMember}
+              className="flex-shrink-0 bg-ink text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-black transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          {party.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {party.map(name => (
+                <span key={name} className="flex items-center gap-1.5 bg-surface border border-hairline rounded-full pl-3 pr-2 py-1 text-xs font-semibold text-ink">
+                  {name}
+                  <button type="button" onClick={() => removePartyMember(name)} className="text-muted hover:text-red-500 transition-colors">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+              <p className="w-full text-xs text-muted mt-0.5">
+                Hunting with others increases your bag limit. Add each species' total below, plus how many were yours if you know.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Location → Blind */}
@@ -326,6 +382,17 @@ export default function HuntEdit() {
                       </div>
                     ))}
                   </div>
+                  {party.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-hairline">
+                      <p className="text-xs text-muted mb-1 font-semibold">Mine (of the {harvest.harvested} harvested)</p>
+                      <input
+                        type="number" min="0" max={harvest.harvested}
+                        value={harvest.mine}
+                        onChange={e => updateHarvestEntry(i, 'mine', parseInt(e.target.value) || 0)}
+                        className="text-center w-24"
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

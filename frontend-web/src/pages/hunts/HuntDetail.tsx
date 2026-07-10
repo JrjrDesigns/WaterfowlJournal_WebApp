@@ -60,10 +60,12 @@ interface Hunt {
   harvests: Array<{
     species_name: string
     count: number
+    mine: number
     missed: number
     shot_not_recovered: number
     seen: number
   }>
+  party: string[]
 }
 
 function wmoCategory(code: number | undefined): string {
@@ -428,6 +430,9 @@ export default function HuntDetail() {
             </p>
             <h1 className="font-display text-4xl text-white tracking-wider leading-none">{hunt.name}</h1>
             <p className="text-sm text-white/70 mt-1">{hunt.blind_name}</p>
+            {hunt.party?.length > 0 && (
+              <p className="text-xs text-white/60 mt-1">Hunting with {hunt.party.join(', ')}</p>
+            )}
           </div>
         </div>
 
@@ -536,9 +541,15 @@ export default function HuntDetail() {
                         <p className="text-xs text-muted/70 uppercase tracking-wider">missed</p>
                       </div>
                     )}
+                    {hunt.party?.length > 0 && (
+                      <div className="text-right">
+                        <p className="font-display text-xl text-blue leading-none">{h.mine}</p>
+                        <p className="text-xs text-muted/70 uppercase tracking-wider">mine</p>
+                      </div>
+                    )}
                     <div className="text-right">
                       <p className="font-display text-2xl text-green leading-none">{h.count}</p>
-                      <p className="text-xs text-muted uppercase tracking-wider">harvested</p>
+                      <p className="text-xs text-muted uppercase tracking-wider">{hunt.party?.length > 0 ? 'party' : 'harvested'}</p>
                     </div>
                   </div>
                 </div>
