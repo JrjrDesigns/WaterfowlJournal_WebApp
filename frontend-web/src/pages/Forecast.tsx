@@ -27,6 +27,7 @@ interface ForecastDay {
   events: WeatherEvent[]
   hunt_score: number
   factors: string[]
+  blind_wind: Array<{ blind_id: string; blind_name: string; level: 'perfect' | 'good'; blind_score: number }>
 }
 
 interface TimingInfo {
@@ -493,6 +494,24 @@ export default function Forecast() {
                       {day.events.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2 pl-[52px]">
                           {day.events.map((e, i) => <EventPill key={i} event={e} />)}
+                        </div>
+                      )}
+
+                      {/* Ideal-wind blind badges */}
+                      {(day.blind_wind ?? []).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2 pl-[52px]">
+                          {(day.blind_wind ?? []).map((bw, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold whitespace-nowrap"
+                              style={{
+                                color: bw.level === 'perfect' ? '#1B5E45' : '#1B4F6E',
+                                backgroundColor: bw.level === 'perfect' ? '#1B5E4518' : '#1B4F6E18',
+                              }}
+                            >
+                              {bw.level === 'perfect' ? '★ Perfect wind' : 'Good wind'} — {bw.blind_name} ({bw.blind_score})
+                            </span>
+                          ))}
                         </div>
                       )}
                     </div>

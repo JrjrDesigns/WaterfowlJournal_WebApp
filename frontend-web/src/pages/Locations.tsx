@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { fetchLocations, createLocation, deleteLocation, fetchBlindsForLocation, createBlind, deleteBlind } from '../utils/api'
+import { fetchLocations, createLocation, deleteLocation, fetchBlindsForLocation, createBlind, updateBlind, deleteBlind } from '../utils/api'
+import WindCompassPicker, { WindCompassValue } from '../components/WindCompassPicker'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -53,6 +54,8 @@ interface BlindData {
   blind_type: string
   notes: string
   location_id: string
+  ideal_wind_directions: string[]
+  ideal_wind_center: string | null
 }
 
 function typeLabel(t: string) {
@@ -135,11 +138,13 @@ export default function Locations() {
     }
   }
 
-  // New blind modal
+  // New/edit blind modal
   const [showNewBlind, setShowNewBlind] = useState(false)
+  const [editingBlindId, setEditingBlindId] = useState<string | null>(null)
   const [blindName, setBlindName] = useState('')
   const [blindType, setBlindType] = useState('ground')
   const [blindNotes, setBlindNotes] = useState('')
+  const [blindIdealWind, setBlindIdealWind] = useState<WindCompassValue>({ directions: [], center: null })
   const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null)
   const [creatingBlind, setCreatingBlind] = useState(false)
   const [blindError, setBlindError] = useState('')
@@ -200,11 +205,30 @@ export default function Locations() {
 
   const handleMapClick = (lat: number, lng: number) => {
     if (!selectedLocation) return
+    resetBlindForm()
     setPendingPin({ lat, lng })
     setShowNewBlind(true)
   }
 
-  const handleCreateBlind = async (e: React.FormEvent) => {
+  const resetBlindForm = () => {
+    setShowNewBlind(false)
+    setEditingBlindId(null)
+    setBlindName(''); setBlindType('ground'); setBlindNotes('')
+    setBlindIdealWind({ directions: [], center: null })
+    setPendingPin(null)
+  }
+
+  const startEditBlind = (b: BlindData) => {
+    setEditingBlindId(b.id)
+    setBlindName(b.name)
+    setBlindType(b.blind_type)
+    setBlindNotes(b.notes)
+    setBlindIdealWind({ directions: b.ideal_wind_directions ?? [], center: b.ideal_wind_center ?? null })
+    setPendingPin({ lat: b.lat, lng: b.lng })
+    setShowNewBlind(true)
+  }
+
+  const handleSaveBlind = async (e: React.FormEvent) => {
     e.preventDefault()
     setBlindError('')
     if (!blindName) { setBlindError('Name is required'); return }
@@ -212,20 +236,26 @@ export default function Locations() {
     if (!selectedLocation) return
     setCreatingBlind(true)
     try {
-      await createBlind(selectedLocation.id, {
+      const payload = {
         name: blindName,
         location_id: selectedLocation.id,
         lat: pendingPin.lat,
         lng: pendingPin.lng,
         blind_type: blindType,
         notes: blindNotes,
-      })
-      setShowNewBlind(false)
-      setBlindName(''); setBlindType('ground'); setBlindNotes(''); setPendingPin(null)
+        ideal_wind_directions: blindIdealWind.directions,
+        ideal_wind_center: blindIdealWind.center,
+      }
+      if (editingBlindId) {
+        await updateBlind(editingBlindId, payload)
+      } else {
+        await createBlind(selectedLocation.id, payload)
+      }
+      resetBlindForm()
       const data = await fetchBlindsForLocation(selectedLocation.id)
       setBlinds(data)
     } catch (err: unknown) {
-      setBlindError(err instanceof Error ? err.message : 'Failed to create blind')
+      setBlindError(err instanceof Error ? err.message : 'Failed to save blind')
     } finally {
       setCreatingBlind(false)
     }
@@ -318,21 +348,21 @@ export default function Locations() {
           </MapContainer>
         </div>
 
-        {/* Inline add-blind form — expands directly below map, map stays visible */}
+        {/* Inline add/edit-blind form — expands directly below map, map stays visible */}
         {showNewBlind && pendingPin ? (
           <div className="bg-surface border border-t-0 border-hairline rounded-b-xl px-4 pt-4 pb-5 mb-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="font-display text-xl text-ink tracking-wider leading-none">ADD BLIND</p>
+                <p className="font-display text-xl text-ink tracking-wider leading-none">{editingBlindId ? 'EDIT BLIND' : 'ADD BLIND'}</p>
                 <p className="text-xs text-muted font-mono mt-0.5">{pendingPin.lat.toFixed(5)}, {pendingPin.lng.toFixed(5)}</p>
               </div>
-              <button onClick={() => { setShowNewBlind(false); setPendingPin(null) }} className="text-muted hover:text-ink transition-colors">
+              <button onClick={resetBlindForm} className="text-muted hover:text-ink transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <form onSubmit={handleCreateBlind} className="space-y-3">
+            <form onSubmit={handleSaveBlind} className="space-y-3">
               {blindError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg">{blindError}</div>}
               <input type="text" value={blindName} onChange={e => setBlindName(e.target.value)} placeholder="Blind name" autoFocus />
               <div className="flex flex-wrap gap-2">
@@ -343,13 +373,17 @@ export default function Locations() {
                   </button>
                 ))}
               </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1 text-center">Ideal Wind</label>
+                <WindCompassPicker value={blindIdealWind} onChange={setBlindIdealWind} />
+              </div>
               <textarea value={blindNotes} onChange={e => setBlindNotes(e.target.value)} placeholder="Notes (optional)" rows={2} className="resize-none" />
               <div className="flex gap-3">
-                <button type="button" onClick={() => { setShowNewBlind(false); setPendingPin(null) }}
+                <button type="button" onClick={resetBlindForm}
                   className="flex-1 py-2.5 rounded-xl border border-hairline text-muted font-semibold text-sm">Cancel</button>
                 <button type="submit" disabled={creatingBlind}
                   className="flex-1 py-2.5 rounded-xl bg-ink text-white font-semibold text-sm disabled:opacity-50">
-                  {creatingBlind ? 'Saving…' : 'Save Blind'}
+                  {creatingBlind ? 'Saving…' : editingBlindId ? 'Save Changes' : 'Save Blind'}
                 </button>
               </div>
             </form>
@@ -382,7 +416,17 @@ export default function Locations() {
                         {b.notes ? ` · ${b.notes}` : ''}
                       </p>
                       <p className="text-xs text-muted/60 font-mono mt-0.5">{b.lat.toFixed(5)}, {b.lng.toFixed(5)}</p>
+                      {b.ideal_wind_directions?.length > 0 && (
+                        <p className="text-xs text-green mt-0.5">
+                          Wind: {b.ideal_wind_directions.join('→')} {b.ideal_wind_center ? `★${b.ideal_wind_center}` : ''}
+                        </p>
+                      )}
                     </div>
+                    <button onClick={() => startEditBlind(b)} className="text-muted hover:text-ink transition-colors flex-shrink-0">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
                     <button onClick={() => setDeleteBlindTarget(b)} className="text-muted hover:text-red-500 transition-colors flex-shrink-0">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

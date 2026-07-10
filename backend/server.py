@@ -86,6 +86,8 @@ class BlindCreate(BaseModel):
     lng: float
     blind_type: str = "ground"  # ground, pit, panel, a-frame, layout, boat
     notes: str = ""
+    ideal_wind_directions: List[str] = []  # resolved arc of cardinals, e.g. ["E","NE","N","NW","W"]; empty = no preference
+    ideal_wind_center: Optional[str] = None  # sweet-spot cardinal within the arc
 
 class Blind(BaseModel):
     id: str
@@ -96,6 +98,8 @@ class Blind(BaseModel):
     lng: float
     blind_type: str = "ground"
     notes: str = ""
+    ideal_wind_directions: List[str] = []
+    ideal_wind_center: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class HarvestData(BaseModel):
@@ -472,11 +476,32 @@ async def create_blind(location_id: str, blind_data: BlindCreate, current_user: 
         "lng": blind_data.lng,
         "blind_type": blind_data.blind_type,
         "notes": blind_data.notes,
+        "ideal_wind_directions": blind_data.ideal_wind_directions,
+        "ideal_wind_center": blind_data.ideal_wind_center,
         "created_at": datetime.utcnow()
     }
     result = await db.blinds.insert_one(doc)
     doc["id"] = str(result.inserted_id)
     return _blind_doc(doc)
+
+@api_router.put("/blinds/{blind_id}", response_model=Blind)
+async def update_blind(blind_id: str, blind_data: BlindCreate, current_user: dict = Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    existing = await db.blinds.find_one({"_id": ObjectId(blind_id), "user_id": user_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Blind not found")
+    update = {
+        "name": blind_data.name,
+        "lat": blind_data.lat,
+        "lng": blind_data.lng,
+        "blind_type": blind_data.blind_type,
+        "notes": blind_data.notes,
+        "ideal_wind_directions": blind_data.ideal_wind_directions,
+        "ideal_wind_center": blind_data.ideal_wind_center,
+    }
+    await db.blinds.update_one({"_id": ObjectId(blind_id)}, {"$set": update})
+    updated = {**existing, **update, "id": blind_id}
+    return _blind_doc(updated)
 
 @api_router.delete("/blinds/{blind_id}")
 async def delete_blind(blind_id: str, current_user: dict = Depends(get_current_user)):
@@ -502,6 +527,8 @@ def _blind_doc(b: dict) -> dict:
         "lng": b["lng"],
         "blind_type": b.get("blind_type", "ground"),
         "notes": b.get("notes", ""),
+        "ideal_wind_directions": b.get("ideal_wind_directions") or [],
+        "ideal_wind_center": b.get("ideal_wind_center"),
         "created_at": b.get("created_at", datetime.utcnow())
     }
 
@@ -996,6 +1023,18 @@ SCORE_W_BASE = 0.2
 HISTORY_MIN_HUNTS = 5         # below this, lean on generic prior instead of history
 
 NORTH_CARDINALS = {"N", "NE", "NW"}
+
+# Per-blind ideal wind direction (set on the Blind, matched against forecast wind_cardinal).
+IDEAL_WIND_PERFECT_PTS = 15   # wind_cardinal matches the blind's sweet-spot direction
+IDEAL_WIND_GOOD_PTS = 7       # wind_cardinal is elsewhere within the blind's ideal range
+
+
+def _wind_match(wind_cardinal: str, ideal_directions: list, ideal_center: Optional[str]) -> Optional[dict]:
+    if not ideal_directions or wind_cardinal not in ideal_directions:
+        return None
+    if wind_cardinal == ideal_center:
+        return {"level": "perfect", "bonus": IDEAL_WIND_PERFECT_PTS}
+    return {"level": "good", "bonus": IDEAL_WIND_GOOD_PTS}
 
 SNOW_CODES = {71, 73, 75, 77, 85, 86}
 RAIN_CODES = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82}
@@ -1525,6 +1564,12 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
     use_history = profile["sample"] >= HISTORY_MIN_HUNTS
     timing_profile = await _migration_timing_profile(user_id)
 
+    all_blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    blinds_by_location: Dict[str, list] = {}
+    for b in all_blinds:
+        if b.get("ideal_wind_directions"):
+            blinds_by_location.setdefault(b["location_id"], []).append(b)
+
     results = []
     best_bets = []
     for loc in locations:
@@ -1579,6 +1624,17 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             if not factors and base >= 65:
                 factors.append("solid conditions")
 
+            blind_wind = []
+            for b in blinds_by_location.get(str(loc["_id"]), []):
+                match = _wind_match(day["wind_cardinal"], b.get("ideal_wind_directions") or [], b.get("ideal_wind_center"))
+                if match:
+                    blind_wind.append({
+                        "blind_id": str(b.get("id") or b["_id"]),
+                        "blind_name": b["name"],
+                        "level": match["level"],
+                        "blind_score": min(100, round(score) + match["bonus"]),
+                    })
+
             enriched = {
                 **day,
                 "moon_phase": moon["phase"],
@@ -1589,6 +1645,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
                 "events": events,
                 "hunt_score": round(score),
                 "factors": factors[:3],
+                "blind_wind": blind_wind,
             }
             loc_days.append(enriched)
             best_bets.append({
