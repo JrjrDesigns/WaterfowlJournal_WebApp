@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -20,6 +20,13 @@ export default function Login() {
   const [error, setError] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (sessionStorage.getItem('sessionExpired')) {
+      sessionStorage.removeItem('sessionExpired')
+      setError('Your session expired. Please sign in again.')
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

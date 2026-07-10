@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001'
 
+const handleUnauthorized = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  sessionStorage.setItem('sessionExpired', '1')
+  window.dispatchEvent(new Event('auth:expired'))
+}
+
 export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('token')
 
@@ -16,6 +23,10 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
     ...options,
     headers,
   })
+
+  if (response.status === 401) {
+    handleUnauthorized()
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Request failed' }))

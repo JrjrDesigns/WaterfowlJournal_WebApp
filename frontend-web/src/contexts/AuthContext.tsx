@@ -42,6 +42,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false)
   }, [])
 
+  useEffect(() => {
+    const handleExpired = () => {
+      setToken(null)
+      setUser(null)
+    }
+    window.addEventListener('auth:expired', handleExpired)
+    return () => window.removeEventListener('auth:expired', handleExpired)
+  }, [])
+
   const refreshUser = async () => {
     const storedToken = localStorage.getItem('token')
     if (!storedToken) return
