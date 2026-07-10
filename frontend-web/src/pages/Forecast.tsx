@@ -136,8 +136,12 @@ function windColor(speed: number): string {
 
 function WindArrow({ direction, speed, size = 18 }: { direction: number; speed: number; size?: number }) {
   const color = windColor(speed)
+  // `direction` is the meteorological "from" bearing (e.g. 45° = a NE wind,
+  // meaning wind blowing FROM the NE). Rotate 180° past that so the tip points
+  // toward where the wind is actually flowing TO, matching the ideal-wind
+  // compass picker's convention instead of pointing back at the source.
   return (
-    <svg width={size} height={size} viewBox="0 0 22 22" style={{ transform: `rotate(${direction}deg)` }}>
+    <svg width={size} height={size} viewBox="0 0 22 22" style={{ transform: `rotate(${direction + 180}deg)` }}>
       <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
     </svg>
   )

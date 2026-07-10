@@ -103,6 +103,9 @@ export default function WindCompassPicker({ value, onChange }: Props) {
           const labelP = pointAt(i, LABEL_R)
           const selected = value.directions.includes(dir)
           const isCenter = value.center === dir
+          // Tip points inward, toward the blind: this represents wind blowing
+          // FROM the named direction TOWARD the center, which is how a hunter
+          // actually thinks about it ("NE wind" = wind flowing in from the NE).
           const rotation = (i * 45 + 180) % 360
           const color = isCenter ? '#D4A94A' : selected ? '#1B5E45' : '#E4E5E3'
           return (
