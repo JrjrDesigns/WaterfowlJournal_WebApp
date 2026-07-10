@@ -173,15 +173,15 @@ function MoonIcon({ phase, size = 16 }: { phase: number; size?: number }) {
   const termRx = Math.abs(Math.cos(Math.PI * 2 * phase)) * r
   const top = `${cx},${cy - r}`
   const bottom = `${cx},${cy + r}`
-  let litPath: string
+  let shadowPath: string
   if (waxing) {
     const sweep2 = phase > 0.25 ? 0 : 1
-    litPath = `M ${top} A ${r},${r} 0 0,1 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
+    shadowPath = `M ${top} A ${r},${r} 0 0,1 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
   } else {
     const sweep2 = phase < 0.75 ? 1 : 0
-    litPath = `M ${top} A ${r},${r} 0 0,0 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
+    shadowPath = `M ${top} A ${r},${r} 0 0,0 ${bottom} A ${termRx},${r} 0 0,${sweep2} ${top} Z`
   }
-  return <svg width={size} height={size}><circle cx={cx} cy={cy} r={r} fill={shadow} /><path d={litPath} fill={lit} /></svg>
+  return <svg width={size} height={size}><circle cx={cx} cy={cy} r={r} fill={lit} /><path d={shadowPath} fill={shadow} /></svg>
 }
 
 const EVENT_STYLE: Record<WeatherEvent['type'], { color: string; bg: string }> = {
@@ -252,6 +252,14 @@ function scoreColor(score: number): string {
   return '#797B7E'
 }
 
+function ColHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[9px] font-semibold uppercase text-muted whitespace-nowrap" style={{ letterSpacing: '0.02em' }}>
+      {children}
+    </span>
+  )
+}
+
 function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' | 'lg' }) {
   const color = scoreColor(score)
   const dims = size === 'lg' ? 'w-14 h-14 text-xl' : size === 'sm' ? 'w-9 h-9 text-xs' : 'w-11 h-11 text-sm'
@@ -264,23 +272,6 @@ function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' 
     </div>
   )
 }
-
-function PressureTrend({ trend }: { trend: 'falling' | 'steady' | 'rising' }) {
-  if (trend === 'steady') return null
-  const falling = trend === 'falling'
-  const color = falling ? '#1B5E45' : '#797B7E'
-  return (
-    <span className="inline-flex items-center gap-0.5" style={{ color }} title={`Barometer ${trend}`}>
-      <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
-        style={{ transform: falling ? 'none' : 'rotate(180deg)' }}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12l7 7 7-7" />
-      </svg>
-    </span>
-  )
-}
-
-const MIG_LABEL = { high: 'High', med: 'Med', low: 'Low' }
-const MIG_COLOR = { high: '#1B5E45', med: '#D97706', low: '#797B7E' }
 
 const TIMING_COLOR: Record<TimingInfo['label'], string> = {
   Peak: '#1B5E45', Building: '#1B5E45', Active: '#1B4F6E', Tapering: '#D97706', Slow: '#797B7E',
@@ -302,6 +293,34 @@ function TimingChip({ timing }: { timing: TimingInfo }) {
       </svg>
       {timing.label} migration
     </span>
+  )
+}
+
+/** Point on the dial's semicircle for a 0-100 value: 0=left (season start), 50=top (peak), 100=right (tapered off). */
+function dialPoint(cx: number, cy: number, r: number, valuePercent: number) {
+  const angleRad = ((180 - 1.8 * valuePercent) * Math.PI) / 180
+  return { x: cx + r * Math.cos(angleRad), y: cy - r * Math.sin(angleRad) }
+}
+
+function MigrationDial({ timing }: { timing: TimingInfo }) {
+  const cx = 27, cy = 27, r = 20
+  const value = Math.max(0, Math.min(100, timing.score))
+  const color = TIMING_COLOR[timing.label]
+  const start = dialPoint(cx, cy, r, 0)
+  const end = dialPoint(cx, cy, r, 100)
+  const needle = dialPoint(cx, cy, r, value)
+  return (
+    <div
+      className="flex flex-col items-center flex-shrink-0"
+      title={`Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`}
+    >
+      <svg width={54} height={30} viewBox="0 0 54 30">
+        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${end.x} ${end.y}`} fill="none" stroke="#E4E5E3" strokeWidth={5} strokeLinecap="round" />
+        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${needle.x} ${needle.y}`} fill="none" stroke={color} strokeWidth={5} strokeLinecap="round" />
+        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth={2} strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={2.2} fill={color} />
+      </svg>
+    </div>
   )
 }
 
@@ -472,6 +491,15 @@ export default function Forecast() {
 
             {isOpen && (
               <div className="border-t border-hairline divide-y divide-hairline">
+                <div className="px-5 py-1.5 flex items-center gap-3">
+                  <div className="w-10 flex-shrink-0" />
+                  <div className="w-24 flex-shrink-0" />
+                  <div className="flex-[1.3] min-w-0" />
+                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
+                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
+                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Migration</ColHeader></div>
+                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Hunt Score</ColHeader></div>
+                </div>
                 {loc.days.map(day => {
                   const isBest = bestDay?.date === day.date && day.hunt_score >= 45
                   return (
@@ -494,30 +522,27 @@ export default function Forecast() {
                             )}
                           </div>
                         </div>
+                        <div className="flex-[1.3] min-w-0" />
                         {/* Wind */}
-                        <div className="flex items-center gap-1 w-16 flex-shrink-0">
-                          <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
-                          <span className="text-xs font-semibold tabular-nums" style={{ color: windColor(day.wind_speed) }}>
-                            {day.wind_cardinal} {day.wind_speed}
-                          </span>
+                        <div className="flex-1 flex flex-col items-center justify-center min-w-0">
+                          <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                            <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
+                          </div>
+                          <span className="text-xs font-semibold leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_cardinal}</span>
+                          <span className="text-xs font-semibold tabular-nums leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_speed}</span>
                         </div>
-                        {/* Moon + pressure */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {/* Moon */}
+                        <div className="flex-1 flex items-center justify-center min-w-0">
                           <MoonIcon phase={day.moon_phase} size={15} />
-                          <PressureTrend trend={day.pressure_trend} />
                         </div>
                         {/* Migration */}
-                        <div className="flex-1 flex items-center justify-end gap-1.5 min-w-0">
-                          <span
-                            className="text-xs font-semibold uppercase tracking-wide"
-                            style={{ color: MIG_COLOR[day.migration.level] }}
-                            title={`Migration: ${day.migration.factors.join(', ') || 'no front'}`}
-                          >
-                            {MIG_LABEL[day.migration.level]}
-                          </span>
+                        <div className="flex-1 flex items-center justify-center min-w-0">
+                          <MigrationDial timing={day.timing} />
                         </div>
                         {/* Score */}
-                        <ScoreBadge score={day.hunt_score} size="sm" />
+                        <div className="flex-1 flex items-center justify-center min-w-0">
+                          <ScoreBadge score={day.hunt_score} size="sm" />
+                        </div>
                       </div>
 
                       {/* Event pills */}
@@ -547,10 +572,6 @@ export default function Forecast() {
                     </div>
                   )
                 })}
-                <div className="px-5 py-2.5 flex items-center justify-between text-xs text-muted">
-                  <span className="uppercase tracking-widest">Migration</span>
-                  <span className="uppercase tracking-widest">Hunt Score</span>
-                </div>
               </div>
             )}
           </div>
