@@ -517,30 +517,6 @@ async def get_all_blinds(current_user: dict = Depends(get_current_user)):
     blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
     return [_blind_doc(b) for b in blinds]
 
-@api_router.get("/blinds/_diagnose")
-async def diagnose_blinds(current_user: dict = Depends(get_current_user)):
-    """Temporary read-only diagnostic — reports blinds that don't validate or
-    don't belong to any current location. Not linked from the UI; remove once used."""
-    user_id = str(current_user["_id"])
-    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
-    locations = await db.locations.find({"user_id": user_id}).to_list(1000)
-    valid_location_ids = {str(l["_id"]) for l in locations}
-
-    problems = []
-    for b in blinds:
-        raw = {k: (str(v) if k in ("_id",) else v) for k, v in b.items()}
-        issue = None
-        try:
-            _blind_doc(b)
-        except Exception as e:
-            issue = f"_blind_doc raised: {type(e).__name__}: {e}"
-        if issue is None and str(b.get("location_id")) not in valid_location_ids:
-            issue = f"location_id {b.get('location_id')!r} does not match any current location"
-        if issue:
-            problems.append({"id": str(b.get("_id")), "issue": issue, "raw": raw})
-
-    return {"total_blinds": len(blinds), "total_locations": len(locations), "problems": problems}
-
 def _blind_doc(b: dict) -> dict:
     return {
         "id": b.get("id") or str(b["_id"]),
