@@ -27,7 +27,20 @@ interface ForecastDay {
   events: WeatherEvent[]
   hunt_score: number
   factors: string[]
-  blind_wind: Array<{ blind_id: string; blind_name: string; level: 'perfect' | 'good'; blind_score: number }>
+  blind_wind: Array<{ blind_id: string; blind_name: string; level: 'perfect' | 'good' }>
+}
+
+interface BlindWindMatch {
+  blind_id: string
+  blind_name: string
+  location_name: string
+  level: 'perfect' | 'good'
+}
+
+interface BlindWindDay {
+  date: string
+  morning: BlindWindMatch[]
+  evening: BlindWindMatch[]
 }
 
 interface TimingInfo {
@@ -69,6 +82,7 @@ interface ForecastResponse {
   best_bets: BestBet[]
   uses_history: boolean
   history_sample: number
+  blind_wind_by_day: BlindWindDay[]
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -216,6 +230,18 @@ function EventPill({ event }: { event: WeatherEvent }) {
     >
       <EventIcon type={event.type} />
       {event.label}
+    </span>
+  )
+}
+
+function BlindWindPill({ match }: { match: BlindWindMatch }) {
+  const perfect = match.level === 'perfect'
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold whitespace-nowrap"
+      style={{ color: perfect ? '#1B5E45' : '#1B4F6E', backgroundColor: perfect ? '#1B5E4518' : '#1B4F6E18' }}
+    >
+      {perfect && '★ '}{match.blind_name} <span className="font-normal opacity-70">· {match.location_name}</span>
     </span>
   )
 }
@@ -513,7 +539,7 @@ export default function Forecast() {
                                 backgroundColor: bw.level === 'perfect' ? '#1B5E4518' : '#1B4F6E18',
                               }}
                             >
-                              {bw.level === 'perfect' ? '★ Perfect wind' : 'Good wind'} — {bw.blind_name} ({bw.blind_score})
+                              {bw.level === 'perfect' ? '★ Perfect wind' : 'Good wind'} — {bw.blind_name}
                             </span>
                           ))}
                         </div>
@@ -530,6 +556,39 @@ export default function Forecast() {
           </div>
         )
       })}
+
+      {/* Best blinds for wind, across all locations, by day/time-of-day */}
+      {(data.blind_wind_by_day ?? []).some(d => d.morning.length > 0 || d.evening.length > 0) && (
+        <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Best Blinds for Wind</p>
+          <div className="space-y-3">
+            {(data.blind_wind_by_day ?? [])
+              .filter(d => d.morning.length > 0 || d.evening.length > 0)
+              .map(d => (
+                <div key={d.date} className="flex items-start gap-3">
+                  <div className="w-12 flex-shrink-0">
+                    <p className="text-xs font-semibold text-ink leading-none">{format(new Date(d.date + 'T12:00:00'), 'EEE')}</p>
+                    <p className="text-xs text-muted mt-0.5">{format(new Date(d.date + 'T12:00:00'), 'M/d')}</p>
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    {d.morning.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-muted uppercase w-7 flex-shrink-0">AM</span>
+                        {d.morning.map((m, i) => <BlindWindPill key={i} match={m} />)}
+                      </div>
+                    )}
+                    {d.evening.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-muted uppercase w-7 flex-shrink-0">PM</span>
+                        {d.evening.map((m, i) => <BlindWindPill key={i} match={m} />)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       <p className="text-xs text-muted text-center px-6 mt-2">
         Hunt Score blends {data.uses_history ? 'your hunt history, ' : ''}seasonal migration timing,

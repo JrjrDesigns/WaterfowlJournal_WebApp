@@ -1024,17 +1024,27 @@ HISTORY_MIN_HUNTS = 5         # below this, lean on generic prior instead of his
 
 NORTH_CARDINALS = {"N", "NE", "NW"}
 
-# Per-blind ideal wind direction (set on the Blind, matched against forecast wind_cardinal).
-IDEAL_WIND_PERFECT_PTS = 15   # wind_cardinal matches the blind's sweet-spot direction
-IDEAL_WIND_GOOD_PTS = 7       # wind_cardinal is elsewhere within the blind's ideal range
+# Per-blind ideal wind direction (set on the Blind, matched against forecast wind readings).
+# This only ever produces a callout, never a score adjustment — hunt_score stays purely
+# about bird activity (weather/migration/timing), independent of any specific blind.
 
-
-def _wind_match(wind_cardinal: str, ideal_directions: list, ideal_center: Optional[str]) -> Optional[dict]:
+def _wind_match(wind_cardinal: str, ideal_directions: list, ideal_center: Optional[str]) -> Optional[str]:
     if not ideal_directions or wind_cardinal not in ideal_directions:
         return None
-    if wind_cardinal == ideal_center:
-        return {"level": "perfect", "bonus": IDEAL_WIND_PERFECT_PTS}
-    return {"level": "good", "bonus": IDEAL_WIND_GOOD_PTS}
+    return "perfect" if wind_cardinal == ideal_center else "good"
+
+
+def _best_window_match(readings: list, ideal_directions: list, ideal_center: Optional[str]) -> Optional[str]:
+    """Wind can shift over a multi-hour window, so check whether ideal wind occurred
+    at any point in it rather than reducing to a single averaged reading."""
+    best = None
+    for r in readings:
+        level = _wind_match(r["cardinal"], ideal_directions, ideal_center)
+        if level == "perfect":
+            return "perfect"
+        if level == "good":
+            best = "good"
+    return best
 
 SNOW_CODES = {71, 73, 75, 77, 85, 86}
 RAIN_CODES = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82}
@@ -1470,7 +1480,7 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
                 "precipitation_sum", "precipitation_probability_max",
                 "sunrise", "sunset",
             ]),
-            "hourly": "surface_pressure",
+            "hourly": "surface_pressure,windspeed_10m,winddirection_10m",
             "temperature_unit": "fahrenheit",
             "windspeed_unit": "mph",
             "timezone": "auto",
@@ -1493,6 +1503,16 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
             d = t[:10]
             press_by_day.setdefault(d, []).append(p)
         day_mean_press = {d: sum(v) / len(v) for d, v in press_by_day.items() if v}
+
+        # Hourly wind grouped by day, for morning/evening window matching against blinds.
+        wind_times_by_day: Dict[str, list] = {}
+        wind_speeds_by_day: Dict[str, list] = {}
+        wind_dirs_by_day: Dict[str, list] = {}
+        for t, sp, di in zip(hourly.get("time", []), hourly.get("windspeed_10m", []), hourly.get("winddirection_10m", [])):
+            d = t[:10]
+            wind_times_by_day.setdefault(d, []).append(t)
+            wind_speeds_by_day.setdefault(d, []).append(sp)
+            wind_dirs_by_day.setdefault(d, []).append(di)
 
         weather_codes = {
             0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -1530,6 +1550,17 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
 
             # Only surface today onward; past days exist solely to seed the windows
             if d >= today:
+                sunrise_hour = int(sunrise[11:13]) if len(sunrise) >= 13 else 6
+                sunset_hour = int(sunset[11:13]) if len(sunset) >= 13 else 19
+                evening_start = max(sunrise_hour, sunset_hour - 5)
+                wind_morning = _filter_wind_window(
+                    wind_times_by_day.get(d, []), wind_speeds_by_day.get(d, []), wind_dirs_by_day.get(d, []),
+                    sunrise_hour, 12
+                )
+                wind_evening = _filter_wind_window(
+                    wind_times_by_day.get(d, []), wind_speeds_by_day.get(d, []), wind_dirs_by_day.get(d, []),
+                    evening_start, sunset_hour
+                )
                 out.append({
                     "date": d,
                     "temp_max": round(temp_max) if temp_max is not None else None,
@@ -1541,6 +1572,8 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
                     "wind_speed": round(wind_max, 1),
                     "wind_direction": round(wind_dir),
                     "wind_cardinal": _deg_to_cardinal(wind_dir),
+                    "wind_morning": wind_morning,
+                    "wind_evening": wind_evening,
                     "pressure_trend": _pressure_trend(press_delta) if press_delta is not None else "steady",
                     "frozen_recent": frozen_recent,
                     "frozen_extended": frozen_extended,
@@ -1572,6 +1605,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
 
     results = []
     best_bets = []
+    blind_wind_by_day: Dict[str, dict] = {}
     for loc in locations:
         center = loc.get("center") or {}
         lat, lng = center.get("lat"), center.get("lng")
@@ -1624,16 +1658,33 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             if not factors and base >= 65:
                 factors.append("solid conditions")
 
+            loc_blinds = blinds_by_location.get(str(loc["_id"]), [])
             blind_wind = []
-            for b in blinds_by_location.get(str(loc["_id"]), []):
-                match = _wind_match(day["wind_cardinal"], b.get("ideal_wind_directions") or [], b.get("ideal_wind_center"))
-                if match:
+            for b in loc_blinds:
+                level = _wind_match(day["wind_cardinal"], b.get("ideal_wind_directions") or [], b.get("ideal_wind_center"))
+                if level:
                     blind_wind.append({
                         "blind_id": str(b.get("id") or b["_id"]),
                         "blind_name": b["name"],
-                        "level": match["level"],
-                        "blind_score": min(100, round(score) + match["bonus"]),
+                        "level": level,
                     })
+
+            if loc_blinds:
+                day_entry = blind_wind_by_day.setdefault(day["date"], {"date": day["date"], "morning": [], "evening": []})
+                for b in loc_blinds:
+                    ideal_dirs = b.get("ideal_wind_directions") or []
+                    ideal_center = b.get("ideal_wind_center")
+                    blind_ref = {
+                        "blind_id": str(b.get("id") or b["_id"]),
+                        "blind_name": b["name"],
+                        "location_name": loc["name"],
+                    }
+                    morning_level = _best_window_match(day.get("wind_morning", []), ideal_dirs, ideal_center)
+                    if morning_level:
+                        day_entry["morning"].append({**blind_ref, "level": morning_level})
+                    evening_level = _best_window_match(day.get("wind_evening", []), ideal_dirs, ideal_center)
+                    if evening_level:
+                        day_entry["evening"].append({**blind_ref, "level": evening_level})
 
             enriched = {
                 **day,
@@ -1676,6 +1727,7 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
         "best_bets": best_bets[:5],
         "uses_history": use_history,
         "history_sample": profile["sample"],
+        "blind_wind_by_day": [blind_wind_by_day[d] for d in sorted(blind_wind_by_day)],
     }
 
 # ============ UTILITY ROUTES ============
