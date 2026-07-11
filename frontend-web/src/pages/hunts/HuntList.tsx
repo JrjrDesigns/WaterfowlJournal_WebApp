@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { fetchHunts, fetchHuntYears } from '../../utils/api'
 import { useAuth } from '../../contexts/AuthContext'
@@ -55,11 +55,14 @@ const FREE_HUNT_LIMIT = 10
 export default function HuntList() {
   const [hunts, setHunts] = useState<Hunt[]>([])
   const [years, setYears] = useState<number[]>([])
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [showPaywall, setShowPaywall] = useState(false)
   const { isPro } = useAuth()
   const navigate = useNavigate()
+
+  const yearParam = searchParams.get('year')
+  const selectedYear = yearParam ? Number(yearParam) : null
 
   useEffect(() => { loadYears() }, [])
   useEffect(() => { loadHunts() }, [selectedYear])
@@ -69,8 +72,8 @@ export default function HuntList() {
       const data = await fetchHuntYears()
       const available = data.years || []
       setYears(available)
-      if (available.length > 0 && selectedYear === null) {
-        setSelectedYear(available[0])
+      if (available.length > 0 && !yearParam) {
+        setSearchParams({ year: String(available[0]) }, { replace: true })
       }
     } catch { /* ignore */ }
   }
@@ -134,7 +137,7 @@ export default function HuntList() {
           {years.map(year => (
             <button
               key={year}
-              onClick={() => setSelectedYear(year)}
+              onClick={() => setSearchParams({ year: String(year) }, { replace: true })}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
                 selectedYear === year
                   ? 'bg-ink text-white border-ink'
