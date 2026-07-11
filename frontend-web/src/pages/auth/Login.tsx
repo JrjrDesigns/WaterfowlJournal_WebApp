@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-
-function BrandMark({ className = 'w-10 h-10' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50,104 C32,80 16,66 16,44 A34,34 0 1 1 84,44 C84,66 68,80 50,104 Z" fill="#1B5E45" />
-      <ellipse cx="59" cy="43" rx="17" ry="16.5" fill="white" />
-      <path d="M16,44 C12,45 12,53 16,54 L52,52 L52,38 Z" fill="white" />
-      <circle cx="63" cy="40" r="2.4" fill="#1B5E45" />
-    </svg>
-  )
-}
+import { LogoStacked } from '../../components/Logo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -50,10 +40,9 @@ export default function Login() {
     <div className="min-h-screen bg-bg flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <BrandMark className="w-14 h-14" />
+          <div className="flex justify-center mb-2">
+            <LogoStacked className="h-28 w-auto" />
           </div>
-          <h1 className="font-display text-5xl text-ink tracking-wider leading-none">BLIND GUIDE</h1>
           <p className="text-muted text-sm mt-2">A field journal for waterfowl hunters</p>
         </div>
 

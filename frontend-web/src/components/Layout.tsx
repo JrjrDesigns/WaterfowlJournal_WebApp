@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { LogoLandscape } from './Logo'
 
 const tabs = [
   {
@@ -51,17 +52,6 @@ function GearIcon({ className = 'w-5 h-5' }: { className?: string }) {
   )
 }
 
-function BrandMark({ className = 'w-7 h-7' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50,104 C32,80 16,66 16,44 A34,34 0 1 1 84,44 C84,66 68,80 50,104 Z" fill="#1B5E45" />
-      <ellipse cx="59" cy="43" rx="17" ry="16.5" fill="white" />
-      <path d="M16,44 C12,45 12,53 16,54 L52,52 L52,38 Z" fill="white" />
-      <circle cx="63" cy="40" r="2.4" fill="#1B5E45" />
-    </svg>
-  )
-}
-
 export default function Layout() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -72,9 +62,8 @@ export default function Layout() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-56 bg-surface border-r border-hairline flex-shrink-0">
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-hairline">
-          <BrandMark />
-          <span className="font-display text-2xl text-ink tracking-wider leading-none">BLIND GUIDE</span>
+        <div className="flex items-center px-5 py-5 border-b border-hairline">
+          <LogoLandscape className="h-8 w-auto" />
         </div>
 
         {/* Nav */}
@@ -132,10 +121,7 @@ export default function Layout() {
         <div className="md:hidden fixed inset-0 z-40 bg-ink/40" onClick={() => setSidebarOpen(false)}>
           <aside className="w-56 h-full bg-surface border-r border-hairline flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-5 border-b border-hairline">
-              <div className="flex items-center gap-3">
-                <BrandMark />
-                <span className="font-display text-2xl text-ink tracking-wider leading-none">BLIND GUIDE</span>
-              </div>
+              <LogoLandscape className="h-7 w-auto" />
               <button onClick={() => setSidebarOpen(false)} className="text-muted hover:text-ink ml-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -178,7 +164,7 @@ export default function Layout() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="font-display text-xl text-ink tracking-wider">BLIND GUIDE</span>
+          <LogoLandscape className="h-6 w-auto" />
           <NavLink to="/profile" className={({ isActive }) => isActive ? 'text-ink' : 'text-muted hover:text-ink'}>
             <GearIcon className="w-6 h-6" />
           </NavLink>
