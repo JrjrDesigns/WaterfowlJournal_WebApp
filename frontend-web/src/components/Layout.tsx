@@ -63,7 +63,7 @@ export default function Layout() {
       <aside className="hidden md:flex flex-col w-56 bg-surface border-r border-hairline flex-shrink-0">
         {/* Logo */}
         <div className="flex items-center px-5 py-5 border-b border-hairline">
-          <LogoLandscape className="h-8 w-auto" />
+          <LogoLandscape className="h-10 w-auto" />
         </div>
 
         {/* Nav */}
