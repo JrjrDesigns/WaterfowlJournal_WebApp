@@ -1,16 +1,13 @@
-const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY as string | undefined
-
-// MapTiler's "hybrid" style: satellite imagery with roads/water/place labels baked in.
-// Falls back to plain Esri satellite (no labels) if no key is configured.
-export const SATELLITE_TILE_URL = MAPTILER_KEY
-  ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
-  : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-
-export const SATELLITE_ATTRIBUTION = MAPTILER_KEY
-  ? '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  : '&copy; <a href="https://www.esri.com/">Esri</a>'
-
+// Esri World Imagery — free, no API key required.
+export const SATELLITE_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+export const SATELLITE_ATTRIBUTION = '&copy; <a href="https://www.esri.com/">Esri</a>'
 export const SATELLITE_MAX_ZOOM = 19
+
+// Transparent Esri reference overlays (roads + place labels), stacked on top of the base
+// imagery to replicate Esri's "Imagery Hybrid" look. Same free arcgisonline.com service
+// as the base layer above — no API key required.
+export const SATELLITE_ROADS_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'
+export const SATELLITE_LABELS_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
 
 export type MapMode = 'street' | 'satellite'
 
