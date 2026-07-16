@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { fetchLocations, createLocation, deleteLocation, fetchBlindsForLocation, createBlind, updateBlind, deleteBlind } from '../utils/api'
 import WindCompassPicker, { WindCompassValue } from '../components/WindCompassPicker'
 import SpotMapTiles from '../components/SpotMapTiles'
-import MapModeToggle from '../components/MapModeToggle'
-import { SATELLITE_TILE_URL, SATELLITE_ATTRIBUTION, SATELLITE_MAX_ZOOM } from '../utils/mapTiles'
-import type { MapMode } from '../utils/mapTiles'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -106,7 +103,6 @@ export default function Locations() {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
   const [blinds, setBlinds] = useState<BlindData[]>([])
   const [blindsLoading, setBlindsLoading] = useState(false)
-  const [mapMode, setMapMode] = useState<MapMode>('street')
 
   // New location modal
   const [showNewLocation, setShowNewLocation] = useState(false)
@@ -328,10 +324,10 @@ export default function Locations() {
           </button>
         </div>
 
-        {/* Map — street/satellite toggle */}
+        {/* Map — satellite hybrid (imagery + roads + labels) */}
         <div className="relative rounded-xl overflow-hidden border border-hairline mb-0" style={{ height: 280 }}>
           <MapContainer center={mapCenter} zoom={16} style={{ height: '100%', width: '100%' }}>
-            <SpotMapTiles mode={mapMode} />
+            <SpotMapTiles />
             <MapPinDropper onDrop={handleMapClick} />
             <Marker position={mapCenter} icon={new L.Icon({
               iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
@@ -347,14 +343,9 @@ export default function Locations() {
             ))}
             {pendingPin && <Marker position={[pendingPin.lat, pendingPin.lng]} icon={greenIcon} />}
           </MapContainer>
-          <div className="absolute top-3 right-3 z-[1000]">
-            <MapModeToggle mode={mapMode} onChange={setMapMode} />
-          </div>
-          {mapMode === 'satellite' && (
-            <p className="absolute bottom-1.5 left-2 z-[1000] text-[10px] text-muted bg-surface/80 px-1.5 py-0.5 rounded">
-              Satellite imagery &copy; Esri
-            </p>
-          )}
+          <p className="absolute bottom-1.5 left-2 z-[1000] text-[10px] text-muted bg-surface/80 px-1.5 py-0.5 rounded">
+            Satellite imagery &copy; Esri
+          </p>
         </div>
 
         {/* Inline add/edit-blind form — expands directly below map, map stays visible */}
@@ -515,11 +506,7 @@ export default function Locations() {
 
                 <div className="h-48 rounded-xl overflow-hidden border border-hairline mb-2">
                   <MapContainer center={[44, -93]} zoom={5} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer
-                      url={SATELLITE_TILE_URL}
-                      attribution={SATELLITE_ATTRIBUTION}
-                      maxZoom={SATELLITE_MAX_ZOOM}
-                    />
+                    <SpotMapTiles />
                     <FlyTo coords={flyTarget} />
                     <MapPinDropper onDrop={(lat, lng) => setLocCenter({ lat, lng })} />
                     {locCenter && <Marker position={[locCenter.lat, locCenter.lng]} icon={greenIcon} />}
