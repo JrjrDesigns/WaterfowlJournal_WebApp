@@ -273,8 +273,10 @@ function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' 
   )
 }
 
-const DAY_ROW_GRID = 'grid gap-1.5 items-center' as const
-const DAY_ROW_COLS = { gridTemplateColumns: '2.5rem 7rem 1fr 1fr 1fr 1fr' }
+// Mobile: data columns flex to fill the row. Desktop (md+): the page's max-w-2xl
+// cap means 1fr columns stretch too far apart, so switch to fixed compact widths
+// plus a trailing spacer that soaks up the extra space instead.
+const DAY_ROW_GRID = 'grid gap-1.5 items-center grid-cols-[2.5rem_7rem_1fr_1fr_1fr_1fr] md:grid-cols-[2.5rem_7rem_4.5rem_4.5rem_4.5rem_4.5rem_1fr]' as const
 
 const TIMING_COLOR: Record<TimingInfo['label'], string> = {
   Peak: '#1B5E45', Building: '#1B5E45', Active: '#1B4F6E', Tapering: '#D97706', Slow: '#797B7E',
@@ -497,20 +499,21 @@ export default function Forecast() {
             {isOpen && (
               <div className="border-t border-hairline divide-y divide-hairline">
                 <div className="px-5 py-1.5">
-                  <div className={DAY_ROW_GRID} style={DAY_ROW_COLS}>
+                  <div className={DAY_ROW_GRID}>
                     <div />
                     <div />
                     <div className="flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
                     <div className="flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
                     <div className="flex justify-center min-w-0"><ColHeader>Migr.</ColHeader></div>
                     <div className="flex justify-center min-w-0"><ColHeader>Score</ColHeader></div>
+                    <div className="hidden md:block" />
                   </div>
                 </div>
                 {loc.days.map(day => {
                   const isBest = bestDay?.date === day.date && day.hunt_score >= 45
                   return (
                     <div key={day.date} className={`px-5 py-3 ${isBest ? 'bg-green/[0.04]' : ''}`}>
-                      <div className={DAY_ROW_GRID} style={DAY_ROW_COLS}>
+                      <div className={DAY_ROW_GRID}>
                         {/* Day */}
                         <div className="min-w-0">
                           <p className="text-xs font-semibold text-ink leading-none">{format(new Date(day.date + 'T12:00:00'), 'EEE')}</p>
@@ -548,6 +551,7 @@ export default function Forecast() {
                         <div className="flex items-center justify-center min-w-0">
                           <ScoreBadge score={day.hunt_score} size="sm" />
                         </div>
+                        <div className="hidden md:block" />
                       </div>
 
                       {/* Event pills */}
