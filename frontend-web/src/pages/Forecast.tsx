@@ -302,8 +302,10 @@ function dialPoint(cx: number, cy: number, r: number, valuePercent: number) {
   return { x: cx + r * Math.cos(angleRad), y: cy - r * Math.sin(angleRad) }
 }
 
-function MigrationDial({ timing }: { timing: TimingInfo }) {
-  const cx = 27, cy = 27, r = 20
+function MigrationDial({ timing, size = 'md' }: { timing: TimingInfo; size?: 'sm' | 'md' }) {
+  const scale = size === 'sm' ? 0.65 : 1
+  const cx = 27 * scale, cy = 27 * scale, r = 20 * scale
+  const svgW = 54 * scale, svgH = 30 * scale
   const value = Math.max(0, Math.min(100, timing.score))
   const color = TIMING_COLOR[timing.label]
   const start = dialPoint(cx, cy, r, 0)
@@ -314,11 +316,11 @@ function MigrationDial({ timing }: { timing: TimingInfo }) {
       className="flex flex-col items-center flex-shrink-0"
       title={`Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`}
     >
-      <svg width={54} height={30} viewBox="0 0 54 30">
-        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${end.x} ${end.y}`} fill="none" stroke="#E4E5E3" strokeWidth={5} strokeLinecap="round" />
-        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${needle.x} ${needle.y}`} fill="none" stroke={color} strokeWidth={5} strokeLinecap="round" />
-        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth={2} strokeLinecap="round" />
-        <circle cx={cx} cy={cy} r={2.2} fill={color} />
+      <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
+        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${end.x} ${end.y}`} fill="none" stroke="#E4E5E3" strokeWidth={5 * scale} strokeLinecap="round" />
+        <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${needle.x} ${needle.y}`} fill="none" stroke={color} strokeWidth={5 * scale} strokeLinecap="round" />
+        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth={2 * scale} strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r={2.2 * scale} fill={color} />
       </svg>
     </div>
   )
@@ -491,30 +493,31 @@ export default function Forecast() {
 
             {isOpen && (
               <div className="border-t border-hairline divide-y divide-hairline">
-                <div className="px-5 py-1.5 flex items-center gap-3">
+                <div className="px-5 py-1.5 flex items-center gap-2">
                   <div className="w-10 flex-shrink-0" />
-                  <div className="w-24 flex-shrink-0" />
-                  <div className="flex-[1.3] min-w-0" />
-                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
-                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
-                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Migration</ColHeader></div>
-                  <div className="flex-1 flex justify-center min-w-0"><ColHeader>Hunt Score</ColHeader></div>
+                  <div className="w-20 flex-shrink-0" />
+                  <div className="flex-1 flex items-center justify-between min-w-0">
+                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
+                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
+                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Migr.</ColHeader></div>
+                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Score</ColHeader></div>
+                  </div>
                 </div>
                 {loc.days.map(day => {
                   const isBest = bestDay?.date === day.date && day.hunt_score >= 45
                   return (
                     <div key={day.date} className={`px-5 py-3 ${isBest ? 'bg-green/[0.04]' : ''}`}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         {/* Day */}
                         <div className="w-10 flex-shrink-0">
                           <p className="text-xs font-semibold text-ink leading-none">{format(new Date(day.date + 'T12:00:00'), 'EEE')}</p>
                           <p className="text-xs text-muted mt-0.5">{format(new Date(day.date + 'T12:00:00'), 'M/d')}</p>
                         </div>
                         {/* Sky + temp */}
-                        <div className="flex items-center gap-2 w-24 flex-shrink-0">
-                          <ConditionIcon code={day.weather_code} size={20} className="text-ink" />
-                          <div>
-                            <p className="text-xs font-semibold text-ink tabular-nums leading-none">
+                        <div className="flex items-center gap-1.5 w-20 flex-shrink-0">
+                          <ConditionIcon code={day.weather_code} size={18} className="text-ink flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-ink tabular-nums leading-none whitespace-nowrap">
                               {day.temp_max}°<span className="text-muted font-normal">/{day.temp_min}°</span>
                             </p>
                             {day.precip_prob > 20 && (
@@ -522,26 +525,28 @@ export default function Forecast() {
                             )}
                           </div>
                         </div>
-                        <div className="flex-[1.3] min-w-0" />
-                        {/* Wind */}
-                        <div className="flex-1 flex flex-col items-center justify-center min-w-0">
-                          <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                            <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
+                        {/* Data columns */}
+                        <div className="flex-1 flex items-center justify-between min-w-0">
+                          {/* Wind */}
+                          <div className="flex-1 flex flex-col items-center justify-center min-w-0">
+                            <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                              <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
+                            </div>
+                            <span className="text-xs font-semibold leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_cardinal}</span>
+                            <span className="text-xs font-semibold tabular-nums leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_speed}</span>
                           </div>
-                          <span className="text-xs font-semibold leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_cardinal}</span>
-                          <span className="text-xs font-semibold tabular-nums leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_speed}</span>
-                        </div>
-                        {/* Moon */}
-                        <div className="flex-1 flex items-center justify-center min-w-0">
-                          <MoonIcon phase={day.moon_phase} size={15} />
-                        </div>
-                        {/* Migration */}
-                        <div className="flex-1 flex items-center justify-center min-w-0">
-                          <MigrationDial timing={day.timing} />
-                        </div>
-                        {/* Score */}
-                        <div className="flex-1 flex items-center justify-center min-w-0">
-                          <ScoreBadge score={day.hunt_score} size="sm" />
+                          {/* Moon */}
+                          <div className="flex-1 flex items-center justify-center min-w-0">
+                            <MoonIcon phase={day.moon_phase} size={15} />
+                          </div>
+                          {/* Migration */}
+                          <div className="flex-1 flex items-center justify-center min-w-0">
+                            <MigrationDial timing={day.timing} size="sm" />
+                          </div>
+                          {/* Score */}
+                          <div className="flex-1 flex items-center justify-center min-w-0">
+                            <ScoreBadge score={day.hunt_score} size="sm" />
+                          </div>
                         </div>
                       </div>
 
