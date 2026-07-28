@@ -273,6 +273,9 @@ function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' 
   )
 }
 
+const DAY_ROW_GRID = 'grid gap-1.5 items-center' as const
+const DAY_ROW_COLS = { gridTemplateColumns: '2.5rem 7rem 1fr 1fr 1fr 1fr' }
+
 const TIMING_COLOR: Record<TimingInfo['label'], string> = {
   Peak: '#1B5E45', Building: '#1B5E45', Active: '#1B4F6E', Tapering: '#D97706', Slow: '#797B7E',
 }
@@ -493,28 +496,28 @@ export default function Forecast() {
 
             {isOpen && (
               <div className="border-t border-hairline divide-y divide-hairline">
-                <div className="px-5 py-1.5 flex items-center gap-2">
-                  <div className="w-10 flex-shrink-0" />
-                  <div className="w-20 flex-shrink-0" />
-                  <div className="flex-1 flex items-center justify-between min-w-0">
-                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
-                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
-                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Migr.</ColHeader></div>
-                    <div className="flex-1 flex justify-center min-w-0"><ColHeader>Score</ColHeader></div>
+                <div className="px-5 py-1.5">
+                  <div className={DAY_ROW_GRID} style={DAY_ROW_COLS}>
+                    <div />
+                    <div />
+                    <div className="flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
+                    <div className="flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
+                    <div className="flex justify-center min-w-0"><ColHeader>Migr.</ColHeader></div>
+                    <div className="flex justify-center min-w-0"><ColHeader>Score</ColHeader></div>
                   </div>
                 </div>
                 {loc.days.map(day => {
                   const isBest = bestDay?.date === day.date && day.hunt_score >= 45
                   return (
                     <div key={day.date} className={`px-5 py-3 ${isBest ? 'bg-green/[0.04]' : ''}`}>
-                      <div className="flex items-center gap-2">
+                      <div className={DAY_ROW_GRID} style={DAY_ROW_COLS}>
                         {/* Day */}
-                        <div className="w-10 flex-shrink-0">
+                        <div className="min-w-0">
                           <p className="text-xs font-semibold text-ink leading-none">{format(new Date(day.date + 'T12:00:00'), 'EEE')}</p>
                           <p className="text-xs text-muted mt-0.5">{format(new Date(day.date + 'T12:00:00'), 'M/d')}</p>
                         </div>
                         {/* Sky + temp */}
-                        <div className="flex items-center gap-1.5 w-20 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <ConditionIcon code={day.weather_code} size={18} className="text-ink flex-shrink-0" />
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-ink tabular-nums leading-none whitespace-nowrap">
@@ -525,41 +528,38 @@ export default function Forecast() {
                             )}
                           </div>
                         </div>
-                        {/* Data columns */}
-                        <div className="flex-1 flex items-center justify-between min-w-0">
-                          {/* Wind */}
-                          <div className="flex-1 flex flex-col items-center justify-center min-w-0">
-                            <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                              <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
-                            </div>
-                            <span className="text-xs font-semibold leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_cardinal}</span>
-                            <span className="text-xs font-semibold tabular-nums leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_speed}</span>
+                        {/* Wind */}
+                        <div className="flex flex-col items-center justify-center min-w-0">
+                          <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                            <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={16} />
                           </div>
-                          {/* Moon */}
-                          <div className="flex-1 flex items-center justify-center min-w-0">
-                            <MoonIcon phase={day.moon_phase} size={15} />
-                          </div>
-                          {/* Migration */}
-                          <div className="flex-1 flex items-center justify-center min-w-0">
-                            <MigrationDial timing={day.timing} size="sm" />
-                          </div>
-                          {/* Score */}
-                          <div className="flex-1 flex items-center justify-center min-w-0">
-                            <ScoreBadge score={day.hunt_score} size="sm" />
-                          </div>
+                          <span className="text-xs font-semibold leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_cardinal}</span>
+                          <span className="text-xs font-semibold tabular-nums leading-tight" style={{ color: windColor(day.wind_speed) }}>{day.wind_speed}</span>
+                        </div>
+                        {/* Moon */}
+                        <div className="flex items-center justify-center min-w-0">
+                          <MoonIcon phase={day.moon_phase} size={15} />
+                        </div>
+                        {/* Migration */}
+                        <div className="flex items-center justify-center min-w-0">
+                          <MigrationDial timing={day.timing} size="sm" />
+                        </div>
+                        {/* Score */}
+                        <div className="flex items-center justify-center min-w-0">
+                          <ScoreBadge score={day.hunt_score} size="sm" />
                         </div>
                       </div>
 
                       {/* Event pills */}
                       {day.events.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2 pl-[52px]">
+                        <div className="flex flex-wrap gap-1.5 mt-2 pl-12">
                           {day.events.map((e, i) => <EventPill key={i} event={e} />)}
                         </div>
                       )}
 
                       {/* Ideal-wind blind badges */}
                       {(day.blind_wind ?? []).length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2 pl-[52px]">
+                        <div className="flex flex-wrap gap-1.5 mt-2 pl-12">
                           {(day.blind_wind ?? []).map((bw, i) => (
                             <span
                               key={i}
