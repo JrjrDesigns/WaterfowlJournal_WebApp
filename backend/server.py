@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 import requests
+import time
+import copy
 from bson import ObjectId
 
 ROOT_DIR = Path(__file__).parent
@@ -1583,8 +1585,20 @@ def _history_match_score(profile, wind_speed, temp, weather_code, moon_name):
     return max(0, min(100, (sum(ratios) / len(ratios)) * 50))
 
 
+# Open-Meteo's free tier has a daily request cap shared across every Railway
+# tenant on the same egress IP; without caching, every forecast page load
+# re-fetches all locations from scratch. Cache each coordinate's response for
+# 6h (~4 refreshes/day/location) so normal usage can't burn through the quota.
+FORECAST_CACHE_TTL_SECONDS = 6 * 60 * 60
+_forecast_cache: Dict[str, tuple] = {}  # cache_key -> (fetched_at, data)
+
+
 def fetch_forecast_data(lat: float, lng: float, days: int = 7):
     """Fetch multi-day forecast from Open-Meteo. Returns list of per-day dicts."""
+    cache_key = f"{round(lat, 2)},{round(lng, 2)},{days}"
+    cached = _forecast_cache.get(cache_key)
+    if cached and (time.time() - cached[0]) < FORECAST_CACHE_TTL_SECONDS:
+        return copy.deepcopy(cached[1])
     try:
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
@@ -1699,7 +1713,8 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
                     "_press_delta": press_delta,
                 })
             prev_temp = temp_max
-        return out
+        _forecast_cache[cache_key] = (time.time(), out)
+        return copy.deepcopy(out)
     except Exception as e:
         logger.error(f"Open-Meteo forecast error: {e}")
         return []
