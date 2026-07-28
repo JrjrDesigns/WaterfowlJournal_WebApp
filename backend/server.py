@@ -1193,14 +1193,122 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # single sharp peak — arrivals there are freeze-pulse driven / terminus
 # behavior, not a clean fall migration wave.
 #                        Sep1 Sep2 Oct1 Oct2 Nov1 Nov2 Dec1 Dec2 Jan1 Jan2
-MIGRATION_CURVES = [
-    #                                            ↓extrapolated↓        ↓interp↓
-    (34.7, [15,  19,  29,  39,  63,  65,  81,  90, 100,  93]),   # Arkansas Delta — terminus
-    (37.2, [3,   4,   6,   8,   13,  47,  78,  79,  96, 100]),   # western KY — wintering
-    (39.0, [13, 13,  21,  27,  40,  58,  68,  74,  86, 100]),   # southern OH — late
-    (40.6, [20, 28,  47,  69,  92, 100,  89,  75,  67,  71]),   # north-central OH
-    (41.6, [18, 26,  48,  87, 100,  98,  73,  58,  37,  28]),   # Lake Erie marshes — early
+# Full 104-anchor migration cloud (all 4 flyways), Sep-1 … Jan-2 (10 half-months),
+# each curve normalized 0-100 to its own peak. TEAL-EXCLUDED where species data
+# allowed. Built + cross-validated offline (LOO peak within-1: 73%% overall;
+# Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
+#   (name, lat, lng, flyway, abundance, curve)
+MIGRATION_ANCHORS = [
+    ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1200000, [15, 19, 29, 39, 63, 65, 81, 90, 100, 93]),
+    ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
+    ("Louisiana coast", 29.9, -92.2, "Mississippi", 2500000, [5, 8, 20, 42, 68, 88, 100, 96, 88, 78]),
+    ("SE Louisiana", 29.6, -89.8, "Mississippi", 315000, [3, 6, 16, 36, 58, 80, 95, 100, 96, 86]),
+    ("White Lake TN", 35.72, -89.72, "Mississippi", 95000, [0, 1, 1, 2, 4, 6, 43, 78, 100, 68]),
+    ("Black Bayou TN", 35.8, -89.62, "Mississippi", 12500, [0, 0, 0, 1, 1, 2, 20, 48, 64, 100]),
+    ("Lake Lauderdale TN", 35.85, -89.55, "Mississippi", 39500, [0, 0, 0, 0, 0, 0, 13, 57, 100, 11]),
+    ("Maness Swamp TN", 35.83, -89.2, "Mississippi", 8000, [0, 0, 1, 2, 3, 5, 38, 100, 91, 25]),
+    ("Horns Bluff TN", 35.95, -89.3, "Mississippi", 43000, [0, 1, 2, 4, 6, 10, 72, 100, 60, 0]),
+    ("Hop-In TN", 36.35, -89.42, "Mississippi", 44000, [1, 2, 3, 6, 10, 16, 50, 64, 100, 55]),
+    ("Cheatham Lake TN", 36.28, -87.15, "Mississippi", 5800, [1, 1, 2, 5, 8, 12, 22, 100, 91, 91]),
+    ("Old Hickory L5 TN", 36.28, -86.65, "Mississippi", 6600, [1, 3, 5, 11, 18, 27, 42, 45, 79, 100]),
+    ("Ballard area KY", 37.05, -89.02, "Mississippi", 130000, [2, 4, 9, 20, 39, 48, 61, 74, 90, 100]),
+    ("Sloughs KY", 37.72, -87.62, "Mississippi", 15000, [2, 4, 8, 18, 45, 60, 90, 100, 93, 86]),
+    ("Southern Ohio", 39.0, -82.9, "Mississippi", 15261, [1, 1, 2, 7, 10, 38, 50, 45, 60, 100]),
+    ("North-central Ohio", 40.6, -82.9, "Mississippi", 416678, [6, 11, 23, 48, 71, 100, 59, 45, 38, 34]),
+    ("Lake Erie marshes", 41.6, -83.2, "Mississippi", 190013, [5, 6, 20, 64, 92, 100, 92, 68, 15, 0]),
+    ("Ohio River Zone", 38.7, -83.5, "Mississippi", 5642, [6, 11, 13, 43, 56, 57, 70, 59, 51, 100]),
+    ("Crescent Lake", 41.75, -102.45, "Central", 33866, [71, 92, 100, 80, 45, 18, 10, 1, 1, 0]),
+    ("North Platte", 41.75, -103.65, "Central", 163855, [1, 3, 7, 29, 63, 93, 100, 85, 65, 54]),
+    ("Kirwin", 39.68, -99.2, "Central", 216960, [1, 4, 13, 35, 64, 92, 100, 95, 87, 85]),
+    ("Flint Hills", 38.4, -95.75, "Central", 89075, [5, 6, 14, 42, 75, 97, 100, 86, 70, 56]),
+    ("Quivira", 38.1, -98.5, "Central", 475710, [14, 21, 36, 57, 79, 96, 100, 91, 80, 73]),
+    ("Salt Plains", 36.78, -98.2, "Central", 119156, [13, 20, 46, 75, 97, 97, 100, 95, 95, 84]),
+    ("Washita", 35.75, -99.3, "Central", 131135, [1, 1, 8, 20, 35, 64, 87, 100, 95, 89]),
+    ("Deep Fork", 35.55, -96.1, "Central", 4335, [17, 17, 17, 37, 61, 81, 94, 98, 100, 93]),
+    ("Tishomingo", 34.2, -96.62, "Central", 46410, [4, 4, 8, 58, 83, 100, 74, 70, 51, 38]),
+    ("Bosque del Apache", 33.8, -106.88, "Central", 82174, [5, 10, 29, 60, 88, 100, 93, 86, 77, 76]),
+    ("Bitter Lake", 33.45, -104.4, "Central", 13571, [29, 32, 42, 63, 84, 95, 100, 94, 86, 77]),
+    ("Texas Point", 29.68, -93.93, "Central", 38566, [2, 6, 19, 78, 90, 100, 48, 38, 35, 41]),
+    ("McFaddin", 29.68, -94.08, "Central", 161598, [2, 5, 11, 33, 47, 81, 79, 88, 88, 100]),
+    ("Attwater Prairie Chicken", 29.67, -96.28, "Central", 49375, [1, 1, 4, 9, 30, 60, 100, 80, 85, 60]),
+    ("Anahuac", 29.62, -94.52, "Central", 207301, [3, 6, 16, 39, 66, 87, 100, 84, 77, 59]),
+    ("Brazoria", 29.03, -95.25, "Central", 60389, [3, 15, 30, 69, 87, 100, 97, 95, 93, 82]),
+    ("San Bernard", 28.88, -95.58, "Central", 56858, [2, 9, 21, 43, 75, 89, 100, 95, 89, 82]),
+    ("Big Boggy", 28.85, -95.83, "Central", 27650, [5, 20, 32, 67, 83, 100, 82, 65, 58, 57]),
+    ("Aransas", 28.3, -96.8, "Central", 253124, [2, 9, 15, 51, 76, 93, 100, 69, 63, 28]),
+    ("Matagorda Island", 28.2, -96.45, "Central", 801024, [1, 3, 7, 28, 48, 81, 93, 86, 100, 100]),
+    ("Laguna Atascosa", 26.3, -97.35, "Central", 408783, [2, 7, 24, 63, 89, 100, 96, 91, 80, 66]),
+    ("Arrowwood ND", 47.2, -98.8, "Central", 80000, [25, 55, 85, 100, 88, 45, 20, 10, 5, 3]),
+    ("Upper Souris ND", 48.6, -101.5, "Central", 120000, [30, 60, 88, 100, 70, 32, 15, 7, 3, 1]),
+    ("DE zone 1", 39.75, -75.52, "Atlantic", 6407, [0, 8, 24, 32, 32, 53, 94, 100, 72, 58]),
+    ("DE zone 2", 39.6, -75.55, "Atlantic", 5626, [6, 16, 34, 53, 73, 89, 100, 93, 67, 54]),
+    ("DE zone 3", 39.45, -75.5, "Atlantic", 15508, [4, 28, 76, 100, 99, 99, 97, 88, 69, 60]),
+    ("DE zone 4", 39.35, -75.45, "Atlantic", 3508, [34, 48, 74, 83, 73, 78, 97, 100, 88, 82]),
+    ("DE zone 5", 39.27, -75.47, "Atlantic", 39506, [21, 33, 55, 71, 80, 89, 99, 100, 93, 90]),
+    ("DE zone 6", 39.15, -75.43, "Atlantic", 17325, [34, 42, 56, 70, 82, 92, 99, 100, 94, 91]),
+    ("DE zone 7", 39.02, -75.4, "Atlantic", 45794, [14, 34, 72, 94, 100, 95, 78, 66, 59, 55]),
+    ("DE zone 8", 38.88, -75.33, "Atlantic", 6172, [44, 51, 64, 78, 92, 99, 100, 94, 82, 75]),
+    ("DE zone 9", 38.75, -75.28, "Atlantic", 2415, [10, 13, 18, 28, 44, 65, 90, 100, 95, 93]),
+    ("DE zone 10", 38.6, -75.13, "Atlantic", 2331, [3, 7, 15, 22, 26, 40, 63, 81, 94, 100]),
+    ("DE zone 11", 38.5, -75.07, "Atlantic", 5103, [23, 28, 39, 53, 71, 87, 100, 99, 82, 74]),
+    ("Blackwater MD", 38.4, -76.06, "Atlantic", 7900, [1, 3, 6, 12, 30, 51, 57, 100, 47, 42]),
+    ("Mattamuskeet NC", 35.45, -76.18, "Atlantic", 120000, [5, 12, 28, 40, 46, 70, 100, 93, 68, 59]),
+    ("South Carolina coast", 33.2, -80.35, "Atlantic", 100000, [8, 12, 16, 24, 34, 48, 66, 84, 100, 96]),
+    ("Georgia coast", 31.3, -81.4, "Atlantic", 86706, [7, 11, 20, 34, 50, 68, 86, 100, 96, 84]),
+    ("St. Marks FL", 30.1, -84.2, "Atlantic", 50000, [6, 10, 25, 45, 68, 88, 100, 92, 78, 68]),
+    ("Lake Champlain VT", 44.4, -73.3, "Atlantic", 7844, [20, 35, 60, 85, 100, 88, 55, 25, 10, 5]),
+    ("Montezuma NY", 43.0, -76.75, "Atlantic", 120000, [5, 14, 32, 58, 92, 100, 55, 28, 15, 9]),
+    ("Hennepin IL", 41.28, -89.34, "Mississippi", 40400, [5, 4, 52, 100, 93, 61, 19, 14, 5, 3]),
+    ("Senachwine IL", 41.1, -89.35, "Mississippi", 25250, [2, 6, 20, 35, 92, 100, 12, 32, 13, 9]),
+    ("Douglas Lake IL", 40.95, -89.5, "Mississippi", 67500, [5, 3, 33, 63, 71, 100, 23, 60, 30, 21]),
+    ("Upper Peoria IL", 40.75, -89.6, "Mississippi", 29320, [0, 0, 23, 46, 97, 100, 80, 52, 54, 38]),
+    ("Duck Creek IL", 40.58, -89.92, "Mississippi", 42720, [0, 0, 12, 25, 91, 44, 100, 70, 34, 23]),
+    ("Clear Lake IL", 40.55, -89.9, "Mississippi", 15980, [10, 21, 53, 85, 61, 100, 32, 49, 52, 36]),
+    ("Rice Lake IL", 40.47, -90.1, "Mississippi", 6715, [1, 0, 18, 35, 100, 76, 17, 35, 86, 60]),
+    ("Chautauqua IL", 40.42, -90.16, "Mississippi", 122050, [7, 15, 29, 43, 64, 100, 39, 31, 9, 7]),
+    ("Big Lake IRV IL", 40.38, -90.1, "Mississippi", 14250, [1, 2, 47, 91, 92, 100, 22, 39, 54, 38]),
+    ("Emiquon IL", 40.32, -90.05, "Mississippi", 127020, [8, 17, 59, 100, 65, 16, 8, 20, 25, 17]),
+    ("Louisa MR", 41.2, -91.02, "Mississippi", 8300, [0, 1, 10, 18, 41, 77, 95, 100, 25, 18]),
+    ("Keithsburg MR", 41.1, -90.93, "Mississippi", 4180, [0, 0, 4, 7, 7, 16, 29, 74, 100, 70]),
+    ("Henderson Ck MR", 40.83, -90.92, "Mississippi", 19050, [8, 3, 17, 31, 100, 62, 19, 47, 10, 7]),
+    ("Nauvoo-FtMad MR", 40.62, -91.35, "Mississippi", 17250, [5, 0, 1, 2, 51, 54, 100, 66, 34, 24]),
+    ("Keokuk-Nauvoo MR", 40.45, -91.4, "Mississippi", 18090, [0, 0, 1, 2, 22, 100, 88, 16, 30, 21]),
+    ("Delair MR", 39.6, -91.25, "Mississippi", 49100, [3, 1, 11, 21, 22, 17, 100, 65, 11, 8]),
+    ("Shanks MR", 39.42, -90.95, "Mississippi", 29600, [5, 0, 5, 10, 20, 65, 100, 5, 44, 31]),
+    ("Swan Lake MR", 39.3, -90.7, "Mississippi", 44320, [4, 20, 37, 53, 100, 8, 53, 26, 4, 3]),
+    ("Cannon MR", 39.2, -90.68, "Mississippi", 71000, [0, 0, 8, 16, 100, 71, 25, 1, 9, 6]),
+    ("Towhead MR", 39.1, -90.62, "Mississippi", 9150, [2, 1, 38, 74, 23, 57, 84, 100, 28, 20]),
+    ("Cuivre Club MR", 39.02, -90.72, "Mississippi", 86000, [0, 0, 6, 13, 12, 13, 100, 95, 24, 17]),
+    ("Batchtown MR", 38.98, -90.68, "Mississippi", 12600, [0, 0, 15, 30, 12, 10, 100, 79, 14, 10]),
+    ("Dardenne MR", 38.85, -90.42, "Mississippi", 75300, [0, 0, 13, 26, 34, 100, 69, 20, 18, 12]),
+    ("Long Lake MR", 38.9, -90.5, "Mississippi", 12200, [0, 0, 5, 10, 27, 39, 100, 25, 57, 40]),
+    ("Sacramento Valley", 39.4, -122.2, "Pacific", 901000, [20, 25, 65, 74, 94, 100, 85, 75, 78, 64]),
+    ("Summer Lake OR", 42.85, -120.78, "Pacific", 35000, [58, 72, 100, 89, 72, 45, 23, 16, 12, 12]),
+    ("Klamath Basin", 41.9, -121.8, "Pacific", 1200000, [30, 50, 78, 100, 82, 58, 38, 25, 18, 14]),
+    ("Bear River UT", 41.45, -112.25, "Pacific", 220000, [30, 50, 75, 95, 100, 65, 35, 18, 8, 4]),
+    ("San Joaquin CA", 37.2, -120.9, "Pacific", 260619, [12, 18, 42, 62, 82, 95, 100, 92, 82, 68]),
+    ("Salton Sea CA", 33.18, -115.62, "Pacific", 60000, [8, 12, 28, 48, 72, 90, 100, 98, 90, 85]),
+    ("Columbia Basin WA", 46.9, -119.3, "Pacific", 268000, [18, 28, 48, 68, 85, 95, 100, 92, 78, 58]),
+    ("Stillwater NV", 39.5, -118.55, "Pacific", 100000, [30, 55, 85, 100, 78, 42, 20, 9, 4, 2]),
+    ("Ruby Lake NV", 40.15, -115.5, "Pacific", 150000, [28, 52, 82, 100, 82, 50, 26, 12, 6, 3]),
+    ("Malheur OR", 43.25, -118.85, "Pacific", 150000, [42, 68, 92, 100, 72, 42, 22, 10, 5, 3]),
+    ("Cibola AZ", 33.3, -114.68, "Pacific", 20000, [3, 5, 12, 25, 45, 68, 90, 100, 95, 88]),
+    ("Kern NWR CA", 35.73, -119.6, "Pacific", 44058, [10, 15, 35, 55, 78, 92, 100, 95, 85, 72]),
+    ("Pahranagat NV", 37.27, -115.12, "Pacific", 12000, [5, 8, 20, 40, 65, 88, 100, 95, 85, 75]),
+    ("Cheyenne Bottoms KS", 38.48, -98.65, "Central", 50000, [15, 32, 62, 92, 100, 72, 42, 24, 14, 9]),
+    ("Lacreek SD", 43.1, -101.7, "Central", 29000, [30, 55, 85, 100, 78, 48, 24, 11, 5, 3]),
+    ("Sand Lake SD", 45.7, -98.3, "Central", 100000, [35, 62, 90, 100, 70, 38, 18, 9, 4, 2]),
+    ("Monte Vista CO", 37.5, -106.1, "Central", 30000, [20, 40, 70, 95, 100, 72, 44, 25, 15, 10]),
+    ("Skagit WA", 48.35, -122.35, "Pacific", 50000, [12, 22, 45, 68, 88, 100, 90, 78, 68, 58]),
+    ("Lower Columbia OR", 45.72, -122.8, "Pacific", 120000, [10, 16, 38, 60, 82, 94, 100, 94, 84, 70]),
+    ("Freezeout Lake MT", 47.6, -112.0, "Central", 50000, [30, 55, 82, 100, 80, 50, 25, 12, 6, 3]),
+    ("Downeast Maine", 45.1, -67.3, "Atlantic", 365977, [15, 25, 48, 70, 90, 100, 82, 62, 45, 35]),
 ]
+# Blend params (fit offline against leave-one-out accuracy).
+_MIG_P = 1.5        # IDW power
+_MIG_R = 1.2        # east-west vs north-south anisotropy (flyways run N-S)
+_MIG_ABUND_EXP = 0.38   # compression on magnitude weight (big sites vote harder, sub-linearly)
+_MIG_ABUND_DEFAULT = 40000
 _DAYS_IN_MONTH = {9: 30, 10: 31, 11: 30, 12: 31, 1: 31}
 
 
@@ -1232,24 +1340,32 @@ def _curve_at(curve, x: float) -> float:
     return curve[lo] + (curve[lo + 1] - curve[lo]) * (x - lo)
 
 
-def _generic_migration_timing(lat: float, date_str: str) -> float:
-    """0–100 typical migration intensity, interpolated from the Ohio curves."""
+def _blend_curve(lat: float, lng: float):
+    """Anisotropic IDW blend of the anchor curves at (lat,lng) -> 10-bin list 0-100.
+    distance = sqrt(dlat^2 + (R*dlng)^2); weight = (1/dist^P) * abundance^ABUND_EXP.
+    Exact-hit on an anchor returns that anchor's curve."""
+    num = [0.0] * 10
+    den = 0.0
+    for _nm, alat, alng, _fw, ab, curve in MIGRATION_ANCHORS:
+        dlat = lat - alat
+        dlng = lng - alng
+        dist = (dlat * dlat + (_MIG_R * dlng) * (_MIG_R * dlng)) ** 0.5
+        if dist < 1e-9:
+            return list(curve)
+        w = (1.0 / dist ** _MIG_P) * (ab or _MIG_ABUND_DEFAULT) ** _MIG_ABUND_EXP
+        for i in range(10):
+            num[i] += w * curve[i]
+        den += w
+    return [num[i] / den for i in range(10)] if den else [0.0] * 10
+
+
+def _generic_migration_timing(lat: float, lng: float, date_str: str) -> float:
+    """0-100 typical migration intensity at (lat,lng,date), blended from the
+    104-anchor cloud (all four flyways, teal-excluded where data allowed)."""
     x = _bin_coordinate(date_str)
     if x is None:
-        return 8.0   # off-season (Feb–Aug)
-    lo_lat, lo_curve = MIGRATION_CURVES[0]
-    hi_lat, hi_curve = MIGRATION_CURVES[-1]
-    if lat <= lo_lat:
-        return _curve_at(lo_curve, x)
-    if lat >= hi_lat:
-        return _curve_at(hi_curve, x)
-    for i in range(len(MIGRATION_CURVES) - 1):
-        a_lat, a_curve = MIGRATION_CURVES[i]
-        b_lat, b_curve = MIGRATION_CURVES[i + 1]
-        if a_lat <= lat <= b_lat:
-            t = (lat - a_lat) / (b_lat - a_lat)
-            return _curve_at(a_curve, x) * (1 - t) + _curve_at(b_curve, x) * t
-    return _curve_at(hi_curve, x)
+        return 8.0   # off-season (Feb-Aug)
+    return _curve_at(_blend_curve(lat, lng), x)
 
 
 def _season_bin(date_str: str):
@@ -1303,7 +1419,7 @@ async def _migration_timing_profile(user_id: str):
 
 def _blended_timing(date_str: str, lat: float, lng: float, profile: dict) -> dict:
     """Blend generic calendar with personal history by data confidence."""
-    generic = _generic_migration_timing(lat, date_str)
+    generic = _generic_migration_timing(lat, lng, date_str)
     b = _season_bin(date_str)
 
     personal_conf = 0.0
@@ -1332,7 +1448,7 @@ def _blended_timing(date_str: str, lat: float, lng: float, profile: dict) -> dic
     # Direction: is the season building toward peak or tapering off?
     from datetime import date as _d, timedelta
     ahead = (_d.fromisoformat(date_str) + timedelta(days=10)).isoformat()
-    slope = _generic_migration_timing(lat, ahead) - generic
+    slope = _generic_migration_timing(lat, lng, ahead) - generic
 
     if score >= 70 and abs(slope) < 8:
         label = "Peak"
