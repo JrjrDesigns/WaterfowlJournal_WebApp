@@ -7,6 +7,7 @@ import L from 'leaflet'
 import { format } from 'date-fns'
 import { fetchLocations, fetchBlindsForLocation, fetchSpecies, createHunt } from '../../utils/api'
 import { compressImage } from '../../utils/compressImage'
+import { SATELLITE_TILE_URL, SATELLITE_ATTRIBUTION, SATELLITE_MAX_ZOOM } from '../../utils/mapTiles'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -324,9 +325,9 @@ export default function HuntCreate() {
               touchZoom={false}
             >
               <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                attribution='&copy; Esri'
-                maxZoom={19}
+                url={SATELLITE_TILE_URL}
+                attribution={SATELLITE_ATTRIBUTION}
+                maxZoom={SATELLITE_MAX_ZOOM}
               />
               <Marker position={[location.lat, location.lng]} icon={greenIcon} />
             </MapContainer>

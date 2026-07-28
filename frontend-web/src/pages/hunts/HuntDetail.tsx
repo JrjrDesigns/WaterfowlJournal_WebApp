@@ -6,6 +6,7 @@ import L from 'leaflet'
 import { fetchHunt, deleteHunt } from '../../utils/api'
 import { useAuth } from '../../contexts/AuthContext'
 import PaywallModal from '../../components/PaywallModal'
+import { SATELLITE_TILE_URL, SATELLITE_ATTRIBUTION, SATELLITE_MAX_ZOOM } from '../../utils/mapTiles'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -613,8 +614,9 @@ export default function HuntDetail() {
         <div className="h-48 rounded-xl overflow-hidden border border-hairline">
           <MapContainer center={[hunt.location.lat, hunt.location.lng]} zoom={13} style={{ height: '100%', width: '100%' }} zoomControl={false}>
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url={SATELLITE_TILE_URL}
+              attribution={SATELLITE_ATTRIBUTION}
+              maxZoom={SATELLITE_MAX_ZOOM}
             />
             <Marker position={[hunt.location.lat, hunt.location.lng]} icon={greenIcon} />
           </MapContainer>
