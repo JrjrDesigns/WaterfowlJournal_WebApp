@@ -273,10 +273,11 @@ function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' 
   )
 }
 
-// Mobile: data columns flex to fill the row. Desktop (md+): the page's max-w-2xl
-// cap means 1fr columns stretch too far apart, so switch to fixed compact widths
-// plus a trailing spacer that soaks up the extra space instead.
-const DAY_ROW_GRID = 'grid gap-1.5 items-center grid-cols-[2.5rem_7rem_1fr_1fr_1fr_1fr] md:grid-cols-[2.5rem_7rem_4.5rem_4.5rem_4.5rem_4.5rem_1fr]' as const
+// Mobile: data columns flex to fill the row. Desktop (md+): day/weather stay
+// left-anchored, the icon columns stay right-anchored (trailing 1.75rem matches
+// the score-badge-to-chevron offset in the collapsed header row above, so the
+// Score column lines up under it), and the gap between them is what collapses.
+const DAY_ROW_GRID = 'grid gap-1.5 items-center grid-cols-[2.5rem_7rem_1fr_1fr_1fr_1fr] md:grid-cols-[2.5rem_7rem_minmax(1rem,1fr)_repeat(4,minmax(3rem,3.75rem))_0.625rem]' as const
 
 const TIMING_COLOR: Record<TimingInfo['label'], string> = {
   Peak: '#1B5E45', Building: '#1B5E45', Active: '#1B4F6E', Tapering: '#D97706', Slow: '#797B7E',
@@ -502,6 +503,7 @@ export default function Forecast() {
                   <div className={DAY_ROW_GRID}>
                     <div />
                     <div />
+                    <div className="hidden md:block" />
                     <div className="flex justify-center min-w-0"><ColHeader>Wind</ColHeader></div>
                     <div className="flex justify-center min-w-0"><ColHeader>Moon</ColHeader></div>
                     <div className="flex justify-center min-w-0"><ColHeader>Migr.</ColHeader></div>
@@ -531,6 +533,7 @@ export default function Forecast() {
                             )}
                           </div>
                         </div>
+                        <div className="hidden md:block" />
                         {/* Wind */}
                         <div className="flex flex-col items-center justify-center min-w-0">
                           <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
