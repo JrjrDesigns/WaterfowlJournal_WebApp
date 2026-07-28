@@ -1,14 +1,10 @@
-"""Derive the empirical MIGRATION_CURVES baked into server.py.
+"""DEPRECATED (V1): this script produced the OLD latitude-only Ohio model
+(3-5 anchors) that used to be pasted into server.py as MIGRATION_CURVES.
 
-Aggregates raw aerial-survey counts (ducks = dabblers + divers) into
-per-latitude-band, per-half-month intensity curves normalized 0–100.
-Run from this directory: `python3 build_migration_curves.py` and paste the
-printed MIGRATION_CURVES literal into server.py. Re-run whenever survey data
-from new states/latitudes is added under surveys/ to recalibrate.
-
-Current source: surveys/ohio_1985-2025.csv (ODNR, per-species by zone).
-Zones map to latitude bands: Lake Erie Marsh ~41.6°N, North ~40.6°N,
-South + Ohio River merged ~39.0°N.
+server.py now uses MIGRATION_ANCHORS: a 104-anchor, 4-flyway, 2-D anisotropic-IDW
+cloud built and cross-validated offline (teal-excluded where species data allowed;
+LOO peak-within-1 = 73%). Do NOT paste this script's output back into server.py.
+Kept only for historical reference / Ohio recalibration.
 """
 import csv
 import os
