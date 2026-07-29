@@ -85,7 +85,13 @@ export default function HuntsScreen() {
   };
 
   const SPECIES_CATEGORIES = {
-    ducks: ['Mallard', 'Teal', 'Wood Duck', 'Pintail', 'Widgeon', 'Gadwall', 'Canvasback', 'Redhead', 'Shoveler'],
+    ducks: [
+      'Mallard',
+      'American Wigeon', 'Black Duck', 'Eurasian Wigeon', 'Gadwall', 'Mottled Duck', 'Pintail', 'Shoveler', 'Wood Duck',
+      'Blue-winged Teal', 'Cinnamon Teal', 'Green-winged Teal',
+      "Barrow's Goldeneye", 'Bufflehead', 'Canvasback', 'Common Goldeneye', 'Common Merganser', 'Hooded Merganser', 'Long-tailed Duck', 'Red-breasted Merganser', 'Redhead', 'Ring-necked Duck', 'Ruddy Duck',
+      'Greater Scaup', 'Lesser Scaup',
+    ],
     geese: ['Canada Goose', 'Snow Goose', 'Specklebelly', 'White-fronted Goose'],
   };
 
