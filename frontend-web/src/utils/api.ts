@@ -90,10 +90,10 @@ export const fetchSpecies = () => apiRequest('/api/species')
 
 export const fetchSubscriptionStatus = () => apiRequest('/api/subscription/status')
 
-export const createCheckoutSession = (priceId: string) =>
+export const createCheckoutSession = (priceId?: string) =>
   apiRequest('/api/subscription/create-checkout-session', {
     method: 'POST',
-    body: JSON.stringify({ price_id: priceId }),
+    body: JSON.stringify(priceId ? { price_id: priceId } : {}),
   })
 
 export const createCustomerPortalSession = () =>

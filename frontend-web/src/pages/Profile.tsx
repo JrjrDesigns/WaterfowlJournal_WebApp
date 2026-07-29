@@ -2,19 +2,55 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
-import { exportHuntsCSV } from '../utils/api'
+import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession } from '../utils/api'
+
+const STRIPE_PRICE_ID_MONTHLY = import.meta.env.VITE_STRIPE_PRICE_ID_MONTHLY as string | undefined
+const STRIPE_PRICE_ID_ANNUAL = import.meta.env.VITE_STRIPE_PRICE_ID_ANNUAL as string | undefined
 
 export default function Profile() {
   const { user, isPro, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [showPaywall, setShowPaywall] = useState(false)
   const [showUpgradePanel, setShowUpgradePanel] = useState(false)
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual')
+  const [isManaging, setIsManaging] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [activating, setActivating] = useState(false)
 
   useEffect(() => {
     if (searchParams.get('upgrade') === '1') setShowUpgradePanel(true)
     refreshUser()
   }, [])
+
+  useEffect(() => {
+    if (searchParams.get('success') !== '1') return
+
+    setSearchParams(params => {
+      params.delete('success')
+      params.delete('session_id')
+      return params
+    }, { replace: true })
+
+    // Stripe's webhook may take a moment to land, so poll briefly for the
+    // subscription flip instead of assuming refreshUser() catches it on the first try.
+    setActivating(true)
+    let attempts = 0
+    const interval = setInterval(async () => {
+      attempts += 1
+      await refreshUser()
+      if (attempts >= 5) {
+        clearInterval(interval)
+        setActivating(false)
+      }
+    }, 1500)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (isPro) setActivating(false)
+  }, [isPro])
 
   const handleLogout = () => {
     logout()
@@ -26,9 +62,40 @@ export default function Profile() {
     exportHuntsCSV()
   }
 
+  const handleSubscribe = async () => {
+    setCheckoutError(null)
+    setIsSubscribing(true)
+    try {
+      const priceId = selectedPlan === 'annual' ? STRIPE_PRICE_ID_ANNUAL : STRIPE_PRICE_ID_MONTHLY
+      const { url } = await createCheckoutSession(priceId)
+      window.location.href = url
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Could not start checkout')
+      setIsSubscribing(false)
+    }
+  }
+
+  const handleManageSubscription = async () => {
+    setCheckoutError(null)
+    setIsManaging(true)
+    try {
+      const { url } = await createCustomerPortalSession()
+      window.location.href = url
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Could not open subscription management')
+      setIsManaging(false)
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="export" />}
+
+      {activating && (
+        <div className="mb-4 bg-green/5 border border-green/30 text-green text-sm font-semibold rounded-xl p-3 text-center">
+          Payment received — activating your Pro access…
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-6">
@@ -86,18 +153,45 @@ export default function Profile() {
                 ))}
               </ul>
 
-              <div className="border border-hairline rounded-lg p-4 mb-4 text-center">
-                <p className="font-display text-4xl text-ink tracking-wider leading-none">$4.99<span className="text-base font-sans font-normal text-muted">/mo</span></p>
-                <p className="text-xs text-muted mt-1">Cancel anytime</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <button
+                  onClick={() => setSelectedPlan('monthly')}
+                  className={`relative border rounded-lg p-3 text-center transition-colors ${
+                    selectedPlan === 'monthly' ? 'border-ink bg-bg' : 'border-hairline'
+                  }`}
+                >
+                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$4.99</p>
+                  <p className="text-xs text-muted mt-1">per month</p>
+                </button>
+                <button
+                  onClick={() => setSelectedPlan('annual')}
+                  className={`relative border rounded-lg p-3 text-center transition-colors ${
+                    selectedPlan === 'annual' ? 'border-ink bg-bg' : 'border-hairline'
+                  }`}
+                >
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-white bg-green px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Best Value
+                  </span>
+                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$39.99</p>
+                  <p className="text-xs text-muted mt-1">per year <span className="text-green font-semibold">($3.33/mo)</span></p>
+                </button>
               </div>
+              <p className="text-xs text-muted text-center mb-4">Cancel anytime</p>
+
+              {checkoutError && (
+                <p className="text-red-600 text-xs font-semibold mb-3 text-center">{checkoutError}</p>
+              )}
 
               <button
-                className="w-full bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-                onClick={() => {
-                  alert('Stripe checkout — wire up VITE_STRIPE_PRICE_ID and backend /api/subscription/create-checkout-session')
-                }}
+                className="w-full bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={handleSubscribe}
+                disabled={isSubscribing}
               >
-                Subscribe — $4.99/month
+                {isSubscribing
+                  ? 'Redirecting to checkout…'
+                  : selectedPlan === 'annual'
+                    ? 'Subscribe — $39.99/year'
+                    : 'Subscribe — $4.99/month'}
               </button>
             </div>
           ) : (
@@ -113,7 +207,7 @@ export default function Profile() {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-semibold text-ink">Upgrade to Pro</p>
-                  <p className="text-xs text-muted">Forecasts, analytics & more — $4.99/mo</p>
+                  <p className="text-xs text-muted">Forecasts, analytics & more — from $3.33/mo</p>
                 </div>
               </div>
               <svg className="w-4 h-4 text-muted group-hover:text-ink transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,12 +226,16 @@ export default function Profile() {
             <p className="text-xs text-muted mt-0.5">All features unlocked</p>
           </div>
           <button
-            onClick={() => alert('Stripe customer portal — wire up backend /api/subscription/customer-portal')}
-            className="text-xs font-semibold text-ink underline underline-offset-2"
+            onClick={handleManageSubscription}
+            disabled={isManaging}
+            className="text-xs font-semibold text-ink underline underline-offset-2 disabled:opacity-60"
           >
-            Manage
+            {isManaging ? 'Opening…' : 'Manage'}
           </button>
         </div>
+      )}
+      {isPro && checkoutError && (
+        <p className="text-red-600 text-xs font-semibold mb-4 text-center">{checkoutError}</p>
       )}
 
       {/* Menu items */}

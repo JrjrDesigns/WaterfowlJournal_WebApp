@@ -59,7 +59,7 @@ export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) 
           onClick={() => { onClose(); navigate('/profile?upgrade=1') }}
           className="w-full bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm mb-3"
         >
-          Go Pro — $4.99/month
+          Go Pro — from $3.33/mo
         </button>
         <button
           onClick={onClose}

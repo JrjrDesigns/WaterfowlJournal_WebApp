@@ -119,10 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null)
   }
 
-  // Dev override: hunter@test.com always gets Pro access for UI testing
   const isPro =
-    user?.email === 'hunter@test.com' ||
-    user?.email === 'pro@test.com' ||
     user?.subscription_status === 'pro' ||
     user?.subscription_status === 'premium'
 
