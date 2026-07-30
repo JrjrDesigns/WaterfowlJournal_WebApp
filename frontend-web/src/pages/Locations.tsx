@@ -183,10 +183,11 @@ export default function Locations() {
     if (!locCenter) { setLocError('Click the map to set the center point'); return }
     setCreatingLoc(true)
     try {
-      await createLocation({ name: locName, location_type: locType, center: locCenter })
+      const newLoc = await createLocation({ name: locName, location_type: locType, center: locCenter })
       setShowNewLocation(false)
       setLocName(''); setLocType('marsh'); setLocCenter(null)
-      loadLocations()
+      await loadLocations()
+      openLocation(newLoc)
     } catch (err: unknown) {
       setLocError(err instanceof Error ? err.message : 'Failed to create location')
     } finally {
@@ -282,7 +283,7 @@ export default function Locations() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Delete confirm modals */}
         {deleteBlindTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-ink/50">
             <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm">
               <h3 className="text-lg font-semibold text-ink mb-2">Delete "{deleteBlindTarget.name}"?</h3>
               <p className="text-muted text-sm mb-6">This cannot be undone.</p>
@@ -294,7 +295,7 @@ export default function Locations() {
           </div>
         )}
         {deleteLocTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-ink/50">
             <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm">
               <h3 className="text-lg font-semibold text-ink mb-2">Delete "{deleteLocTarget.name}"?</h3>
               <p className="text-muted text-sm mb-6">This will also delete all blinds at this location. Cannot be undone.</p>
@@ -447,7 +448,7 @@ export default function Locations() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* New Location Modal */}
       {showNewLocation && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/50 p-0 sm:p-4">
+        <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-ink/50 p-0 sm:p-4">
           <div className="w-full sm:max-w-lg bg-surface border border-hairline rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-hairline">
               <h2 className="font-display text-2xl text-ink tracking-wider">NEW LOCATION</h2>

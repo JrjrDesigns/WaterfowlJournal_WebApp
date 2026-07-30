@@ -34,7 +34,7 @@ export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) 
   const navigate = useNavigate()
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm">
       <div className="bg-surface border border-hairline rounded-2xl w-full max-w-sm p-7 shadow-xl">
         <div className="mb-6">
           <h2 className="font-display text-3xl text-ink tracking-wider leading-none mb-2">{titles[reason]}</h2>

@@ -6,6 +6,7 @@ import L from 'leaflet'
 import { fetchHunt, deleteHunt } from '../../utils/api'
 import { useAuth } from '../../contexts/AuthContext'
 import PaywallModal from '../../components/PaywallModal'
+import SpeciesIcon from '../../components/SpeciesIcon'
 import { SATELLITE_TILE_URL, SATELLITE_ATTRIBUTION, SATELLITE_MAX_ZOOM } from '../../utils/mapTiles'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
@@ -344,7 +345,7 @@ export default function HuntDetail() {
       {/* Lightbox */}
       {lightboxPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-ink/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[2000] bg-ink/90 flex items-center justify-center p-4"
           onClick={() => setLightboxPhoto(null)}
         >
           <img src={lightboxPhoto} alt="" className="max-w-full max-h-full object-contain rounded-lg" />
@@ -353,7 +354,7 @@ export default function HuntDetail() {
 
       {/* Delete confirm */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50">
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-ink/50">
           <div className="bg-surface border border-hairline rounded-2xl p-6 w-full max-w-sm shadow-lg">
             <h3 className="text-lg font-semibold text-ink mb-2">Delete this hunt?</h3>
             <p className="text-muted text-sm mb-6">This cannot be undone.</p>
@@ -528,7 +529,10 @@ export default function HuntDetail() {
             <div className="divide-y divide-hairline">
               {hunt.harvests.map((h, i) => (
                 <div key={i} className="flex items-center justify-between py-2.5">
-                  <span className="text-sm font-semibold text-ink">{h.species_name}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <SpeciesIcon species={h.species_name} size={28} />
+                    <span className="text-sm font-semibold text-ink truncate">{h.species_name}</span>
+                  </div>
                   <div className="flex items-center gap-5">
                     {h.seen > 0 && (
                       <div className="text-right">

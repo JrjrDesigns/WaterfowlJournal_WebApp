@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { fetchLocations, fetchBlindsForLocation, fetchSpecies, createHunt } from '../../utils/api'
 import { compressImage } from '../../utils/compressImage'
 import { SATELLITE_TILE_URL, SATELLITE_ATTRIBUTION, SATELLITE_MAX_ZOOM } from '../../utils/mapTiles'
+import HarvestEntryCard, { Harvest } from '../../components/HarvestEntryCard'
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -37,15 +38,6 @@ interface BlindData {
   location_id: string
   lat: number
   lng: number
-}
-
-interface Harvest {
-  species: string
-  harvested: number
-  missed: number
-  shot_not_recovered: number
-  seen: number
-  mine: number
 }
 
 export default function HuntCreate() {
@@ -107,10 +99,10 @@ export default function HuntCreate() {
   }
 
   const addHarvest = () => {
-    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0, mine: 0 }])
+    setHarvests(prev => [...prev, { species: allSpecies[0] || '', harvested: 0, missed: 0, shot_not_recovered: 0, seen: 0, mine: 0, confirmed: false }])
   }
 
-  const updateHarvest = (i: number, field: keyof Harvest, value: string | number) => {
+  const updateHarvest = (i: number, field: keyof Harvest, value: string | number | boolean) => {
     setHarvests(prev => {
       const next = [...prev]
       next[i] = { ...next[i], [field]: value }
@@ -361,45 +353,15 @@ export default function HuntCreate() {
           ) : (
             <div className="p-4 space-y-3">
               {harvests.map((harvest, i) => (
-                <div key={i} className="bg-surface border border-hairline rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-muted font-semibold uppercase tracking-wider">Entry {i + 1}</span>
-                    <button type="button" onClick={() => setHarvests(prev => prev.filter((_, j) => j !== i))} className="text-muted hover:text-red-500 transition-colors">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                  <select value={harvest.species} onChange={e => updateHarvest(i, 'species', e.target.value)} className="mb-3">
-                    {allSpecies.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(['seen', 'harvested', 'missed', 'shot_not_recovered'] as const).map(field => (
-                      <div key={field}>
-                        <p className="text-xs text-muted mb-1 font-semibold capitalize">
-                          {field === 'shot_not_recovered' ? 'Lost' : field}
-                        </p>
-                        <input
-                          type="number" min="0"
-                          value={harvest[field]}
-                          onChange={e => updateHarvest(i, field, parseInt(e.target.value) || 0)}
-                          className="text-center"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {party.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-hairline">
-                      <p className="text-xs text-muted mb-1 font-semibold">Mine (of the {harvest.harvested} harvested)</p>
-                      <input
-                        type="number" min="0" max={harvest.harvested}
-                        value={harvest.mine}
-                        onChange={e => updateHarvest(i, 'mine', parseInt(e.target.value) || 0)}
-                        className="text-center w-24"
-                      />
-                    </div>
-                  )}
-                </div>
+                <HarvestEntryCard
+                  key={i}
+                  harvest={harvest}
+                  index={i}
+                  allSpecies={allSpecies}
+                  hasParty={party.length > 0}
+                  onUpdate={(field, value) => updateHarvest(i, field, value)}
+                  onRemove={() => setHarvests(prev => prev.filter((_, j) => j !== i))}
+                />
               ))}
             </div>
           )}
