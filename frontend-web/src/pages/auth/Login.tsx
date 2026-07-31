@@ -94,13 +94,6 @@ export default function Login() {
             </Link>
           </p>
         </div>
-
-        {/* Test credentials — remove before production */}
-        <div className="mt-5 p-4 bg-surface border border-hairline rounded-xl">
-          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-2">Test Account</p>
-          <p className="text-xs text-muted font-mono">hunter@test.com</p>
-          <p className="text-xs text-muted font-mono">test123</p>
-        </div>
       </div>
     </div>
   )
