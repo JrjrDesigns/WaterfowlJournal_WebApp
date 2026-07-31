@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { fetchStatistics, fetchHuntYears } from '../utils/api'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
+import SpeciesIcon from '../components/SpeciesIcon'
 
 interface Bucket { name: string; hunts: number; harvested: number }
 interface TopEntry { name: string; hunts: number; harvested: number }
@@ -152,6 +153,7 @@ export default function Stats() {
   const [loading, setLoading] = useState(true)
   const [showPaywall, setShowPaywall] = useState(false)
   const { isPro } = useAuth()
+  const latestRequestYear = useRef<number | null>(null)
 
   useEffect(() => { loadYears() }, [])
   useEffect(() => { loadStats() }, [selectedYear])
@@ -166,12 +168,19 @@ export default function Stats() {
   }
 
   const loadStats = async () => {
+    const requestYear = selectedYear
+    latestRequestYear.current = requestYear
     setLoading(true)
     try {
-      const data = await fetchStatistics(selectedYear || undefined)
+      const data = await fetchStatistics(requestYear || undefined)
+      // Ignore this response if a newer year has been selected in the meantime —
+      // otherwise a slow request for a stale year can overwrite fresher data.
+      if (latestRequestYear.current !== requestYear) return
       setStats(data)
-    } catch { /* ignore */ } finally {
-      setLoading(false)
+    } catch {
+      /* ignore */
+    } finally {
+      if (latestRequestYear.current === requestYear) setLoading(false)
     }
   }
 
@@ -215,6 +224,11 @@ export default function Stats() {
     .sort(([, a], [, b]) => b.harvested - a.harvested)
     .slice(0, 6)
     .map(([name, data]) => ({ name, ...data }))
+
+  const speciesSummary = Object.entries(stats.by_species)
+    .filter(([, data]) => data.harvested > 0)
+    .sort(([, a], [, b]) => b.harvested - a.harvested)
+    .map(([name, data]) => ({ name, harvested: data.harvested }))
 
   const monthData = stats.by_month.map(m => ({
     ...m,
@@ -327,6 +341,47 @@ export default function Stats() {
         </button>
       ) : (
         <>
+          {/* Species Breakdown */}
+          {speciesSummary.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Species Breakdown</p>
+
+              {/* Mobile: full-width list, no room for cards */}
+              <div className="sm:hidden bg-surface border border-hairline rounded-xl overflow-hidden divide-y divide-hairline">
+                {speciesSummary.map(s => (
+                  <div key={s.name} className="flex items-stretch">
+                    <SpeciesIcon
+                      species={s.name}
+                      variant="thumbnail"
+                      className="w-24 h-24 flex-shrink-0 border-r border-hairline"
+                    />
+                    <div className="flex-1 min-w-0 px-4 py-3.5 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-ink break-words leading-tight">{s.name}</p>
+                      <p className="font-display text-2xl text-green leading-none flex-shrink-0 pl-3">{s.harvested}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tablet/Desktop: card grid — always 2 across, text stacks instead of truncating */}
+              <div className="hidden sm:grid sm:grid-cols-2 gap-3">
+                {speciesSummary.map(s => (
+                  <div key={s.name} className="flex items-stretch bg-surface border border-hairline rounded-xl overflow-hidden">
+                    <SpeciesIcon
+                      species={s.name}
+                      variant="thumbnail"
+                      className="w-24 h-24 flex-shrink-0 border-r border-hairline"
+                    />
+                    <div className="flex-1 min-w-0 px-3 py-3.5 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-ink break-words leading-tight">{s.name}</p>
+                      <p className="font-display text-2xl text-green leading-none flex-shrink-0 pl-2">{s.harvested}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Highlights */}
           <div className="bg-surface border border-hairline rounded-xl mb-4 overflow-hidden">
             <p className="text-xs font-semibold text-muted uppercase tracking-widest px-5 pt-4 pb-1">Highlights</p>

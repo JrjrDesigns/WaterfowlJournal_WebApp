@@ -8,9 +8,40 @@ function slugify(name: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
-export default function SpeciesIcon({ species, size = 40, className = '' }: { species: string; size?: number; className?: string }) {
+const PlaceholderGlyph = ({ size }: { size: string | number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="text-muted">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c-3 0-5 2-5 5 0 4 3 7 5 9 2-2 5-5 5-9 0-3-2-5-5-5z" />
+  </svg>
+)
+
+interface Props {
+  species: string
+  size?: number
+  className?: string
+  /** 'avatar' = small circular cropped icon (default). 'thumbnail' = full-bleed rectangle on white, uncropped. */
+  variant?: 'avatar' | 'thumbnail'
+}
+
+export default function SpeciesIcon({ species, size = 40, className = '', variant = 'avatar' }: Props) {
   const [failed, setFailed] = useState(false)
   useEffect(() => { setFailed(false) }, [species])
+
+  if (variant === 'thumbnail') {
+    return (
+      <div className={`bg-white flex items-center justify-center overflow-hidden ${className}`}>
+        {species && !failed ? (
+          <img
+            src={`/species-icons/${slugify(species)}.png`}
+            alt={species}
+            className="w-full h-full object-contain"
+            onError={() => setFailed(true)}
+          />
+        ) : (
+          <PlaceholderGlyph size="40%" />
+        )}
+      </div>
+    )
+  }
 
   if (!species || failed) {
     return (
@@ -18,9 +49,7 @@ export default function SpeciesIcon({ species, size = 40, className = '' }: { sp
         className={`flex items-center justify-center bg-bg border border-hairline rounded-full flex-shrink-0 ${className}`}
         style={{ width: size, height: size }}
       >
-        <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="text-muted">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c-3 0-5 2-5 5 0 4 3 7 5 9 2-2 5-5 5-9 0-3-2-5-5-5z" />
-        </svg>
+        <PlaceholderGlyph size={size * 0.55} />
       </div>
     )
   }
