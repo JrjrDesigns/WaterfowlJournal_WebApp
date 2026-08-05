@@ -163,7 +163,13 @@ function WindStrips({ morning, evening, showMorning, showEvening }: {
         </div>
       )}
 
-      {/* Grid row */}
+      {/* Grid row.
+          `e.direction` is the meteorological "from" bearing straight off Open-Meteo
+          (315° = wind FROM the NW), and `e.cardinal` is that same origin as text.
+          So the label reads the origin ("NW") while the arrow is rotated 180° past
+          it to point where the wind is actually flowing TO (SE). Keep these in
+          sync with WindArrow in Forecast.tsx — dropping the +180 makes the arrow
+          point back at the source and contradicts its own label. */}
       <div className="flex items-stretch">
         {mEntries.length > 0 && (
           <div style={{ flex: mEntries.length, display: 'grid', gridTemplateColumns: `repeat(${mEntries.length}, 1fr)` }}>
@@ -172,7 +178,7 @@ function WindStrips({ morning, evening, showMorning, showEvening }: {
               return (
                 <div key={i} className="flex flex-col items-center gap-0.5 py-1">
                   <span className="text-xs font-mono text-muted leading-none">{fmtHour(e.time)}</span>
-                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)`, flexShrink: 0 }}>
+                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction + 180}deg)`, flexShrink: 0 }}>
                     <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
                   </svg>
                   <span className="text-xs font-bold leading-none" style={{ color }}>{e.cardinal}</span>
@@ -192,7 +198,7 @@ function WindStrips({ morning, evening, showMorning, showEvening }: {
               return (
                 <div key={i} className="flex flex-col items-center gap-0.5 py-1">
                   <span className="text-xs font-mono text-muted leading-none">{fmtHour(e.time)}</span>
-                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction}deg)`, flexShrink: 0 }}>
+                  <svg width={20} height={20} viewBox="0 0 22 22" style={{ transform: `rotate(${e.direction + 180}deg)`, flexShrink: 0 }}>
                     <path d="M11 2 L15 16 L11 13 L7 16 Z" fill={color} />
                   </svg>
                   <span className="text-xs font-bold leading-none" style={{ color }}>{e.cardinal}</span>
