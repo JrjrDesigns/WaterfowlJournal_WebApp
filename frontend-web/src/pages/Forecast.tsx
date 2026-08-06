@@ -246,8 +246,14 @@ function BlindWindPill({ match }: { match: BlindWindMatch }) {
   )
 }
 
+// 70+ is the rare "clear the calendar" score — migration, weather and history
+// all lining up. Below it, badges are a tinted outline; at it, the badge flips
+// to a solid fill so a great day reads as an event instead of just a greener
+// version of an average one.
+const SCORE_STRONG = 70
+
 function scoreColor(score: number): string {
-  if (score >= 70) return '#1B5E45'
+  if (score >= SCORE_STRONG) return '#1B5E45'
   if (score >= 45) return '#D97706'
   return '#797B7E'
 }
@@ -262,11 +268,16 @@ function ColHeader({ children }: { children: React.ReactNode }) {
 
 function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' | 'lg' }) {
   const color = scoreColor(score)
+  const strong = score >= SCORE_STRONG
   const dims = size === 'lg' ? 'w-14 h-14 text-xl' : size === 'sm' ? 'w-9 h-9 text-xs' : 'w-11 h-11 text-sm'
   return (
     <div
       className={`${dims} rounded-full flex items-center justify-center font-display flex-shrink-0`}
-      style={{ color, backgroundColor: `${color}18`, border: `1.5px solid ${color}` }}
+      style={strong
+        // Solid fill + white numeral, matching the app's existing emphasis
+        // pattern (bg-green/bg-ink + text-white). box-shadow halo is layout-safe.
+        ? { color: '#FFFFFF', backgroundColor: color, border: `1.5px solid ${color}`, boxShadow: `0 0 0 3px ${color}24` }
+        : { color, backgroundColor: `${color}18`, border: `1.5px solid ${color}` }}
     >
       {score}
     </div>
