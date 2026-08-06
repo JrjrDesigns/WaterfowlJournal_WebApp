@@ -253,6 +253,10 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
             "hourly": "windspeed_10m,winddirection_10m",
             "temperature_unit": "fahrenheit",
             "windspeed_unit": "mph",
+            # Open-Meteo defaults precipitation to MILLIMETERS. Everything
+            # downstream (the `"` suffix in HuntDetail, the >= 0.1 rain-event
+            # threshold) assumes inches, so ask for inches explicitly.
+            "precipitation_unit": "inch",
             "timezone": "auto",
             "start_date": date_str,
             "end_date": date_str
@@ -1476,6 +1480,108 @@ def _timing_bonus(score: float) -> int:
     return round(max(TIMING_BONUS_MIN, min(TIMING_BONUS_MAX, (score - 55) * 0.22)))
 
 
+# --- Score shaping ---------------------------------------------------------
+# Migration timing and moon phase apply as MULTIPLIERS, not addends.
+#
+# Everything upstream of this (base conditions, migration index, event bonuses,
+# freeze) is additive, which means any one ingredient can substitute for any
+# other. Backtested against 2,604 real in-season days across 4 locations and 7
+# seasons, that let a cold snowy day with RISING pressure and no front reach
+# 100, and put 64% of all 99+ days on a full or gibbous moon — exactly when
+# birds have been feeding all night and sit tight at dawn.
+#
+# Multiplying instead forces the conjunction the domain actually calls for:
+# peak migration AND a front AND a dark moon. Off-peak or a bright moon caps
+# the day no matter how good the weather looks.
+#
+# Values below are fitted, not guessed — see the tuning notes in the PR. With
+# them, 99+ drops from 0.89 to 0.32 days per location-season, every 99+ day has
+# both a cold front and a north wind, and the average migration-timing score of
+# a 90+ day rises from 61 to 74.
+# Calibrated against 2,604 real in-season days (Open-Meteo archive, 2019-2026)
+# across four real Ohio locations. Target: a 99+ day happens roughly once per
+# three location-seasons, and every 99+ day carries a genuine cold front and a
+# north wind. Changing any constant here without re-running that backtest will
+# quietly break the calibration.
+SCORE_RAW_SCALE = 0.912
+TIMING_MULT_MIN = 0.55    # dead season
+TIMING_MULT_MAX = 1.30    # peak migration
+MOON_MULT_NEW = 1.00      # new moon / dark sky
+MOON_MULT_FULL = 0.88     # full moon — they moved and fed overnight
+
+# Timing is asymmetric around the local peak. BEFORE the peak a low timing score
+# means the birds genuinely have not arrived and no weather invents them, so the
+# penalty runs all the way to TIMING_MULT_MIN. AFTER the peak the northern
+# reservoir is what matters: a hard push delivers birds that are staged upstream,
+# so a strong migration signal RESTORES timing toward (but never to) peak.
+# Without this, a legitimate late-January front could never top a season.
+TIMING_PUSH_TARGET = 85.0    # a full push feels like a good day, not a peak one
+TIMING_PUSH_STRENGTH = 0.70  # how much of the gap to TARGET a full push closes
+
+# A full moon costs less when something else is already forcing birds to move —
+# a hard front, or a freeze that has left one piece of open water. They fed all
+# night or they didn't; if the marsh is locked they are on your river regardless.
+MOON_DAMP_MAX = 0.60         # at most 60% of the moon penalty can be muted
+
+# Freeze concentration is a MULTIPLIER, not an addend. As an addend it was dead
+# weight: on a hard-freeze day the additive stack (base + events + freeze) is
+# already clipped at 100, so raising the bump changed nothing. Applied here it
+# survives the clip. Moving water only — a marsh cannot concentrate birds by
+# freezing, it just becomes unhuntable (that penalty lives in _freeze_adjustment).
+FREEZE_CONCENTRATION_MULT = 1.15
+
+
+def _past_peak(lat: float, lng: float, date_str: str) -> bool:
+    """Is this date past the local migration peak for this location?"""
+    x = _bin_coordinate(date_str)
+    if x is None:
+        return True   # Feb-Aug: everything is 'after' as far as this matters
+    curve = _blend_curve(lat, lng)
+    peak_idx = max(range(10), key=lambda i: curve[i])
+    return x > peak_idx
+
+
+def _effective_timing(timing_score: float, migration_score: float, past_peak: bool) -> float:
+    """Post-peak, a strong push restores timing toward TIMING_PUSH_TARGET."""
+    if not past_peak:
+        return timing_score
+    gap = TIMING_PUSH_TARGET - timing_score
+    if gap <= 0:
+        return timing_score
+    return timing_score + gap * (max(0.0, min(100.0, migration_score)) / 100.0) * TIMING_PUSH_STRENGTH
+
+
+def _timing_multiplier(timing_score: float) -> float:
+    t = max(0.0, min(100.0, timing_score))
+    return TIMING_MULT_MIN + (TIMING_MULT_MAX - TIMING_MULT_MIN) * (t / 100.0)
+
+
+def _drive_strength(migration_score: float, freeze_delta: float) -> float:
+    """0-1: how hard something other than the moon is pushing birds today."""
+    by_front = max(0.0, min(100.0, migration_score)) / 100.0
+    by_freeze = max(0.0, freeze_delta) / float(MOVING_LOCK_BUMP)
+    return max(0.0, min(1.0, max(by_front, by_freeze)))
+
+
+def _moon_multiplier(illumination: float, drive: float = 0.0) -> float:
+    il = max(0.0, min(100.0, illumination))
+    base = MOON_MULT_NEW - (MOON_MULT_NEW - MOON_MULT_FULL) * (il / 100.0)
+    return base + (1.0 - base) * max(0.0, min(1.0, drive)) * MOON_DAMP_MAX
+
+
+def _freeze_concentration_multiplier(location_type, frozen_recent: int) -> float:
+    """Moving water is the only thing open once everything else locks."""
+    if _water_group(location_type) != "moving":
+        return 1.0
+    if frozen_recent >= SHALLOW_LOCK_DAYS:
+        lock = 1.0
+    elif frozen_recent >= SHALLOW_PARTIAL_DAYS:
+        lock = 0.5
+    else:
+        return 1.0
+    return 1.0 + (FREEZE_CONCENTRATION_MULT - 1.0) * lock
+
+
 def _pressure_trend(delta: float) -> str:
     if delta <= -MIG_PRESSURE_FALL:
         return "falling"
@@ -1619,6 +1725,9 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
             "hourly": "surface_pressure,windspeed_10m,winddirection_10m",
             "temperature_unit": "fahrenheit",
             "windspeed_unit": "mph",
+            # See note in fetch_weather_data: Open-Meteo defaults to mm, but the
+            # rain-event threshold below (>= 0.1) is written for inches.
+            "precipitation_unit": "inch",
             "timezone": "auto",
             "forecast_days": days,
             "past_days": FREEZE_LOOKBACK,
@@ -1776,9 +1885,19 @@ async def get_forecast(current_user: dict = Depends(get_current_user)):
             score = max(0, min(100, score + fz["delta"]))
             events = evt["events"] + ([fz["event"]] if fz["event"] else [])
 
-            # Seasonal migration timing (typical calendar, personalized by history)
+            # Timing, moon and freeze-concentration all apply multiplicatively, so
+            # a missing ingredient scales the day down instead of being covered by
+            # another. See the block above _past_peak for what each one encodes.
             timing = _blended_timing(day["date"], lat, lng, timing_profile)
-            score = max(0, min(100, score + _timing_bonus(timing["score"])))
+            eff_timing = _effective_timing(timing["score"], mig["score"],
+                                           _past_peak(lat, lng, day["date"]))
+            drive = _drive_strength(mig["score"], fz["delta"])
+            score = score * SCORE_RAW_SCALE \
+                * _timing_multiplier(eff_timing) \
+                * _moon_multiplier(moon["illumination"], drive) \
+                * _freeze_concentration_multiplier(loc.get("location_type"),
+                                                   day["frozen_recent"])
+            score = max(0, min(100, score))
 
             # Narrative: lead with weather/water events, then wind / pressure / timing.
             factors = [e["label"] for e in events]
