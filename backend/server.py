@@ -16,6 +16,7 @@ import requests
 import time
 import copy
 import calendar
+import json
 from bson import ObjectId
 
 ROOT_DIR = Path(__file__).parent
@@ -2017,12 +2018,30 @@ STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 
-def resolve_subscription_state(sub: dict) -> dict:
+def stripe_field(obj, key, default=None):
+    """Read one field from a Stripe object or a plain dict.
+
+    stripe-python's StripeObject keeps its fields in an internal `_data` mapping
+    and routes attribute access through `__getattr__`. That means `obj.get(...)`
+    is interpreted as "give me the FIELD named 'get'", which doesn't exist, so it
+    raises AttributeError instead of behaving like dict.get. Subscript access
+    works on both StripeObject and dict, so go through that.
+    """
+    try:
+        value = obj[key]
+    except (KeyError, TypeError, AttributeError, IndexError):
+        return default
+    return default if value is None else value
+
+
+def resolve_subscription_state(sub) -> dict:
     """Map a Stripe subscription object onto the fields we store on the user.
+
+    Accepts either a StripeObject or a plain dict.
 
     Stripe has two distinct notions of "paused" and they behave differently:
 
-      1. Pause payment collection (what the customer portal offers). The
+      1. Pause payment collection (what we use for the in-app pause). The
          subscription's `status` stays "active" and the pause lives in a
          separate `pause_collection` object. Reading `status` alone would leave
          a paused customer on Pro forever while Stripe bills them nothing.
@@ -2031,14 +2050,14 @@ def resolve_subscription_state(sub: dict) -> dict:
 
     Both drop the user to free; access comes back when billing resumes.
     """
-    pause_collection = sub.get("pause_collection") or {}
-    status = sub.get("status")
+    pause_collection = stripe_field(sub, "pause_collection", {})
+    status = stripe_field(sub, "status")
 
     if pause_collection or status == "paused":
         return {
             "subscription_status": "free",
             "subscription_paused": True,
-            "subscription_resumes_at": pause_collection.get("resumes_at"),
+            "subscription_resumes_at": stripe_field(pause_collection, "resumes_at"),
         }
 
     return {
@@ -2139,9 +2158,9 @@ def find_stripe_subscription_id(stripe_lib, current_user: dict) -> Optional[str]
     subs = stripe_lib.Subscription.list(customer=customer_id, status="all", limit=20)
     candidates = [
         s for s in subs.auto_paging_iter()
-        if s.get("status") in ("active", "trialing", "past_due", "paused")
+        if stripe_field(s, "status") in ("active", "trialing", "past_due", "paused")
     ]
-    return candidates[0]["id"] if candidates else None
+    return stripe_field(candidates[0], "id") if candidates else None
 
 
 @api_router.post("/subscription/pause")
@@ -2252,6 +2271,45 @@ async def create_customer_portal(current_user: dict = Depends(get_current_user))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+async def apply_stripe_subscription_event(event: dict):
+    """Apply one Stripe subscription event to the matching user record."""
+    event_type = event["type"]
+    sub = event["data"]["object"]
+    customer_id = stripe_field(sub, "customer")
+
+    if not customer_id:
+        logger.error(f"Stripe webhook {event_type}: event carried no customer id")
+        return
+
+    user = await db.users.find_one({"stripe_customer_id": customer_id})
+    if not user:
+        # Previously this returned silently, so a mismatched customer id looked
+        # like a successful delivery while the account stayed on free.
+        logger.error(
+            f"Stripe webhook {event_type}: NO USER matches "
+            f"stripe_customer_id={customer_id} -- account not updated"
+        )
+        return
+
+    if event_type == "customer.subscription.deleted":
+        updates = {
+            "subscription_status": "free",
+            "subscription_paused": False,
+            "subscription_resumes_at": None,
+            "stripe_subscription_id": None,
+        }
+    else:
+        updates = resolve_subscription_state(sub)
+        # Keep the subscription id so we can resume without a lookup.
+        updates["stripe_subscription_id"] = stripe_field(sub, "id")
+
+    await db.users.update_one({"_id": user["_id"]}, {"$set": updates})
+    logger.info(
+        f"Stripe webhook {event_type}: user {user['_id']} -> "
+        f"{updates['subscription_status']} (paused={updates.get('subscription_paused')})"
+    )
+
+
 @app.post("/api/stripe/webhook")
 async def stripe_webhook(request: Request):
     import stripe as stripe_lib
@@ -2260,44 +2318,38 @@ async def stripe_webhook(request: Request):
     sig_header = request.headers.get("stripe-signature", "")
 
     try:
-        event = stripe_lib.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+        stripe_lib.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
     except Exception as e:
+        logger.error(f"Stripe webhook signature verification failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-    if event["type"] in (
+    # Signature is verified above; from here work with the raw JSON as plain
+    # dicts. StripeObject's attribute handling differs between library versions
+    # and there is nothing in the event we need the SDK wrapper for.
+    event = json.loads(payload)
+
+    event_type = event.get("type")
+    event_id = event.get("id")
+    logger.info(f"Stripe webhook received: {event_type} ({event_id})")
+
+    handled = (
         "customer.subscription.created",
         "customer.subscription.updated",
         "customer.subscription.resumed",
         "customer.subscription.paused",
-    ):
-        sub = event["data"]["object"]
-        customer_id = sub["customer"]
-        user = await db.users.find_one({"stripe_customer_id": customer_id})
-        if user:
-            updates = resolve_subscription_state(sub)
-            # Keep the subscription id so we can resume without a lookup.
-            updates["stripe_subscription_id"] = sub.get("id")
-            await db.users.update_one({"_id": user["_id"]}, {"$set": updates})
-            logger.info(
-                f"User {user['_id']} subscription -> {updates['subscription_status']}"
-                f" (paused={updates['subscription_paused']})"
-            )
+        "customer.subscription.deleted",
+    )
 
-    elif event["type"] == "customer.subscription.deleted":
-        sub = event["data"]["object"]
-        customer_id = sub["customer"]
-        user = await db.users.find_one({"stripe_customer_id": customer_id})
-        if user:
-            await db.users.update_one(
-                {"_id": user["_id"]},
-                {"$set": {
-                    "subscription_status": "free",
-                    "subscription_paused": False,
-                    "subscription_resumes_at": None,
-                    "stripe_subscription_id": None,
-                }},
+    if event_type in handled:
+        try:
+            await apply_stripe_subscription_event(event)
+        except Exception:
+            # Log the full traceback, then 500 so Stripe retries. Without this
+            # the failure was invisible from both sides.
+            logger.exception(
+                f"Stripe webhook {event_type} ({event_id}) failed while updating the user"
             )
-            logger.info(f"User {user['_id']} subscription cancelled")
+            raise HTTPException(status_code=500, detail="webhook handler error")
 
     return {"received": True}
 
