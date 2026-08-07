@@ -268,6 +268,32 @@ function scoreBand(score: number) {
   return SCORE_BANDS.find(b => score >= b.min) ?? SCORE_BANDS[SCORE_BANDS.length - 1]
 }
 
+// Reads straight off SCORE_BANDS so the key can never drift from the badges.
+const BAND_LABELS = ['drop everything', 'head for the blind', 'could go either way', 'stay home'] as const
+
+function ScoreKey() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2">
+      {SCORE_BANDS.map((band, i) => (
+        <div key={band.min} className="flex items-center gap-2">
+          <span
+            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+            style={band.solid
+              ? { backgroundColor: band.color }
+              : { backgroundColor: `${band.color}30`, border: `1.5px solid ${band.color}` }}
+          />
+          <span className="text-xs text-muted leading-tight">
+            <span className="font-semibold text-ink">
+              {band.min === 0 ? 'Under 50' : `${band.min}+`}
+            </span>{' '}
+            {BAND_LABELS[i]}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function ColHeader({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[9px] font-semibold uppercase text-muted whitespace-nowrap" style={{ letterSpacing: '0.02em' }}>
@@ -434,6 +460,18 @@ export default function Forecast() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Header />
+
+      {/* What the score is, and how to read it. Deliberately qualitative — the
+          blend weights are due a rework, so no percentages are published here. */}
+      <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
+        <p className="text-sm text-ink leading-relaxed mb-4">
+          Every day, each of your locations gets a Hunt Score out of 100, built from
+          {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
+          cold-front pressure, freeze timing, and weather conditions.
+        </p>
+        <ScoreKey />
+      </div>
 
       {/* Best bets */}
       {data.best_bets.length > 0 && (
@@ -642,8 +680,7 @@ export default function Forecast() {
       )}
 
       <p className="text-xs text-muted text-center px-6 mt-2">
-        Hunt Score blends {data.uses_history ? 'your hunt history, ' : ''}seasonal migration timing,
-        cold-front pressure, and conditions. Forecasts beyond ~5 days are less reliable.
+        Forecasts beyond ~5 days are less reliable.
       </p>
     </div>
   )

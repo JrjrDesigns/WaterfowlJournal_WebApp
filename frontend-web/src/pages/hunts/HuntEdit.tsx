@@ -264,7 +264,10 @@ export default function HuntEdit() {
 
         {/* Hunting Party */}
         <div>
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunting With</label>
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">Hunting With</label>
+          <p className="text-xs text-muted mb-2">
+            Add your hunting partners here, so you can identify who shot what
+          </p>
           <div className="flex gap-2">
             <input
               type="text"
@@ -294,9 +297,6 @@ export default function HuntEdit() {
                   </button>
                 </span>
               ))}
-              <p className="w-full text-xs text-muted mt-0.5">
-                Hunting with others increases your bag limit. Add each species' total below, plus how many were yours if you know.
-              </p>
             </div>
           )}
         </div>

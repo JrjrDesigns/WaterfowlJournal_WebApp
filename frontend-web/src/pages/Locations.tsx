@@ -180,7 +180,7 @@ export default function Locations() {
     e.preventDefault()
     setLocError('')
     if (!locName) { setLocError('Name is required'); return }
-    if (!locCenter) { setLocError('Click the map to set the center point'); return }
+    if (!locCenter) { setLocError('Tap the map to set the center point'); return }
     setCreatingLoc(true)
     try {
       const newLoc = await createLocation({ name: locName, location_type: locType, center: locCenter })
@@ -460,6 +460,11 @@ export default function Locations() {
               </button>
             </div>
             <form onSubmit={handleCreateLocation} className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+              <p className="text-sm text-muted leading-relaxed">
+                A location is the whole area you hunt — a marsh, a field, a stretch of river.
+                Once it's saved, you'll drop a pin for each blind inside it.
+              </p>
+
               {locError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{locError}</div>}
 
               <div>
@@ -480,9 +485,12 @@ export default function Locations() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                  Center Point — search or tap map to set
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                  Center of the Area
                 </label>
+                <p className="text-xs text-muted mb-2">
+                  This just centers the map here — you'll mark the actual blinds next.
+                </p>
 
                 {/* Address search — plain div, not a form, to avoid nested form conflict */}
                 <div className="flex gap-2 mb-2">
