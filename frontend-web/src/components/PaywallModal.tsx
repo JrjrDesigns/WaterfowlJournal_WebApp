@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Props {
   onClose: () => void
@@ -32,13 +33,20 @@ const descriptions: Record<string, string> = {
 
 export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) {
   const navigate = useNavigate()
+  const { isPaused } = useAuth()
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm">
       <div className="bg-surface border border-hairline rounded-2xl w-full max-w-sm p-7 shadow-xl">
         <div className="mb-6">
-          <h2 className="font-display text-3xl text-ink tracking-wider leading-none mb-2">{titles[reason]}</h2>
-          <p className="text-muted text-sm leading-relaxed">{descriptions[reason]}</p>
+          <h2 className="font-display text-3xl text-ink tracking-wider leading-none mb-2">
+            {isPaused ? 'Your Pro is paused' : titles[reason]}
+          </h2>
+          <p className="text-muted text-sm leading-relaxed">
+            {isPaused
+              ? 'Resume your subscription to get this back — your hunt history is untouched.'
+              : descriptions[reason]}
+          </p>
         </div>
 
         <div className="bg-bg rounded-xl p-4 mb-6 border border-hairline">
@@ -59,7 +67,7 @@ export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) 
           onClick={() => { onClose(); navigate('/profile?upgrade=1') }}
           className="w-full bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm mb-3"
         >
-          Go Pro — from $3.33/mo
+          {isPaused ? 'Resume Pro' : 'Go Pro — from $3.33/mo'}
         </button>
         <button
           onClick={onClose}

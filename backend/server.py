@@ -15,6 +15,7 @@ from jose import JWTError, jwt
 import requests
 import time
 import copy
+import calendar
 from bson import ObjectId
 
 ROOT_DIR = Path(__file__).parent
@@ -64,6 +65,8 @@ class User(BaseModel):
     email: str
     name: str
     subscription_status: str = "free"
+    subscription_paused: bool = False
+    subscription_resumes_at: Optional[int] = None  # unix seconds, from Stripe
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class LocationCreate(BaseModel):
@@ -379,7 +382,9 @@ async def register(user_data: UserRegister):
             "id": user_id,
             "email": user_data.email,
             "name": user_data.name,
-            "subscription_status": "free"
+            "subscription_status": "free",
+            "subscription_paused": False,
+            "subscription_resumes_at": None
         }
     }
 
@@ -399,7 +404,9 @@ async def login(user_data: UserLogin):
             "id": user_id,
             "email": user["email"],
             "name": user["name"],
-            "subscription_status": user.get("subscription_status", "free")
+            "subscription_status": user.get("subscription_status", "free"),
+            "subscription_paused": user.get("subscription_paused", False),
+            "subscription_resumes_at": user.get("subscription_resumes_at")
         }
     }
 
@@ -410,6 +417,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "email": current_user["email"],
         "name": current_user["name"],
         "subscription_status": current_user.get("subscription_status", "free"),
+        "subscription_paused": current_user.get("subscription_paused", False),
+        "subscription_resumes_at": current_user.get("subscription_resumes_at"),
         "created_at": current_user.get("created_at", datetime.utcnow())
     }
 
@@ -2007,6 +2016,38 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
+
+def resolve_subscription_state(sub: dict) -> dict:
+    """Map a Stripe subscription object onto the fields we store on the user.
+
+    Stripe has two distinct notions of "paused" and they behave differently:
+
+      1. Pause payment collection (what the customer portal offers). The
+         subscription's `status` stays "active" and the pause lives in a
+         separate `pause_collection` object. Reading `status` alone would leave
+         a paused customer on Pro forever while Stripe bills them nothing.
+      2. `status == "paused"`, which Stripe sets when a trial ends with no
+         payment method on file.
+
+    Both drop the user to free; access comes back when billing resumes.
+    """
+    pause_collection = sub.get("pause_collection") or {}
+    status = sub.get("status")
+
+    if pause_collection or status == "paused":
+        return {
+            "subscription_status": "free",
+            "subscription_paused": True,
+            "subscription_resumes_at": pause_collection.get("resumes_at"),
+        }
+
+    return {
+        "subscription_status": "pro" if status in ("active", "trialing") else "free",
+        "subscription_paused": False,
+        "subscription_resumes_at": None,
+    }
+
+
 @api_router.get("/subscription/status")
 async def get_subscription_status(current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
@@ -2016,6 +2057,8 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
         "user_id": user_id,
         "subscription_status": status,
         "is_pro": status in ("pro", "premium"),
+        "subscription_paused": current_user.get("subscription_paused", False),
+        "subscription_resumes_at": current_user.get("subscription_resumes_at"),
         "stripe_customer_id": stripe_customer_id,
     }
 
@@ -2028,6 +2071,14 @@ async def create_checkout_session(
     stripe_lib.api_key = STRIPE_SECRET_KEY
     user_id = str(current_user["_id"])
     price_id = request_data.get("price_id", STRIPE_PRO_PRICE_ID)
+
+    # A paused subscriber still has a live subscription in Stripe. Sending them
+    # through checkout again would bill them for a second one.
+    if current_user.get("subscription_paused"):
+        raise HTTPException(
+            status_code=400,
+            detail="Your subscription is paused. Resume it instead of starting a new one.",
+        )
 
     try:
         customer_id = current_user.get("stripe_customer_id")
@@ -2054,6 +2105,136 @@ async def create_checkout_session(
         return {"url": session.url}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+PAUSE_MONTH_OPTIONS = (1, 3, 6)
+
+
+def add_months(start: datetime, months: int) -> datetime:
+    """Return `start` advanced by whole calendar months, clamping the day.
+
+    Avoids a python-dateutil dependency. Clamping matters for month-end dates:
+    Aug 31 + 6 months lands on Feb 28/29, not an invalid Feb 31.
+    """
+    month_index = start.month - 1 + months
+    year = start.year + month_index // 12
+    month = month_index % 12 + 1
+    last_day = calendar.monthrange(year, month)[1]
+    return start.replace(year=year, month=month, day=min(start.day, last_day))
+
+
+def find_stripe_subscription_id(stripe_lib, current_user: dict) -> Optional[str]:
+    """Best-effort lookup of the user's Stripe subscription id.
+
+    The webhook stores this going forward, but anyone who subscribed before that
+    shipped has no stored id, so fall back to querying Stripe by customer.
+    """
+    subscription_id = current_user.get("stripe_subscription_id")
+    if subscription_id:
+        return subscription_id
+
+    customer_id = current_user.get("stripe_customer_id")
+    if not customer_id:
+        return None
+
+    subs = stripe_lib.Subscription.list(customer=customer_id, status="all", limit=20)
+    candidates = [
+        s for s in subs.auto_paging_iter()
+        if s.get("status") in ("active", "trialing", "past_due", "paused")
+    ]
+    return candidates[0]["id"] if candidates else None
+
+
+@api_router.post("/subscription/pause")
+async def pause_subscription(
+    request_data: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Pause billing for a fixed number of months, then auto-resume.
+
+    We use pause_collection[behavior]=void so no invoice is ever collected for
+    the paused stretch, and always set resumes_at so the subscription comes back
+    on its own rather than drifting paused forever.
+    """
+    import stripe as stripe_lib
+    stripe_lib.api_key = STRIPE_SECRET_KEY
+
+    months = request_data.get("months", 3)
+    if months not in PAUSE_MONTH_OPTIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Pause length must be one of {PAUSE_MONTH_OPTIONS} months",
+        )
+
+    if current_user.get("subscription_paused"):
+        raise HTTPException(status_code=400, detail="Your subscription is already paused")
+
+    if current_user.get("subscription_status") not in ("pro", "premium"):
+        raise HTTPException(status_code=400, detail="No active subscription to pause")
+
+    resumes_at = int(add_months(datetime.utcnow(), months).timestamp())
+
+    try:
+        subscription_id = find_stripe_subscription_id(stripe_lib, current_user)
+        if not subscription_id:
+            raise HTTPException(status_code=400, detail="No active subscription found")
+
+        sub = stripe_lib.Subscription.modify(
+            subscription_id,
+            pause_collection={"behavior": "void", "resumes_at": resumes_at},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Apply locally rather than waiting on the webhook, so the UI is correct the
+    # instant the request returns. The webhook then confirms the same state.
+    updates = resolve_subscription_state(sub)
+    updates["stripe_subscription_id"] = subscription_id
+    await db.users.update_one({"_id": current_user["_id"]}, {"$set": updates})
+    logger.info(f"User {current_user['_id']} paused {subscription_id} for {months}mo")
+
+    return {
+        "subscription_status": updates["subscription_status"],
+        "subscription_paused": updates["subscription_paused"],
+        "subscription_resumes_at": updates["subscription_resumes_at"],
+    }
+
+
+@api_router.post("/subscription/resume")
+async def resume_subscription(current_user: dict = Depends(get_current_user)):
+    """Lift a payment-collection pause and restore Pro immediately.
+
+    Pausing is deliberately understated in the UI; resuming is one tap, so we
+    don't make the user wait on the webhook here.
+    """
+    import stripe as stripe_lib
+    stripe_lib.api_key = STRIPE_SECRET_KEY
+
+    if not current_user.get("stripe_customer_id"):
+        raise HTTPException(status_code=400, detail="No Stripe customer found")
+
+    try:
+        subscription_id = find_stripe_subscription_id(stripe_lib, current_user)
+        if not subscription_id:
+            raise HTTPException(status_code=400, detail="No paused subscription found")
+
+        sub = stripe_lib.Subscription.modify(subscription_id, pause_collection="")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    updates = resolve_subscription_state(sub)
+    updates["stripe_subscription_id"] = subscription_id
+    await db.users.update_one({"_id": current_user["_id"]}, {"$set": updates})
+    logger.info(f"User {current_user['_id']} resumed subscription {subscription_id}")
+
+    return {
+        "subscription_status": updates["subscription_status"],
+        "subscription_paused": updates["subscription_paused"],
+    }
+
 
 @api_router.post("/subscription/customer-portal")
 async def create_customer_portal(current_user: dict = Depends(get_current_user)):
@@ -2083,28 +2264,40 @@ async def stripe_webhook(request: Request):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    if event["type"] == "customer.subscription.created":
+    if event["type"] in (
+        "customer.subscription.created",
+        "customer.subscription.updated",
+        "customer.subscription.resumed",
+        "customer.subscription.paused",
+    ):
         sub = event["data"]["object"]
         customer_id = sub["customer"]
         user = await db.users.find_one({"stripe_customer_id": customer_id})
         if user:
-            await db.users.update_one(
-                {"_id": user["_id"]},
-                {"$set": {"subscription_status": "pro"}},
+            updates = resolve_subscription_state(sub)
+            # Keep the subscription id so we can resume without a lookup.
+            updates["stripe_subscription_id"] = sub.get("id")
+            await db.users.update_one({"_id": user["_id"]}, {"$set": updates})
+            logger.info(
+                f"User {user['_id']} subscription -> {updates['subscription_status']}"
+                f" (paused={updates['subscription_paused']})"
             )
-            logger.info(f"User {user['_id']} upgraded to pro")
 
-    elif event["type"] in ("customer.subscription.deleted", "customer.subscription.updated"):
+    elif event["type"] == "customer.subscription.deleted":
         sub = event["data"]["object"]
         customer_id = sub["customer"]
-        new_status = "pro" if sub.get("status") == "active" else "free"
         user = await db.users.find_one({"stripe_customer_id": customer_id})
         if user:
             await db.users.update_one(
                 {"_id": user["_id"]},
-                {"$set": {"subscription_status": new_status}},
+                {"$set": {
+                    "subscription_status": "free",
+                    "subscription_paused": False,
+                    "subscription_resumes_at": None,
+                    "stripe_subscription_id": None,
+                }},
             )
-            logger.info(f"User {user['_id']} subscription status: {new_status}")
+            logger.info(f"User {user['_id']} subscription cancelled")
 
     return {"received": True}
 

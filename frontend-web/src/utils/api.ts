@@ -99,6 +99,15 @@ export const createCheckoutSession = (priceId?: string) =>
 export const createCustomerPortalSession = () =>
   apiRequest('/api/subscription/customer-portal', { method: 'POST' })
 
+export const pauseSubscription = (months: number) =>
+  apiRequest('/api/subscription/pause', {
+    method: 'POST',
+    body: JSON.stringify({ months }),
+  })
+
+export const resumeSubscription = () =>
+  apiRequest('/api/subscription/resume', { method: 'POST' })
+
 export const exportHuntsCSV = () => {
   const token = localStorage.getItem('token')
   const url = `${API_URL}/api/hunts/export/csv`

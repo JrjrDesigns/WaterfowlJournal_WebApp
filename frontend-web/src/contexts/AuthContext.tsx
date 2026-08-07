@@ -5,6 +5,8 @@ interface User {
   email: string
   name: string
   subscription_status: string
+  subscription_paused?: boolean
+  subscription_resumes_at?: number | null
 }
 
 interface AuthContextType {
@@ -12,6 +14,7 @@ interface AuthContextType {
   token: string | null
   loading: boolean
   isPro: boolean
+  isPaused: boolean
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, name: string) => Promise<void>
   logout: () => void
@@ -65,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: userData.email,
           name: userData.name,
           subscription_status: userData.subscription_status,
+          subscription_paused: userData.subscription_paused ?? false,
+          subscription_resumes_at: userData.subscription_resumes_at ?? null,
         }
         setUser(user)
         localStorage.setItem('user', JSON.stringify(user))
@@ -123,8 +128,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user?.subscription_status === 'pro' ||
     user?.subscription_status === 'premium'
 
+  // A paused subscriber is not Pro — they keep their data but lose the features
+  // until billing resumes.
+  const isPaused = user?.subscription_paused === true
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, isPro, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, isPro, isPaused, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

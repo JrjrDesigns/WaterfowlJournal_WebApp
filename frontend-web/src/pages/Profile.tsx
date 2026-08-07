@@ -2,13 +2,35 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
-import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession } from '../utils/api'
+import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription } from '../utils/api'
 
 const STRIPE_PRICE_ID_MONTHLY = import.meta.env.VITE_STRIPE_PRICE_ID_MONTHLY as string | undefined
 const STRIPE_PRICE_ID_ANNUAL = import.meta.env.VITE_STRIPE_PRICE_ID_ANNUAL as string | undefined
 
+// Mirrors add_months() in backend/server.py — whole calendar months with the
+// day clamped to the target month's length, so the date previewed here matches
+// the resumes_at the server actually sends to Stripe.
+function addMonths(start: Date, months: number): Date {
+  const d = new Date(start)
+  const targetDay = d.getDate()
+  d.setDate(1)
+  d.setMonth(d.getMonth() + months)
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+  d.setDate(Math.min(targetDay, lastDay))
+  return d
+}
+
+function formatResumeDate(unixSeconds?: number | null): string | null {
+  if (!unixSeconds) return null
+  return new Date(unixSeconds * 1000).toLocaleDateString(undefined, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
 export default function Profile() {
-  const { user, isPro, logout, refreshUser } = useAuth()
+  const { user, isPro, isPaused, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [showPaywall, setShowPaywall] = useState(false)
@@ -16,8 +38,14 @@ export default function Profile() {
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual')
   const [isManaging, setIsManaging] = useState(false)
+  const [isResuming, setIsResuming] = useState(false)
+  const [showPausePanel, setShowPausePanel] = useState(false)
+  const [pauseMonths, setPauseMonths] = useState(3)
+  const [isPausing, setIsPausing] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [activating, setActivating] = useState(false)
+
+  const resumeDate = formatResumeDate(user?.subscription_resumes_at)
 
   useEffect(() => {
     if (searchParams.get('upgrade') === '1') setShowUpgradePanel(true)
@@ -75,6 +103,33 @@ export default function Profile() {
     }
   }
 
+  const handlePause = async () => {
+    setCheckoutError(null)
+    setIsPausing(true)
+    try {
+      await pauseSubscription(pauseMonths)
+      await refreshUser()
+      setShowPausePanel(false)
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Could not pause your subscription')
+    } finally {
+      setIsPausing(false)
+    }
+  }
+
+  const handleResume = async () => {
+    setCheckoutError(null)
+    setIsResuming(true)
+    try {
+      await resumeSubscription()
+      await refreshUser()
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Could not resume your subscription')
+    } finally {
+      setIsResuming(false)
+    }
+  }
+
   const handleManageSubscription = async () => {
     setCheckoutError(null)
     setIsManaging(true)
@@ -121,15 +176,48 @@ export default function Profile() {
           <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${
             isPro
               ? 'text-green border-green/30 bg-green/5'
-              : 'text-muted border-hairline bg-bg'
+              : isPaused
+                ? 'text-amber-600 border-amber-500/30 bg-amber-500/5'
+                : 'text-muted border-hairline bg-bg'
           }`}>
-            {isPro ? 'Pro' : 'Free'}
+            {isPro ? 'Pro' : isPaused ? 'Paused' : 'Free'}
           </span>
         </div>
       </div>
 
+      {/* Paused subscription — resuming is one tap; pausing lives in the Stripe portal */}
+      {isPaused && (
+        <div className="bg-surface border border-amber-500/30 rounded-xl p-5 mb-4">
+          <p className="text-sm font-semibold text-ink">Pro is paused</p>
+          <p className="text-xs text-muted mt-1 leading-relaxed">
+            {resumeDate
+              ? `Billing restarts on ${resumeDate} and Pro turns back on automatically. Every hunt you've logged is safe.`
+              : `You won't be billed while paused. Every hunt you've logged is safe — resume any time to get Pro back.`}
+          </p>
+
+          {checkoutError && (
+            <p className="text-red-600 text-xs font-semibold mt-3">{checkoutError}</p>
+          )}
+
+          <button
+            onClick={handleResume}
+            disabled={isResuming}
+            className="w-full mt-4 bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isResuming ? 'Resuming…' : 'Resume Pro now'}
+          </button>
+          <button
+            onClick={handleManageSubscription}
+            disabled={isManaging}
+            className="w-full mt-2 text-muted hover:text-ink text-xs py-2 transition-colors disabled:opacity-60"
+          >
+            {isManaging ? 'Opening…' : 'Manage billing'}
+          </button>
+        </div>
+      )}
+
       {/* Upgrade panel */}
-      {!isPro && (
+      {!isPro && !isPaused && (
         <div className="mb-4">
           {showUpgradePanel ? (
             <div className="bg-surface border border-hairline rounded-xl p-6">
@@ -220,18 +308,81 @@ export default function Profile() {
 
       {/* Pro subscription management */}
       {isPro && (
-        <div className="bg-surface border border-hairline rounded-xl p-4 mb-4 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-ink">Pro — Active</p>
-            <p className="text-xs text-muted mt-0.5">All features unlocked</p>
+        <div className="bg-surface border border-hairline rounded-xl mb-4">
+          <div className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-ink">Pro — Active</p>
+              <p className="text-xs text-muted mt-0.5">All features unlocked</p>
+            </div>
+            <button
+              onClick={handleManageSubscription}
+              disabled={isManaging}
+              className="text-xs font-semibold text-ink underline underline-offset-2 disabled:opacity-60"
+            >
+              {isManaging ? 'Opening…' : 'Manage'}
+            </button>
           </div>
-          <button
-            onClick={handleManageSubscription}
-            disabled={isManaging}
-            className="text-xs font-semibold text-ink underline underline-offset-2 disabled:opacity-60"
-          >
-            {isManaging ? 'Opening…' : 'Manage'}
-          </button>
+
+          {/* Off-season pause. Kept deliberately quiet — it's a retention valve,
+              not something to advertise. */}
+          {!showPausePanel ? (
+            <button
+              onClick={() => setShowPausePanel(true)}
+              className="w-full text-xs text-muted hover:text-ink py-3 border-t border-hairline transition-colors"
+            >
+              Hunting season over? Pause your subscription
+            </button>
+          ) : (
+            <div className="border-t border-hairline p-4">
+              <p className="text-sm font-semibold text-ink">Pause for the off-season</p>
+              <p className="text-xs text-muted mt-1 leading-relaxed">
+                You won't be billed while paused, and Pro features turn off until it ends.
+                Your hunts, locations and photos all stay exactly as they are.
+              </p>
+
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                {[1, 3, 6].map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setPauseMonths(m)}
+                    className={`border rounded-lg py-2 text-center transition-colors ${
+                      pauseMonths === m ? 'border-ink bg-bg' : 'border-hairline'
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-ink">{m} mo</p>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted mt-3">
+                Billing restarts automatically on{' '}
+                <span className="font-semibold text-ink">
+                  {formatResumeDate(Math.floor(addMonths(new Date(), pauseMonths).getTime() / 1000))}
+                </span>
+                . You can resume sooner any time.
+              </p>
+
+              {checkoutError && (
+                <p className="text-red-600 text-xs font-semibold mt-3">{checkoutError}</p>
+              )}
+
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => { setShowPausePanel(false); setCheckoutError(null) }}
+                  className="flex-1 border border-hairline text-muted hover:text-ink font-semibold py-2.5 rounded-xl transition-colors text-sm"
+                >
+                  Never mind
+                </button>
+                <button
+                  onClick={handlePause}
+                  disabled={isPausing}
+                  className="flex-1 bg-ink hover:bg-black text-white font-semibold py-2.5 rounded-xl transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isPausing ? 'Pausing…' : `Pause ${pauseMonths} mo`}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {isPro && checkoutError && (
