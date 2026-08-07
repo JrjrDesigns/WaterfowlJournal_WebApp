@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Layout from './components/Layout'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import ResetPassword from './pages/auth/ResetPassword'
 import HuntList from './pages/hunts/HuntList'
 import HuntCreate from './pages/hunts/HuntCreate'
 import HuntDetail from './pages/hunts/HuntDetail'
@@ -38,6 +40,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/auth/login" element={<AuthRoute><Login /></AuthRoute>} />
       <Route path="/auth/register" element={<AuthRoute><Register /></AuthRoute>} />
+      <Route path="/auth/forgot" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
+      <Route path="/auth/reset" element={<AuthRoute><ResetPassword /></AuthRoute>} />
       <Route
         element={
           <ProtectedRoute>

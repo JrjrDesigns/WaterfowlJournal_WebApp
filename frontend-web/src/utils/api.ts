@@ -60,6 +60,19 @@ export const apiRequest = async (
   return response.json()
 }
 
+// Auth — password reset
+export const requestPasswordReset = (email: string) =>
+  apiRequest('/api/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  }, 20000)
+
+export const resetPassword = (token: string, password: string) =>
+  apiRequest('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  }, 20000)
+
 // Locations
 export const fetchLocations = () => apiRequest('/api/locations')
 

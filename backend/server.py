@@ -17,6 +17,8 @@ import time
 import copy
 import calendar
 import json
+import secrets
+import hashlib
 from bson import ObjectId
 
 ROOT_DIR = Path(__file__).parent
@@ -422,6 +424,125 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "subscription_resumes_at": current_user.get("subscription_resumes_at"),
         "created_at": current_user.get("created_at", datetime.utcnow())
     }
+
+# ============ PASSWORD RESET ============
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESET_FROM_EMAIL = os.environ.get("RESET_FROM_EMAIL", "Blind Guide <noreply@blindguideapp.com>")
+RESET_TOKEN_TTL_MINUTES = 60
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
+def _hash_reset_token(token: str) -> str:
+    """Only the hash is stored, so a database leak can't be used to reset accounts."""
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def _send_reset_email(to_email: str, name: str, reset_url: str):
+    """Send via Resend's HTTP API. Raises on failure so the caller can log it."""
+    if not RESEND_API_KEY:
+        raise RuntimeError("RESEND_API_KEY is not configured")
+
+    html = f"""
+      <div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:480px">
+        <h2 style="color:#13141A;margin-bottom:8px">Reset your password</h2>
+        <p style="color:#3d3f45;line-height:1.6">
+          Hi {name or 'there'} — we got a request to reset the password for your
+          Blind Guide account. This link is good for {RESET_TOKEN_TTL_MINUTES} minutes:
+        </p>
+        <p style="margin:24px 0">
+          <a href="{reset_url}"
+             style="background:#13141A;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-weight:600;display:inline-block">
+            Choose a new password
+          </a>
+        </p>
+        <p style="color:#797B7E;font-size:13px;line-height:1.6">
+          If you didn't ask for this, you can ignore this email — your password won't change.
+        </p>
+      </div>
+    """
+    resp = requests.post(
+        "https://api.resend.com/emails",
+        headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+        json={
+            "from": RESET_FROM_EMAIL,
+            "to": [to_email],
+            "subject": "Reset your Blind Guide password",
+            "html": html,
+        },
+        timeout=15,
+    )
+    if resp.status_code >= 300:
+        raise RuntimeError(f"Resend returned {resp.status_code}: {resp.text[:200]}")
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(payload: ForgotPasswordRequest):
+    """Always reports success — otherwise this endpoint reveals which emails have accounts."""
+    email = payload.email.strip().lower()
+    generic = {"message": "If that email has an account, a reset link is on its way."}
+
+    user = await db.users.find_one({"email": email})
+    if not user:
+        logger.info(f"Password reset requested for unknown email {email}")
+        return generic
+
+    token = secrets.token_urlsafe(32)
+    await db.password_resets.insert_one({
+        "user_id": user["_id"],
+        "token_hash": _hash_reset_token(token),
+        "expires_at": datetime.utcnow() + timedelta(minutes=RESET_TOKEN_TTL_MINUTES),
+        "used": False,
+        "created_at": datetime.utcnow(),
+    })
+
+    reset_url = f"{FRONTEND_URL}/auth/reset?token={token}"
+    try:
+        _send_reset_email(email, user.get("name", ""), reset_url)
+        logger.info(f"Password reset email sent to user {user['_id']}")
+    except Exception as e:
+        # Still return the generic message; surfacing this would leak account existence.
+        logger.exception(f"Failed sending password reset email to user {user['_id']}: {e}")
+
+    return generic
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(payload: ResetPasswordRequest):
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    record = await db.password_resets.find_one({
+        "token_hash": _hash_reset_token(payload.token),
+        "used": False,
+    })
+    if not record or record["expires_at"] < datetime.utcnow():
+        raise HTTPException(
+            status_code=400,
+            detail="That reset link is invalid or has expired. Request a new one.",
+        )
+
+    await db.users.update_one(
+        {"_id": record["user_id"]},
+        {"$set": {"password_hash": get_password_hash(payload.password)}},
+    )
+    # Single use, and drop any other outstanding tokens for this account.
+    await db.password_resets.update_many(
+        {"user_id": record["user_id"], "used": False},
+        {"$set": {"used": True}},
+    )
+    logger.info(f"Password reset completed for user {record['user_id']}")
+
+    return {"message": "Your password has been reset. You can sign in now."}
 
 # ============ LOCATIONS ROUTES ============
 
