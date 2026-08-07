@@ -96,6 +96,7 @@ export default function Profile() {
     try {
       const priceId = selectedPlan === 'annual' ? STRIPE_PRICE_ID_ANNUAL : STRIPE_PRICE_ID_MONTHLY
       const { url } = await createCheckoutSession(priceId)
+      if (!url) throw new Error('Stripe did not return a checkout link. Please try again.')
       window.location.href = url
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Could not start checkout')
@@ -135,6 +136,7 @@ export default function Profile() {
     setIsManaging(true)
     try {
       const { url } = await createCustomerPortalSession()
+      if (!url) throw new Error('Stripe did not return a billing link. Please try again.')
       window.location.href = url
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Could not open subscription management')

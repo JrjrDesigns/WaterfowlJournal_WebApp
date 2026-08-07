@@ -7,7 +7,15 @@ const handleUnauthorized = () => {
   window.dispatchEvent(new Event('auth:expired'))
 }
 
-export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+// Generous by default: hunts can carry a compressed photo and get logged from
+// places with poor signal. Short-running calls pass their own lower timeout.
+const DEFAULT_TIMEOUT_MS = 45000
+
+export const apiRequest = async (
+  endpoint: string,
+  options: RequestInit = {},
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+) => {
   const token = localStorage.getItem('token')
 
   const headers: HeadersInit = {
@@ -19,10 +27,26 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  // Without this a stalled request never settles, leaving buttons stuck on
+  // their loading label with no error and no way back.
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error('That took too long to respond. Check your connection and try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
 
   if (response.status === 401) {
     handleUnauthorized()
@@ -90,23 +114,27 @@ export const fetchSpecies = () => apiRequest('/api/species')
 
 export const fetchSubscriptionStatus = () => apiRequest('/api/subscription/status')
 
+// Billing calls are quick round-trips to Stripe; if one stalls the customer is
+// staring at a spinner mid-payment, so fail fast enough to show a retry.
+const BILLING_TIMEOUT_MS = 20000
+
 export const createCheckoutSession = (priceId?: string) =>
   apiRequest('/api/subscription/create-checkout-session', {
     method: 'POST',
     body: JSON.stringify(priceId ? { price_id: priceId } : {}),
-  })
+  }, BILLING_TIMEOUT_MS)
 
 export const createCustomerPortalSession = () =>
-  apiRequest('/api/subscription/customer-portal', { method: 'POST' })
+  apiRequest('/api/subscription/customer-portal', { method: 'POST' }, BILLING_TIMEOUT_MS)
 
 export const pauseSubscription = (months: number) =>
   apiRequest('/api/subscription/pause', {
     method: 'POST',
     body: JSON.stringify({ months }),
-  })
+  }, BILLING_TIMEOUT_MS)
 
 export const resumeSubscription = () =>
-  apiRequest('/api/subscription/resume', { method: 'POST' })
+  apiRequest('/api/subscription/resume', { method: 'POST' }, BILLING_TIMEOUT_MS)
 
 export const exportHuntsCSV = () => {
   const token = localStorage.getItem('token')

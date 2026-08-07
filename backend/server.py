@@ -2210,6 +2210,8 @@ async def pause_subscription(
     # instant the request returns. The webhook then confirms the same state.
     updates = resolve_subscription_state(sub)
     updates["stripe_subscription_id"] = subscription_id
+    # Stamped so an older in-flight webhook can't overwrite what we just did.
+    updates["subscription_synced_at"] = int(time.time())
     await db.users.update_one({"_id": current_user["_id"]}, {"$set": updates})
     logger.info(f"User {current_user['_id']} paused {subscription_id} for {months}mo")
 
@@ -2246,6 +2248,8 @@ async def resume_subscription(current_user: dict = Depends(get_current_user)):
 
     updates = resolve_subscription_state(sub)
     updates["stripe_subscription_id"] = subscription_id
+    # Stamped so the earlier "paused" webhook can't land late and undo this.
+    updates["subscription_synced_at"] = int(time.time())
     await db.users.update_one({"_id": current_user["_id"]}, {"$set": updates})
     logger.info(f"User {current_user['_id']} resumed subscription {subscription_id}")
 
@@ -2291,6 +2295,18 @@ async def apply_stripe_subscription_event(event: dict):
         )
         return
 
+    # Stripe does not guarantee delivery order. Without this, a delayed
+    # "paused" event landing after a newer "resumed" one would flip a paying
+    # customer back to free and leave them there.
+    event_created = event.get("created") or 0
+    last_applied = user.get("subscription_synced_at") or 0
+    if event_created and event_created < last_applied:
+        logger.info(
+            f"Stripe webhook {event_type}: ignoring out-of-order event "
+            f"(created={event_created} < last applied={last_applied})"
+        )
+        return
+
     if event_type == "customer.subscription.deleted":
         updates = {
             "subscription_status": "free",
@@ -2303,6 +2319,7 @@ async def apply_stripe_subscription_event(event: dict):
         # Keep the subscription id so we can resume without a lookup.
         updates["stripe_subscription_id"] = stripe_field(sub, "id")
 
+    updates["subscription_synced_at"] = event_created or int(time.time())
     await db.users.update_one({"_id": user["_id"]}, {"$set": updates})
     logger.info(
         f"Stripe webhook {event_type}: user {user['_id']} -> "
