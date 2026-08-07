@@ -246,16 +246,26 @@ function BlindWindPill({ match }: { match: BlindWindMatch }) {
   )
 }
 
-// 70+ is the rare "clear the calendar" score — migration, weather and history
-// all lining up. Below it, badges are a tinted outline; at it, the badge flips
-// to a solid fill so a great day reads as an event instead of just a greener
-// version of an average one.
-const SCORE_STRONG = 70
+// Score bands, one base colour each. Measured over 2,604 real in-season days,
+// 90+ lands on ~1.6% of them (about once a season per spot) and 70+ on ~11%
+// (roughly weekly), so the two solid treatments are genuinely scarce.
+//
+// The top two bands render solid — colour fill, white numeral, near-white rim.
+// The lower two invert to a tint of the same colour with a matching rim and
+// numeral, reading as present but clearly a step down from "go". `${colour}18`
+// over white lands almost exactly on #FAF3EB for the orange, which is where the
+// intended cream comes from.
+const BADGE_RIM = '#EFF2F1'   // near-white rim on the solid bands
 
-function scoreColor(score: number): string {
-  if (score >= SCORE_STRONG) return '#1B5E45'
-  if (score >= 45) return '#D97706'
-  return '#797B7E'
+const SCORE_BANDS = [
+  { min: 90, color: '#305D47', solid: true  },   // green  — the once-a-season day
+  { min: 70, color: '#406984', solid: true  },   // blue   — worth going
+  { min: 50, color: '#CC7C2E', solid: false },   // orange — inverted, a step down
+  { min: 0,  color: '#797B7E', solid: false },   // muted  — stay home
+] as const
+
+function scoreBand(score: number) {
+  return SCORE_BANDS.find(b => score >= b.min) ?? SCORE_BANDS[SCORE_BANDS.length - 1]
 }
 
 function ColHeader({ children }: { children: React.ReactNode }) {
@@ -267,17 +277,14 @@ function ColHeader({ children }: { children: React.ReactNode }) {
 }
 
 function ScoreBadge({ score, size = 'md' }: { score: number; size?: 'sm' | 'md' | 'lg' }) {
-  const color = scoreColor(score)
-  const strong = score >= SCORE_STRONG
+  const band = scoreBand(score)
   const dims = size === 'lg' ? 'w-14 h-14 text-xl' : size === 'sm' ? 'w-9 h-9 text-xs' : 'w-11 h-11 text-sm'
   return (
     <div
       className={`${dims} rounded-full flex items-center justify-center font-display flex-shrink-0`}
-      style={strong
-        // Solid fill + white numeral, matching the app's existing emphasis
-        // pattern (bg-green/bg-ink + text-white). box-shadow halo is layout-safe.
-        ? { color: '#FFFFFF', backgroundColor: color, border: `1.5px solid ${color}`, boxShadow: `0 0 0 3px ${color}24` }
-        : { color, backgroundColor: `${color}18`, border: `1.5px solid ${color}` }}
+      style={band.solid
+        ? { color: '#FFFFFF', backgroundColor: band.color, border: `1.5px solid ${BADGE_RIM}` }
+        : { color: band.color, backgroundColor: `${band.color}18`, border: `1.5px solid ${band.color}` }}
     >
       {score}
     </div>
