@@ -428,7 +428,14 @@ export default function Profile() {
         Sign Out
       </button>
 
-      <p className="text-center text-muted/50 text-xs mt-6">Blind Guide v1.0</p>
+      <p className="text-center text-xs mt-6 space-x-3">
+        <a href="https://blindguideapp.com/terms" target="_blank" rel="noopener noreferrer"
+          className="text-muted hover:text-ink transition-colors">Terms of Service</a>
+        <span className="text-muted/40">·</span>
+        <a href="https://blindguideapp.com/privacy" target="_blank" rel="noopener noreferrer"
+          className="text-muted hover:text-ink transition-colors">Privacy Policy</a>
+      </p>
+      <p className="text-center text-muted/50 text-xs mt-2">Blind Guide v1.0</p>
     </div>
   )
 }

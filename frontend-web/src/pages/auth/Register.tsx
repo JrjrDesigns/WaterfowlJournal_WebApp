@@ -95,6 +95,15 @@ export default function Register() {
             >
               {loading ? 'Creating account…' : 'Create Account'}
             </button>
+
+            <p className="text-center text-muted text-xs leading-relaxed">
+              By creating an account you agree to our{' '}
+              <a href="https://blindguideapp.com/terms" target="_blank" rel="noopener noreferrer"
+                className="text-ink underline underline-offset-2">Terms of Service</a>
+              {' '}and{' '}
+              <a href="https://blindguideapp.com/privacy" target="_blank" rel="noopener noreferrer"
+                className="text-ink underline underline-offset-2">Privacy Policy</a>.
+            </p>
           </form>
 
           <p className="text-center text-muted text-sm mt-5">
