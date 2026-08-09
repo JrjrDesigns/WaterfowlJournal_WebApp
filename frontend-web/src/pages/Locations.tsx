@@ -179,7 +179,7 @@ export default function Locations() {
   const handleCreateLocation = async (e: React.FormEvent) => {
     e.preventDefault()
     setLocError('')
-    if (!locName) { setLocError('Name is required'); return }
+    if (!locName) { setLocError('Give this location a title'); return }
     if (!locCenter) { setLocError('Tap the map to set the center point'); return }
     setCreatingLoc(true)
     try {
@@ -233,7 +233,7 @@ export default function Locations() {
   const handleSaveBlind = async (e: React.FormEvent) => {
     e.preventDefault()
     setBlindError('')
-    if (!blindName) { setBlindError('Name is required'); return }
+    if (!blindName) { setBlindError('Give this blind a title'); return }
     if (!pendingPin) { setBlindError('No pin location'); return }
     if (!selectedLocation) return
     setCreatingBlind(true)
@@ -373,7 +373,7 @@ export default function Locations() {
                 data-lpignore="true"
                 value={blindName}
                 onChange={e => setBlindName(e.target.value)}
-                placeholder="Blind name"
+                placeholder="Call it something — North Pit, Point Blind…"
                 autoFocus
               />
               <div className="flex flex-wrap gap-2">
@@ -478,7 +478,11 @@ export default function Locations() {
               {locError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{locError}</div>}
 
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Location Name</label>
+                {/* Label deliberately avoids the word "name" — iOS Safari classifies a
+                    field as a contact field from its label text and then offers to fill it
+                    from Contacts, ignoring autocomplete="off". Same reason the search box
+                    below says "place" rather than "address". */}
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">What You Call It</label>
                 <input
                   type="text"
                   name="location-title"
@@ -512,10 +516,10 @@ export default function Locations() {
                   This just centers the map here — you'll mark the actual blinds next.
                 </p>
 
-                {/* Address search — plain div, not a form, to avoid nested form conflict */}
+                {/* Place search — plain div, not a form, to avoid nested form conflict */}
                 <div className="flex gap-2 mb-2">
                   <input
-                    type="text"
+                    type="search"
                     name="place-search"
                     autoComplete="off"
                     data-1p-ignore
@@ -523,8 +527,8 @@ export default function Locations() {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleGeocode(e as unknown as React.FormEvent) } }}
-                    placeholder="Search address or place…"
-                    className="flex-1"
+                    placeholder="Search a town, lake, or landmark…"
+                    className="flex-1 appearance-none"
                   />
                   <button
                     type="button"

@@ -158,7 +158,7 @@ export default function HuntEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!huntName) { setError('Hunt name is required'); return }
+    if (!huntName) { setError('Give this hunt a title'); return }
     if (!selectedBlindId) { setError('Select a blind'); return }
     if (!location) { setError('Selected blind has no coordinates'); return }
 
@@ -215,9 +215,9 @@ export default function HuntEdit() {
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{error}</div>
         )}
 
-        {/* Hunt Name */}
+        {/* Hunt title — label avoids "name" so iOS Safari does not treat it as a contact field */}
         <div>
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunt Name</label>
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunt Title</label>
           <input
             type="text"
             name="hunt-title"
