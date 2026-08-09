@@ -365,7 +365,17 @@ export default function Locations() {
             </div>
             <form onSubmit={handleSaveBlind} className="space-y-3">
               {blindError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg">{blindError}</div>}
-              <input type="text" value={blindName} onChange={e => setBlindName(e.target.value)} placeholder="Blind name" autoFocus />
+              <input
+                type="text"
+                name="blind-title"
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+                value={blindName}
+                onChange={e => setBlindName(e.target.value)}
+                placeholder="Blind name"
+                autoFocus
+              />
               <div className="flex flex-wrap gap-2">
                 {BLIND_TYPES.map(t => (
                   <button key={t} type="button" onClick={() => setBlindType(t)}
@@ -469,7 +479,17 @@ export default function Locations() {
 
               <div>
                 <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Location Name</label>
-                <input type="text" value={locName} onChange={e => setLocName(e.target.value)} placeholder="Johnson's Marsh" autoFocus />
+                <input
+                  type="text"
+                  name="location-title"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  value={locName}
+                  onChange={e => setLocName(e.target.value)}
+                  placeholder="Big Timber Marsh"
+                  autoFocus
+                />
               </div>
 
               <div>
@@ -496,6 +516,10 @@ export default function Locations() {
                 <div className="flex gap-2 mb-2">
                   <input
                     type="text"
+                    name="place-search"
+                    autoComplete="off"
+                    data-1p-ignore
+                    data-lpignore="true"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleGeocode(e as unknown as React.FormEvent) } }}

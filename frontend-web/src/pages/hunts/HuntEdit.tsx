@@ -218,7 +218,16 @@ export default function HuntEdit() {
         {/* Hunt Name */}
         <div>
           <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Hunt Name</label>
-          <input type="text" value={huntName} onChange={e => setHuntName(e.target.value)} placeholder="Morning Duck Hunt" />
+          <input
+            type="text"
+            name="hunt-title"
+            autoComplete="off"
+            data-1p-ignore
+            data-lpignore="true"
+            value={huntName}
+            onChange={e => setHuntName(e.target.value)}
+            placeholder="Morning Duck Hunt"
+          />
         </div>
 
         {/* Date */}
@@ -271,10 +280,16 @@ export default function HuntEdit() {
           <div className="flex gap-2">
             <input
               type="text"
+              name="party-entry"
+              autoComplete="off"
+              autoCapitalize="words"
+              spellCheck={false}
+              data-1p-ignore
+              data-lpignore="true"
               value={partyInput}
               onChange={e => setPartyInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addPartyMember() } }}
-              placeholder="Add a hunter's name…"
+              placeholder="Add a hunting partner…"
               className="flex-1"
             />
             <button

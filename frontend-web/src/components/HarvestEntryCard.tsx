@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import SpeciesIcon from './SpeciesIcon'
 
 export interface Harvest {
@@ -28,6 +28,37 @@ function summarize(h: Harvest, hasParty: boolean): string {
   if (h.missed > 0) parts.push(`${h.missed} missed`)
   if (h.shot_not_recovered > 0) parts.push(`${h.shot_not_recovered} lost`)
   return parts.length > 0 ? parts.join(' · ') : 'No harvest recorded'
+}
+
+/**
+ * Count field that can be emptied while typing. A plain controlled number input
+ * writes `parseInt('') || 0` back on every keystroke, so backspacing the last
+ * digit instantly re-renders a "0" the user can never clear. Keeping the raw
+ * text in local state lets the box sit empty until blur, and text+inputMode
+ * still brings up the numeric keypad on iOS without the spinner arrows.
+ */
+function CountInput({ value, max, onChange }: { value: number; max?: number; onChange: (n: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null)
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      autoComplete="off"
+      value={draft ?? String(value)}
+      onFocus={e => e.currentTarget.select()}
+      onChange={e => {
+        const digits = e.target.value.replace(/[^0-9]/g, '')
+        const parsed = digits === '' ? 0 : parseInt(digits, 10)
+        const clamped = max !== undefined ? Math.min(parsed, max) : parsed
+        setDraft(clamped === parsed ? digits : String(clamped))
+        onChange(clamped)
+      }}
+      onBlur={() => setDraft(null)}
+      className="text-center"
+    />
+  )
 }
 
 const TrashIcon = () => (
@@ -77,24 +108,16 @@ export default function HarvestEntryCard({ harvest, index, allSpecies, hasParty,
             <p className="text-xs text-muted mb-1 font-semibold capitalize">
               {field === 'shot_not_recovered' ? 'Lost' : field}
             </p>
-            <input
-              type="number" min="0"
-              value={harvest[field]}
-              onChange={e => onUpdate(field, parseInt(e.target.value) || 0)}
-              className="text-center"
-            />
+            <CountInput value={harvest[field]} onChange={n => onUpdate(field, n)} />
           </div>
         ))}
       </div>
       {hasParty && (
         <div className="mt-2 pt-2 border-t border-hairline">
           <p className="text-xs text-muted mb-1 font-semibold">Mine (of the {harvest.harvested} harvested)</p>
-          <input
-            type="number" min="0" max={harvest.harvested}
-            value={harvest.mine}
-            onChange={e => onUpdate('mine', parseInt(e.target.value) || 0)}
-            className="text-center w-24"
-          />
+          <div className="w-24">
+            <CountInput value={harvest.mine} max={harvest.harvested} onChange={n => onUpdate('mine', n)} />
+          </div>
         </div>
       )}
       <button
