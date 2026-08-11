@@ -20,6 +20,7 @@ import json
 import secrets
 import hashlib
 import re
+from collections import defaultdict, deque
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
@@ -195,6 +196,96 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if user is None:
         raise credentials_exception
     return user
+
+
+# ============ RATE LIMITING ============
+#
+# Deliberately in-process and dependency-free. The backend runs as a single
+# Railway instance, so an external store would buy nothing today, and a failed
+# package install on a push-to-deploy setup takes the whole API down. If this is
+# ever scaled past one instance these counters become per-instance and the
+# effective limits multiply — revisit then.
+
+_rate_buckets: Dict[str, deque] = defaultdict(deque)
+_rate_sweeps = 0
+
+
+def _bucket(key: str, window_seconds: int) -> deque:
+    """The hits for `key` still inside the window, oldest first."""
+    global _rate_sweeps
+    cutoff = time.time() - window_seconds
+    bucket = _rate_buckets[key]
+    while bucket and bucket[0] <= cutoff:
+        bucket.popleft()
+
+    # Keys are per-email and per-IP, so the dict would otherwise grow forever.
+    _rate_sweeps += 1
+    if _rate_sweeps % 500 == 0:
+        for k in [k for k, v in _rate_buckets.items() if not v]:
+            del _rate_buckets[k]
+
+    return bucket
+
+
+def _retry_after(bucket: deque, window_seconds: int) -> int:
+    return max(1, int(bucket[0] + window_seconds - time.time()))
+
+
+def rate_limit_hit(key: str, limit: int, window_seconds: int) -> Optional[int]:
+    """Count an attempt. Returns seconds to wait if it went over the limit."""
+    bucket = _bucket(key, window_seconds)
+    if len(bucket) >= limit:
+        return _retry_after(bucket, window_seconds)
+    bucket.append(time.time())
+    return None
+
+
+def rate_limit_blocked(key: str, limit: int, window_seconds: int) -> Optional[int]:
+    """Check without counting — used before doing expensive work."""
+    bucket = _bucket(key, window_seconds)
+    if len(bucket) >= limit:
+        return _retry_after(bucket, window_seconds)
+    return None
+
+
+def rate_limit_record(key: str, window_seconds: int) -> None:
+    _bucket(key, window_seconds).append(time.time())
+
+
+def rate_limit_clear(key: str) -> None:
+    _rate_buckets.pop(key, None)
+
+
+def too_many(retry_after: int, message: str) -> HTTPException:
+    return HTTPException(
+        status_code=429, detail=message, headers={"Retry-After": str(retry_after)}
+    )
+
+
+def client_ip(request: Request) -> str:
+    """Railway terminates TLS upstream, so request.client is its proxy."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+# Guessing one account's password is capped per email address, so rotating IPs
+# doesn't help — which matters because the reverse (capping only by IP) would
+# punish real users, who share carrier NAT addresses out in the field. The
+# per-IP cap is a backstop against sheer volume: every password check burns
+# real CPU by design, so unlimited attempts are a denial of service even when
+# every one of them fails.
+LOGIN_FAIL_LIMIT, LOGIN_FAIL_WINDOW = 8, 15 * 60
+AUTH_IP_LIMIT, AUTH_IP_WINDOW = 30, 60
+REGISTER_IP_LIMIT, REGISTER_IP_WINDOW = 10, 60 * 60
+RESET_EMAIL_LIMIT, RESET_EMAIL_WINDOW = 4, 60 * 60
+
+
+def guard_auth_ip(request: Request) -> None:
+    retry = rate_limit_hit(f"auth-ip:{client_ip(request)}", AUTH_IP_LIMIT, AUTH_IP_WINDOW)
+    if retry is not None:
+        raise too_many(retry, "Too many attempts. Wait a moment and try again.")
 
 
 # What a free account gets. Enforced here, not just in the client: the app on
@@ -387,8 +478,15 @@ def normalize_email(email: str) -> str:
 
 
 @api_router.post("/auth/register", response_model=Token)
-async def register(user_data: UserRegister):
+async def register(user_data: UserRegister, request: Request):
     email = normalize_email(user_data.email)
+
+    guard_auth_ip(request)
+    retry = rate_limit_hit(
+        f"register-ip:{client_ip(request)}", REGISTER_IP_LIMIT, REGISTER_IP_WINDOW
+    )
+    if retry is not None:
+        raise too_many(retry, "Too many accounts created from here. Try again later.")
 
     # Check if user exists
     existing_user = await db.users.find_one({"email": email})
@@ -431,8 +529,20 @@ async def register(user_data: UserRegister):
     }
 
 @api_router.post("/auth/login", response_model=Token)
-async def login(user_data: UserLogin):
+async def login(user_data: UserLogin, request: Request):
     email = normalize_email(user_data.email)
+
+    guard_auth_ip(request)
+
+    # Checked before the password is verified, so a locked-out attacker can't
+    # keep spending CPU on bcrypt.
+    fail_key = f"login-fail:{email}"
+    retry = rate_limit_blocked(fail_key, LOGIN_FAIL_LIMIT, LOGIN_FAIL_WINDOW)
+    if retry is not None:
+        raise too_many(
+            retry, "Too many failed sign-in attempts. Try again in a few minutes or reset your password."
+        )
+
     user = await db.users.find_one({"email": email})
     if not user:
         # Accounts created before emails were normalized may be stored with
@@ -441,7 +551,11 @@ async def login(user_data: UserLogin):
             {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}}
         )
     if not user or not verify_password(user_data.password, user["password_hash"]):
+        rate_limit_record(fail_key, LOGIN_FAIL_WINDOW)
         raise HTTPException(status_code=401, detail="Incorrect email or password")
+
+    # Only failures count, so someone signing in normally is never throttled.
+    rate_limit_clear(fail_key)
 
     user_id = str(user["_id"])
     access_token = create_access_token(data={"sub": user_id})
@@ -532,10 +646,18 @@ def _send_reset_email(to_email: str, name: str, reset_url: str):
 
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(payload: ForgotPasswordRequest):
+async def forgot_password(payload: ForgotPasswordRequest, request: Request):
     """Always reports success — otherwise this endpoint reveals which emails have accounts."""
     email = normalize_email(payload.email)
     generic = {"message": "If that email has an account, a reset link is on its way."}
+
+    guard_auth_ip(request)
+    # Capped per address so this can't be used to bomb someone's inbox. The
+    # generic reply above is returned either way, so the cap leaks nothing about
+    # whether the account exists.
+    if rate_limit_hit(f"reset:{email}", RESET_EMAIL_LIMIT, RESET_EMAIL_WINDOW) is not None:
+        logger.info(f"Password reset rate limited for {email}")
+        return generic
 
     user = await db.users.find_one({"email": email})
     if not user:
@@ -2598,6 +2720,35 @@ async def export_hunts_csv(current_user: dict = Depends(require_pro)):
 # Include router
 app.include_router(api_router)
 
+# Photos are sent as base64 inside the JSON body, and the client compresses them
+# to roughly 100KB each first — so this is generous for a hunt carrying several
+# while still refusing the multi-megabyte uploads that would otherwise fill a
+# 512MB database in a few hundred requests.
+MAX_REQUEST_BYTES = 3 * 1024 * 1024
+
+
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    declared = request.headers.get("content-length")
+    if declared:
+        try:
+            oversize = int(declared) > MAX_REQUEST_BYTES
+        except ValueError:
+            oversize = False
+        if oversize:
+            from fastapi.responses import JSONResponse
+            logger.warning(
+                f"Rejected {declared} byte request to {request.url.path} from {client_ip(request)}"
+            )
+            return JSONResponse(
+                status_code=413,
+                content={"detail": "That upload is too large. Try fewer or smaller photos."},
+            )
+    return await call_next(request)
+
+
+# Added last, so it wraps everything above and CORS headers reach error
+# responses too — including the 413 and 429s.
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
