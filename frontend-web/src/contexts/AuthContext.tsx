@@ -8,6 +8,7 @@ interface User {
   subscription_status: string
   subscription_paused?: boolean
   subscription_resumes_at?: number | null
+  deletion_scheduled_for?: number | null
 }
 
 interface AuthContextType {
@@ -71,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subscription_status: userData.subscription_status,
           subscription_paused: userData.subscription_paused ?? false,
           subscription_resumes_at: userData.subscription_resumes_at ?? null,
+          deletion_scheduled_for: userData.deletion_scheduled_for ?? null,
         }
         setUser(user)
         localStorage.setItem('user', JSON.stringify(user))

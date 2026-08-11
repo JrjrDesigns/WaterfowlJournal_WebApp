@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
-import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription, deleteAccount } from '../utils/api'
+import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription, requestAccountDeletion, restoreAccount } from '../utils/api'
+
+// Mirrors DELETION_GRACE_DAYS in backend/server.py — the server sets the real
+// date, this is only what we promise the user before they commit.
+const DELETION_GRACE_DAYS = 30
 
 const STRIPE_PRICE_ID_MONTHLY = import.meta.env.VITE_STRIPE_PRICE_ID_MONTHLY as string | undefined
 const STRIPE_PRICE_ID_ANNUAL = import.meta.env.VITE_STRIPE_PRICE_ID_ANNUAL as string | undefined
@@ -46,25 +50,46 @@ export default function Profile() {
   const [activating, setActivating] = useState(false)
   const [showDeletePanel, setShowDeletePanel] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
+  const [deleteEmail, setDeleteEmail] = useState('')
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
 
-  const handleDeleteAccount = async () => {
-    if (!deletePassword) {
-      setDeleteError('Enter your password to confirm')
+  const deletionDate = user?.deletion_scheduled_for
+    ? new Date(user.deletion_scheduled_for * 1000).toLocaleDateString(undefined, {
+        month: 'long', day: 'numeric', year: 'numeric',
+      })
+    : null
+
+  const handleRequestDeletion = async () => {
+    if (!deletePassword || !deleteEmail) {
+      setDeleteError('Enter your email and password to confirm')
       return
     }
     setDeleteError(null)
     setIsDeleting(true)
     try {
-      await deleteAccount(deletePassword)
-      // The account is gone, so clear the stored session before anything can
-      // try to use it and bounce off a 401.
-      logout()
-      navigate('/auth/register', { replace: true })
+      await requestAccountDeletion(deletePassword, deleteEmail)
+      await refreshUser()
+      setShowDeletePanel(false)
+      setDeletePassword('')
+      setDeleteEmail('')
     } catch (err: unknown) {
-      setDeleteError(err instanceof Error ? err.message : 'Could not delete your account')
+      setDeleteError(err instanceof Error ? err.message : 'Could not schedule the deletion')
+    } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleRestore = async () => {
+    setIsRestoring(true)
+    try {
+      await restoreAccount()
+      await refreshUser()
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not cancel the deletion')
+    } finally {
+      setIsRestoring(false)
     }
   }
 
@@ -451,9 +476,37 @@ export default function Profile() {
         Sign Out
       </button>
 
-      {/* Deliberately understated and two steps deep: irreversible, and nobody
-          should reach it by mistake while looking for sign out. */}
-      {!showDeletePanel ? (
+      {/* A deletion already pending outranks everything else on this screen. */}
+      {deletionDate ? (
+        <div className="mt-4 border border-red-300 bg-red-50 rounded-xl p-5">
+          <p className="text-sm font-semibold text-ink">Your account is scheduled for deletion</p>
+          <p className="text-xs text-muted mt-1.5 leading-relaxed">
+            Everything on it will be erased on <span className="font-semibold text-ink">{deletionDate}</span>.
+            Until then nothing has been touched, and you can change your mind.
+          </p>
+          <p className="text-xs text-muted mt-2 leading-relaxed">
+            Billing has already stopped, so you won't be charged again. Restoring
+            the account doesn't restart a subscription — you'd resubscribe if you
+            wanted Pro back.
+          </p>
+
+          {deleteError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
+              {deleteError}
+            </div>
+          )}
+
+          <button
+            onClick={handleRestore}
+            disabled={isRestoring}
+            className="w-full bg-ink hover:bg-black text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-4 disabled:opacity-50"
+          >
+            {isRestoring ? 'Restoring…' : 'Keep my account'}
+          </button>
+        </div>
+      ) : !showDeletePanel ? (
+        /* Understated and two steps deep: nobody should reach this by mistake
+           while looking for sign out. */
         <button
           onClick={() => { setShowDeletePanel(true); setDeleteError(null) }}
           className="w-full text-center text-muted/70 hover:text-red-600 text-xs font-semibold py-4 transition-colors"
@@ -464,11 +517,13 @@ export default function Profile() {
         <div className="mt-4 border border-red-200 bg-red-50/50 rounded-xl p-5">
           <p className="text-sm font-semibold text-ink">Delete your account?</p>
           <p className="text-xs text-muted mt-1.5 leading-relaxed">
-            This erases your account and every hunt, location and blind on it. It
-            cannot be undone.{isPro && ' Your Pro subscription will be cancelled so you are not charged again.'}
+            Your account and every hunt, location and blind on it will be erased
+            after {DELETION_GRACE_DAYS} days. Nothing is deleted straight away — you can cancel any
+            time before then by coming back here.
           </p>
           <p className="text-xs text-muted mt-2 leading-relaxed">
-            Want a copy first? Close this and use Export Data.
+            {isPro && 'Your Pro subscription is cancelled immediately, so you are not charged again. '}
+            Want a copy of your hunts first? Close this and use Export Data.
           </p>
 
           {deleteError && (
@@ -478,7 +533,18 @@ export default function Profile() {
           )}
 
           <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-4 mb-2">
-            Confirm your password
+            Type your email to confirm
+          </label>
+          <input
+            type="email"
+            value={deleteEmail}
+            onChange={e => setDeleteEmail(e.target.value)}
+            autoComplete="off"
+            placeholder={user?.email || 'you@example.com'}
+          />
+
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-3 mb-2">
+            And your password
           </label>
           <input
             type="password"
@@ -490,18 +556,20 @@ export default function Profile() {
 
           <div className="flex gap-2 mt-4">
             <button
-              onClick={() => { setShowDeletePanel(false); setDeletePassword(''); setDeleteError(null) }}
+              onClick={() => {
+                setShowDeletePanel(false); setDeletePassword(''); setDeleteEmail(''); setDeleteError(null)
+              }}
               disabled={isDeleting}
               className="flex-1 border border-hairline text-ink font-semibold py-2.5 rounded-lg text-sm disabled:opacity-50"
             >
               Keep my account
             </button>
             <button
-              onClick={handleDeleteAccount}
+              onClick={handleRequestDeletion}
               disabled={isDeleting}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
             >
-              {isDeleting ? 'Deleting…' : 'Delete forever'}
+              {isDeleting ? 'Scheduling…' : 'Schedule deletion'}
             </button>
           </div>
         </div>

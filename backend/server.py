@@ -20,6 +20,7 @@ import json
 import secrets
 import hashlib
 import re
+import asyncio
 from collections import defaultdict, deque
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -75,6 +76,7 @@ class User(BaseModel):
     subscription_status: str = "free"
     subscription_paused: bool = False
     subscription_resumes_at: Optional[int] = None  # unix seconds, from Stripe
+    deletion_scheduled_for: Optional[int] = None  # unix seconds; set while a deletion is pending
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class LocationCreate(BaseModel):
@@ -295,6 +297,12 @@ RESET_EMAIL_LIMIT, RESET_EMAIL_WINDOW = 4, 60 * 60
 FREE_HUNT_LIMIT = 10
 
 PRO_STATUSES = ("pro", "premium")
+
+
+def deletion_timestamp(user: dict) -> Optional[int]:
+    """When this account is due to be erased, as unix seconds, or None."""
+    scheduled = user.get("deletion_scheduled_for")
+    return int(scheduled.timestamp()) if scheduled else None
 
 
 def user_is_pro(user: dict) -> bool:
@@ -574,7 +582,8 @@ async def login(user_data: UserLogin, request: Request):
             "name": user["name"],
             "subscription_status": user.get("subscription_status", "free"),
             "subscription_paused": user.get("subscription_paused", False),
-            "subscription_resumes_at": user.get("subscription_resumes_at")
+            "subscription_resumes_at": user.get("subscription_resumes_at"),
+            "deletion_scheduled_for": deletion_timestamp(user),
         }
     }
 
@@ -587,6 +596,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "subscription_status": current_user.get("subscription_status", "free"),
         "subscription_paused": current_user.get("subscription_paused", False),
         "subscription_resumes_at": current_user.get("subscription_resumes_at"),
+        "deletion_scheduled_for": deletion_timestamp(current_user),
         "created_at": current_user.get("created_at", datetime.utcnow())
     }
 
@@ -2676,16 +2686,23 @@ async def stripe_webhook(request: Request):
 # ============ ACCOUNT DELETION ============
 
 
+# A deletion is scheduled rather than done on the spot. Erasing a season's
+# worth of hunts on one mis-tap is not recoverable by us or by them, so the
+# request is reversible for a month and only then carried out for real.
+DELETION_GRACE_DAYS = 30
+
+
 class DeleteAccountRequest(BaseModel):
     password: str
+    email: str
 
 
 @api_router.post("/account/delete")
-async def delete_account(
+async def request_account_deletion(
     payload: DeleteAccountRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    """Erase the account and everything in it. Irreversible."""
+    """Schedule the account for erasure. Reversible until the grace period ends."""
     # The password, not just a valid token: a phone left unlocked on a tailgate
     # shouldn't be enough to destroy someone's seasons.
     # 403 rather than 401 on purpose: the client treats any 401 as an expired
@@ -2694,12 +2711,21 @@ async def delete_account(
     if not verify_password(payload.password, current_user["password_hash"]):
         raise HTTPException(status_code=403, detail="That password is incorrect.")
 
+    # Typing the address out is deliberate friction — much harder to do by
+    # accident than filling a password field the browser already knows.
+    if normalize_email(payload.email) != normalize_email(current_user["email"]):
+        raise HTTPException(
+            status_code=403,
+            detail="That email doesn't match the account you're signed in to.",
+        )
+
     user_oid = current_user["_id"]
     user_id = str(user_oid)
 
-    # Billing goes first and hard. Deleting the account while Stripe keeps
-    # charging is the one outcome worse than not deleting it at all, and once
-    # the user row is gone there's nothing left to reconcile a payment against.
+    # Billing stops now, not in thirty days — nobody should pay through a grace
+    # period for an account they've asked to be rid of. Cancelling is also the
+    # one step that can't wait: charging a customer whose account later vanishes
+    # invites a chargeback with no record left to reconcile it against.
     if STRIPE_SECRET_KEY and not STRIPE_SECRET_KEY.startswith("YOUR_"):
         try:
             import stripe as stripe_lib
@@ -2707,15 +2733,55 @@ async def delete_account(
             subscription_id = find_stripe_subscription_id(stripe_lib, current_user)
             if subscription_id:
                 stripe_lib.Subscription.delete(subscription_id)
-                logger.info(f"Cancelled subscription {subscription_id} deleting user {user_id}")
+                logger.info(f"Cancelled subscription {subscription_id} for user {user_id}")
         except Exception as e:
-            logger.exception(f"Could not cancel Stripe subscription deleting user {user_id}: {e}")
+            logger.exception(f"Could not cancel Stripe subscription for user {user_id}: {e}")
             raise HTTPException(
                 status_code=502,
                 detail="We couldn't cancel your subscription just now, so we've left your "
                        "account alone rather than risk charging you again. Please try later.",
             )
 
+    scheduled_for = datetime.utcnow() + timedelta(days=DELETION_GRACE_DAYS)
+    await db.users.update_one(
+        {"_id": user_oid},
+        {"$set": {
+            "deletion_requested_at": datetime.utcnow(),
+            "deletion_scheduled_for": scheduled_for,
+            "subscription_status": "free",
+            "subscription_paused": False,
+            "subscription_resumes_at": None,
+        }},
+    )
+    logger.info(f"Account {user_id} scheduled for deletion on {scheduled_for.isoformat()}")
+
+    return {
+        "scheduled": True,
+        "deletion_scheduled_for": int(scheduled_for.timestamp()),
+        "grace_days": DELETION_GRACE_DAYS,
+    }
+
+
+@api_router.post("/account/restore")
+async def restore_account(current_user: dict = Depends(get_current_user)):
+    """Call off a pending deletion. Data was never touched, so this just clears
+    the flags — the subscription is not resurrected, since billing really did
+    stop and Stripe has no notion of un-cancelling."""
+    if not current_user.get("deletion_scheduled_for"):
+        return {"restored": False, "detail": "This account isn't scheduled for deletion."}
+
+    await db.users.update_one(
+        {"_id": current_user["_id"]},
+        {"$unset": {"deletion_requested_at": "", "deletion_scheduled_for": ""}},
+    )
+    logger.info(f"Account {current_user['_id']} deletion cancelled by the owner")
+    return {"restored": True}
+
+
+async def purge_one_account(user: dict) -> dict:
+    """Actually erase an account whose grace period has run out."""
+    user_oid = user["_id"]
+    user_id = str(user_oid)
     # Owned data before the account itself, so a failure part-way leaves the
     # user able to sign in and retry rather than orphaning their records.
     removed = {
@@ -2725,9 +2791,35 @@ async def delete_account(
     }
     await db.password_resets.delete_many({"user_id": user_oid})
     await db.users.delete_one({"_id": user_oid})
+    logger.info(f"Purged account {user_id}: {removed}")
+    return removed
 
-    logger.info(f"Deleted account {user_id}: {removed}")
-    return {"deleted": True, **removed}
+
+async def purge_expired_accounts() -> int:
+    due = await db.users.find(
+        {"deletion_scheduled_for": {"$lte": datetime.utcnow()}}
+    ).to_list(500)
+    for user in due:
+        try:
+            await purge_one_account(user)
+        except Exception as e:
+            # One bad record shouldn't stop the rest; it'll be retried next pass.
+            logger.exception(f"Failed purging account {user.get('_id')}: {e}")
+    return len(due)
+
+
+async def deletion_purge_loop():
+    """The app has no scheduler, so the purge rides along with the process. A
+    redeploy restarts the clock, which only ever delays a purge — the due date
+    lives in the database, so nothing is lost or erased early."""
+    while True:
+        try:
+            purged = await purge_expired_accounts()
+            if purged:
+                logger.info(f"Purged {purged} account(s) past their grace period")
+        except Exception as e:
+            logger.exception(f"Deletion purge pass failed: {e}")
+        await asyncio.sleep(6 * 60 * 60)
 
 # ============ EXPORT ROUTE ============
 
@@ -2842,6 +2934,10 @@ app.add_middleware(
 INDEXES = [
     # (collection, keys, options)
     ("users", [("email", 1)], {"unique": True, "name": "uniq_email"}),
+    # Sparse: only the handful of accounts with a deletion pending are indexed,
+    # so the periodic purge sweep doesn't read every user.
+    ("users", [("deletion_scheduled_for", 1)],
+     {"name": "users_deletion_due", "sparse": True}),
     # Covers filtering by user, the year range filter, and the newest-first sort
     # in one pass. A compound index also serves its own prefix, so plain
     # "this user's hunts" lookups and the free-tier count use it too.
@@ -2871,6 +2967,11 @@ async def ensure_indexes():
         logger.info("Dropped hunts_user_id; replaced by hunts_user_id_date")
     except Exception:
         pass
+
+
+@app.on_event("startup")
+async def start_deletion_purge():
+    asyncio.create_task(deletion_purge_loop())
 
 
 @app.on_event("shutdown")
