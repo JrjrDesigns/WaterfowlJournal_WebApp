@@ -2606,21 +2606,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Every query in this app is scoped to one user, so each collection needs its
+# owner field indexed. Without these, Mongo reads an entire collection to answer
+# any request — cost grows with total users, not with the asking user's own data,
+# so it stays invisible in testing and only bites once other people sign up.
+INDEXES = [
+    # (collection, keys, options)
+    ("users", [("email", 1)], {"unique": True, "name": "uniq_email"}),
+    # Covers filtering by user, the year range filter, and the newest-first sort
+    # in one pass. A compound index also serves its own prefix, so plain
+    # "this user's hunts" lookups and the free-tier count use it too.
+    ("hunts", [("user_id", 1), ("date", -1)], {"name": "hunts_user_id_date"}),
+    ("locations", [("user_id", 1)], {"name": "locations_user_id"}),
+    ("blinds", [("user_id", 1), ("location_id", 1)], {"name": "blinds_user_id_location"}),
+    ("password_resets", [("token_hash", 1)], {"name": "reset_token_hash"}),
+    # Expired reset rows are already refused on use; expire them so the
+    # collection doesn't grow forever on a 512MB tier.
+    ("password_resets", [("expires_at", 1)], {"name": "reset_ttl", "expireAfterSeconds": 0}),
+]
+
+
 @app.on_event("startup")
 async def ensure_indexes():
     """Never fatal: if legacy rows already collide the index can't be built, and
     refusing to boot over that would take the whole app down."""
-    try:
-        await db.users.create_index("email", unique=True, name="uniq_email")
-    except Exception as e:
-        logger.warning(f"Could not create unique index on users.email: {e}")
+    for collection, keys, options in INDEXES:
+        try:
+            await db[collection].create_index(keys, **options)
+        except Exception as e:
+            logger.warning(f"Could not create index {options.get('name')} on {collection}: {e}")
 
-    # The free-tier check counts a user's hunts on every create; without this
-    # that count reads the whole collection.
+    # Superseded by hunts_user_id_date, which answers everything it did.
     try:
-        await db.hunts.create_index("user_id", name="hunts_user_id")
-    except Exception as e:
-        logger.warning(f"Could not create index on hunts.user_id: {e}")
+        await db.hunts.drop_index("hunts_user_id")
+        logger.info("Dropped hunts_user_id; replaced by hunts_user_id_date")
+    except Exception:
+        pass
 
 
 @app.on_event("shutdown")
