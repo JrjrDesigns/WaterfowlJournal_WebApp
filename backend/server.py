@@ -38,7 +38,18 @@ db = client[os.environ['DB_NAME']]
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-change-in-production")
+# Required, with no fallback on purpose. This key is the only thing standing
+# between a stranger and a signed token for any account. The old default was a
+# literal string sitting in a public repo, so losing the environment variable
+# wouldn't have broken anything visibly — it would have quietly made every
+# account forgeable. Refusing to start is the safer failure.
+SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY is not set. Refusing to start: without it, auth tokens would "
+        "be signed with a predictable key and any account could be impersonated. "
+        "Set SECRET_KEY in the environment (Railway → Variables)."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 10080  # 7 days
 
@@ -150,6 +161,8 @@ class Hunt(BaseModel):
     weather_data: Optional[Dict[str, Any]] = None
     notes: str = ""
     photos: List[str] = []
+    # Sent by the list endpoint in place of `photos`, which it omits.
+    photo_count: int = 0
     harvests: List[HarvestData] = []
     is_morning: bool = False
     is_evening: bool = False
@@ -892,13 +905,18 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
             "location": hunt["location"],
             "weather_data": hunt.get("weather_data"),
             "notes": hunt.get("notes", ""),
-            "photos": hunt.get("photos", []),
+            # Photos are deliberately omitted here and sent only by the
+            # single-hunt endpoint. They're base64 in the document, so including
+            # them made opening the list download every photo the user has ever
+            # taken — megabytes, on cell service, to render a list that never
+            # displayed them. The count keeps the information without the weight.
+            "photo_count": len(hunt.get("photos") or []),
             "harvests": transformed_harvests,
             "is_morning": hunt.get("is_morning", False),
             "is_evening": hunt.get("is_evening", False),
             "created_at": hunt.get("created_at", datetime.utcnow())
         })
-    
+
     return result
 
 @api_router.get("/hunts/years")
@@ -1012,13 +1030,30 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
             if loc:
                 location_type = loc.get("location_type")
 
-    weather_data = fetch_weather_data(
-        hunt_data.location["lat"],
-        hunt_data.location["lng"],
-        hunt_data.date,
-        is_morning=hunt_data.is_morning,
-        is_evening=hunt_data.is_evening,
+    # Weather is a fact about a place at a time, so it only needs fetching again
+    # if one of those changed. Re-fetching on every save meant renaming a hunt or
+    # fixing a harvest count spent an Open-Meteo call — and that quota is shared
+    # across everyone on the same host, so idle edits were competing with real
+    # lookups. Past weather doesn't change, so the stored copy stays correct.
+    existing_weather = existing.get("weather_data")
+    weather_inputs_changed = (
+        existing.get("date") != hunt_data.date
+        or (existing.get("location") or {}).get("lat") != hunt_data.location["lat"]
+        or (existing.get("location") or {}).get("lng") != hunt_data.location["lng"]
+        or existing.get("is_morning") != hunt_data.is_morning
+        or existing.get("is_evening") != hunt_data.is_evening
     )
+
+    if existing_weather and not weather_inputs_changed:
+        weather_data = existing_weather
+    else:
+        weather_data = fetch_weather_data(
+            hunt_data.location["lat"],
+            hunt_data.location["lng"],
+            hunt_data.date,
+            is_morning=hunt_data.is_morning,
+            is_evening=hunt_data.is_evening,
+        )
 
     await db.hunts.update_one({"_id": ObjectId(hunt_id)}, {"$set": {
         "name": hunt_data.name,

@@ -13,7 +13,9 @@ interface Hunt {
   date: string
   weather_data: { temp?: number; condition?: string; weather_code?: number; wind_speed?: number } | null
   harvests: Array<{ species_name: string; count: number }>
-  photos: string[]
+  // The list endpoint sends a count, not the images — they're base64 and this
+  // screen never displayed them. Full photos come from the single-hunt fetch.
+  photo_count: number
 }
 
 function wmoCategory(code: number | undefined): string {
