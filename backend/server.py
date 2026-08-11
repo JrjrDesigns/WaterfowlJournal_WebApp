@@ -312,6 +312,25 @@ FREE_HUNT_LIMIT = 10
 PRO_STATUSES = ("pro", "premium")
 
 
+async def fetch_capped(cursor, limit: int, what: str, user_id: str = "") -> list:
+    """`to_list` with a ceiling that announces itself.
+
+    Motor quietly returns the first `limit` documents and no indication there
+    were more, so a user past the cap would simply find older seasons missing
+    and reasonably conclude the app lost their data. This doesn't stop the
+    truncation — that needs pagination — but it puts it in the logs years
+    before anyone could hit it on a screen.
+    """
+    rows = await cursor.to_list(limit)
+    if len(rows) >= limit:
+        logger.warning(
+            f"QUERY CAP HIT: {what} returned its full {limit}-row limit"
+            + (f" for user {user_id}" if user_id else "")
+            + " — older records are being silently dropped. This needs pagination."
+        )
+    return rows
+
+
 def deletion_timestamp(user: dict) -> Optional[int]:
     """When this account is due to be erased, as unix seconds, or None."""
     scheduled = user.get("deletion_scheduled_for")
@@ -744,7 +763,7 @@ async def reset_password(payload: ResetPasswordRequest):
 @api_router.get("/locations", response_model=List[Location])
 async def get_locations(current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
+    locations = await fetch_capped(db.locations.find({"user_id": user_id}).sort("name", 1), 1000, "locations", user_id)
     return [
         {
             "id": str(loc["_id"]),
@@ -791,7 +810,7 @@ async def delete_location(location_id: str, current_user: dict = Depends(get_cur
 @api_router.get("/locations/{location_id}/blinds", response_model=List[Blind])
 async def get_blinds_for_location(location_id: str, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    blinds = await db.blinds.find({"location_id": location_id, "user_id": user_id}).to_list(1000)
+    blinds = await fetch_capped(db.blinds.find({"location_id": location_id, "user_id": user_id}), 1000, "blinds for a location", user_id)
     return [_blind_doc(b) for b in blinds]
 
 @api_router.post("/locations/{location_id}/blinds", response_model=Blind)
@@ -846,7 +865,7 @@ async def delete_blind(blind_id: str, current_user: dict = Depends(get_current_u
 @api_router.get("/blinds", response_model=List[Blind])
 async def get_all_blinds(current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
     return [_blind_doc(b) for b in blinds]
 
 def _blind_doc(b: dict) -> dict:
@@ -879,7 +898,7 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
         end_date = f"{year}-12-31"
         query_filter["date"] = {"$gte": start_date, "$lte": end_date}
     
-    hunts = await db.hunts.find(query_filter).sort("date", -1).to_list(1000)
+    hunts = await fetch_capped(db.hunts.find(query_filter).sort("date", -1), 1000, "hunt list", user_id)
     
     result = []
     for hunt in hunts:
@@ -925,7 +944,7 @@ async def get_hunt_years(current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
     
     # Get all hunts and extract unique years
-    hunts = await db.hunts.find({"user_id": user_id}).to_list(10000)
+    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
     years = set()
     
     for hunt in hunts:
@@ -1189,11 +1208,11 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
     if year:
         query_filter["date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
 
-    hunts = await db.hunts.find(query_filter).to_list(10000)
+    hunts = await fetch_capped(db.hunts.find(query_filter), 10000, "hunts for statistics", user_id)
 
     # Resolve blind → location name once
-    blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
-    locations = await db.locations.find({"user_id": user_id}).to_list(1000)
+    blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
+    locations = await fetch_capped(db.locations.find({"user_id": user_id}), 1000, "locations", user_id)
     loc_names = {str(l["_id"]): l.get("name", "Unknown") for l in locations}
     blind_to_loc = {str(b["_id"]): loc_names.get(str(b.get("location_id")), "Unknown") for b in blinds}
 
@@ -1749,7 +1768,7 @@ def _season_bin(date_str: str):
 
 async def _migration_timing_profile(user_id: str):
     """Bin the user's hunts by half-month; track birds seen vs harvested."""
-    hunts = await db.hunts.find({"user_id": user_id}).to_list(10000)
+    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
     bins = {}  # bin -> {seen, harv, hunts}
     seen_hunts = 0
     total = 0
@@ -1996,7 +2015,7 @@ def _base_conditions_score(wind_speed, weather_code, temp_max):
 
 async def _user_condition_profile(user_id: str):
     """Avg birds/hunt per condition bucket from the user's full history."""
-    hunts = await db.hunts.find({"user_id": user_id}).to_list(10000)
+    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
     buckets = {"wind": {}, "temp": {}, "sky": {}, "moon": {}}
     total_birds = 0
     sample = 0
@@ -2063,9 +2082,65 @@ FORECAST_CACHE_TTL_SECONDS = 6 * 60 * 60
 _forecast_cache: Dict[str, tuple] = {}  # cache_key -> (fetched_at, data)
 
 
+def _forecast_cache_key(lat: float, lng: float, days: int) -> str:
+    return f"{round(lat, 2)},{round(lng, 2)},{days}"
+
+
+async def forecast_for(lat: float, lng: float, days: int = 7):
+    """Forecast for a point, cached in the database as well as in memory.
+
+    The in-process cache is emptied by every restart, and this app redeploys on
+    every push — so an afternoon of ordinary work could re-fetch the same
+    forecasts over and over against a quota that has no API key and is shared
+    with everything else on this host. Persisting it means a deploy costs
+    nothing, and the cache would still be shared if this ever runs as more than
+    one instance.
+    """
+    key = _forecast_cache_key(lat, lng, days)
+
+    cached = _forecast_cache.get(key)
+    if cached and (time.time() - cached[0]) < FORECAST_CACHE_TTL_SECONDS:
+        return copy.deepcopy(cached[1])
+
+    try:
+        doc = await db.forecast_cache.find_one(
+            {"_id": key, "expires_at": {"$gt": datetime.utcnow()}}
+        )
+    except Exception as e:
+        logger.warning(f"Forecast cache read failed for {key}: {e}")
+        doc = None
+
+    if doc and doc.get("data"):
+        _forecast_cache[key] = (time.time(), doc["data"])
+        return copy.deepcopy(doc["data"])
+
+    data = fetch_forecast_data(lat, lng, days)
+
+    # Failures come back as [] and are deliberately not stored — caching an
+    # outage for six hours would turn a blip into an empty Forecast tab.
+    if data:
+        try:
+            now = datetime.utcnow()
+            await db.forecast_cache.replace_one(
+                {"_id": key},
+                {
+                    "_id": key,
+                    "data": data,
+                    "fetched_at": now,
+                    "expires_at": now + timedelta(seconds=FORECAST_CACHE_TTL_SECONDS),
+                },
+                upsert=True,
+            )
+        except Exception as e:
+            # A cache that can't be written is a slow app, not a broken one.
+            logger.warning(f"Forecast cache write failed for {key}: {e}")
+
+    return data
+
+
 def fetch_forecast_data(lat: float, lng: float, days: int = 7):
     """Fetch multi-day forecast from Open-Meteo. Returns list of per-day dicts."""
-    cache_key = f"{round(lat, 2)},{round(lng, 2)},{days}"
+    cache_key = _forecast_cache_key(lat, lng, days)
     cached = _forecast_cache.get(cache_key)
     if cached and (time.time() - cached[0]) < FORECAST_CACHE_TTL_SECONDS:
         return copy.deepcopy(cached[1])
@@ -2196,12 +2271,12 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
 @api_router.get("/forecast")
 async def get_forecast(current_user: dict = Depends(require_pro)):
     user_id = str(current_user["_id"])
-    locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
+    locations = await fetch_capped(db.locations.find({"user_id": user_id}).sort("name", 1), 1000, "locations", user_id)
     profile = await _user_condition_profile(user_id)
     use_history = profile["sample"] >= HISTORY_MIN_HUNTS
     timing_profile = await _migration_timing_profile(user_id)
 
-    all_blinds = await db.blinds.find({"user_id": user_id}).to_list(1000)
+    all_blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
     blinds_by_location: Dict[str, list] = {}
     for b in all_blinds:
         if b.get("ideal_wind_directions"):
@@ -2215,7 +2290,7 @@ async def get_forecast(current_user: dict = Depends(require_pro)):
         lat, lng = center.get("lat"), center.get("lng")
         if lat is None or lng is None:
             continue
-        days = fetch_forecast_data(lat, lng, 7)
+        days = await forecast_for(lat, lng, 7)
         loc_days = []
         for day in days:
             prev_temp = day.pop("_prev_temp")
@@ -2865,7 +2940,7 @@ async def export_hunts_csv(current_user: dict = Depends(require_pro)):
     import io
 
     user_id = str(current_user["_id"])
-    hunts = await db.hunts.find({"user_id": user_id}).sort("date", -1).to_list(10000)
+    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}).sort("date", -1), 10000, "hunts for CSV export", user_id)
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -2983,6 +3058,9 @@ INDEXES = [
     # Expired reset rows are already refused on use; expire them so the
     # collection doesn't grow forever on a 512MB tier.
     ("password_resets", [("expires_at", 1)], {"name": "reset_ttl", "expireAfterSeconds": 0}),
+    # Same idea for cached forecasts: stale entries are already ignored on read,
+    # so let Mongo sweep them rather than growing the collection forever.
+    ("forecast_cache", [("expires_at", 1)], {"name": "forecast_ttl", "expireAfterSeconds": 0}),
 ]
 
 
