@@ -156,7 +156,12 @@ export default function Stats() {
   const latestRequestYear = useRef<number | null>(null)
 
   useEffect(() => { loadYears() }, [])
-  useEffect(() => { loadStats() }, [selectedYear])
+  // Stats are Pro-only on the server now, so asking as a free user just earns a
+  // 403. The paywall below renders from isPro either way.
+  useEffect(() => {
+    if (isPro) loadStats()
+    else setLoading(false)
+  }, [selectedYear, isPro])
 
   const loadYears = async () => {
     try {

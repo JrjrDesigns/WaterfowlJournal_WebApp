@@ -196,6 +196,28 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise credentials_exception
     return user
 
+
+# What a free account gets. Enforced here, not just in the client: the app on
+# the user's phone can be told anything, so a gate that only lives there is
+# decoration. The client keeps its own copy purely to show the paywall without
+# a round trip.
+FREE_HUNT_LIMIT = 10
+
+PRO_STATUSES = ("pro", "premium")
+
+
+def user_is_pro(user: dict) -> bool:
+    """Single source of truth. A paused subscriber reads as free — the webhook
+    writes subscription_status accordingly (see resolve_subscription_state)."""
+    return user.get("subscription_status", "free") in PRO_STATUSES
+
+
+async def require_pro(current_user: dict = Depends(get_current_user)) -> dict:
+    if not user_is_pro(current_user):
+        raise HTTPException(status_code=403, detail="Pro subscription required")
+    return current_user
+
+
 def _deg_to_cardinal(deg: float) -> str:
     dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     return dirs[round(deg / 45) % 8]
@@ -764,7 +786,17 @@ async def get_hunt_years(current_user: dict = Depends(get_current_user)):
 @api_router.post("/hunts", response_model=Hunt)
 async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    
+
+    # Only blocks logging new hunts. Existing ones stay readable either way —
+    # a lapsed subscriber never loses access to what they already recorded.
+    if not user_is_pro(current_user):
+        hunt_count = await db.hunts.count_documents({"user_id": user_id})
+        if hunt_count >= FREE_HUNT_LIMIT:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Free accounts are limited to {FREE_HUNT_LIMIT} hunts. Upgrade to Pro to keep logging.",
+            )
+
     blind_name = hunt_data.blind_name or "Unknown Location"
     blind_id = hunt_data.blind_id
     location_type = None
@@ -979,7 +1011,7 @@ WIND_ORDER = ["Calm (≤5)", "Light (6–12)", "Moderate (13–20)", "Strong (21
 DOW_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 @api_router.get("/statistics")
-async def get_statistics(year: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+async def get_statistics(year: Optional[int] = None, current_user: dict = Depends(require_pro)):
     user_id = str(current_user["_id"])
 
     query_filter = {"user_id": user_id}
@@ -1991,7 +2023,7 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
 
 
 @api_router.get("/forecast")
-async def get_forecast(current_user: dict = Depends(get_current_user)):
+async def get_forecast(current_user: dict = Depends(require_pro)):
     user_id = str(current_user["_id"])
     locations = await db.locations.find({"user_id": user_id}).sort("name", 1).to_list(1000)
     profile = await _user_condition_profile(user_id)
@@ -2518,14 +2550,10 @@ async def stripe_webhook(request: Request):
 # ============ EXPORT ROUTE ============
 
 @api_router.get("/hunts/export/csv")
-async def export_hunts_csv(current_user: dict = Depends(get_current_user)):
+async def export_hunts_csv(current_user: dict = Depends(require_pro)):
     from fastapi.responses import StreamingResponse
     import csv
     import io
-
-    status = current_user.get("subscription_status", "free")
-    if status not in ("pro", "premium"):
-        raise HTTPException(status_code=403, detail="Pro subscription required for CSV export")
 
     user_id = str(current_user["_id"])
     hunts = await db.hunts.find({"user_id": user_id}).sort("date", -1).to_list(10000)
@@ -2586,6 +2614,13 @@ async def ensure_indexes():
         await db.users.create_index("email", unique=True, name="uniq_email")
     except Exception as e:
         logger.warning(f"Could not create unique index on users.email: {e}")
+
+    # The free-tier check counts a user's hunts on every create; without this
+    # that count reads the whole collection.
+    try:
+        await db.hunts.create_index("user_id", name="hunts_user_id")
+    except Exception as e:
+        logger.warning(f"Could not create index on hunts.user_id: {e}")
 
 
 @app.on_event("shutdown")
