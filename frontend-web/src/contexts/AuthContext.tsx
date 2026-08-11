@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'
+import { loginRequest, registerRequest } from '../utils/api'
 
 interface User {
   id: string
@@ -79,42 +80,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const login = async (email: string, password: string) => {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.detail || 'Login failed')
-    }
-
-    const data = await response.json()
+  // Both auth calls go through apiRequest so they inherit its timeout, abort
+  // handling and network-error wording. Hand-rolled fetches here used to hang
+  // forever on a stalled connection and surface raw browser text like
+  // "Load failed" straight into the form.
+  const adoptSession = (data: { access_token: string; user: User }) => {
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setToken(data.access_token)
     setUser(data.user)
   }
 
+  const login = async (email: string, password: string) => {
+    adoptSession(await loginRequest(email, password))
+  }
+
   const register = async (email: string, password: string, name: string) => {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.detail || 'Registration failed')
-    }
-
-    const data = await response.json()
-    localStorage.setItem('token', data.access_token)
-    localStorage.setItem('user', JSON.stringify(data.user))
-    setToken(data.access_token)
-    setUser(data.user)
+    adoptSession(await registerRequest(email, password, name))
   }
 
   const logout = () => {

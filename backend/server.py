@@ -19,7 +19,9 @@ import calendar
 import json
 import secrets
 import hashlib
+import re
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -356,34 +358,49 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
 
 # ============ AUTH ROUTES ============
 
+def normalize_email(email: str) -> str:
+    """Clients that skip this send `Bob@X.com`, which would otherwise register a
+    second account that its owner can never log back into."""
+    return email.strip().lower()
+
+
 @api_router.post("/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
+    email = normalize_email(user_data.email)
+
     # Check if user exists
-    existing_user = await db.users.find_one({"email": user_data.email})
+    existing_user = await db.users.find_one({"email": email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     user_doc = {
-        "email": user_data.email,
+        "email": email,
         "password_hash": hashed_password,
         "name": user_data.name,
         "subscription_status": "free",
         "created_at": datetime.utcnow()
     }
-    result = await db.users.insert_one(user_doc)
+    # The check above loses a race between two in-flight signups for the same
+    # address — which is exactly what a client retrying over a flaky connection
+    # produces. The unique index is what actually prevents a duplicate account;
+    # this turns the collision into the same 400 the check would have given.
+    try:
+        result = await db.users.insert_one(user_doc)
+    except DuplicateKeyError:
+        raise HTTPException(status_code=400, detail="Email already registered")
     user_id = str(result.inserted_id)
-    
+
     # Create token
     access_token = create_access_token(data={"sub": user_id})
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
             "id": user_id,
-            "email": user_data.email,
+            "email": email,
             "name": user_data.name,
             "subscription_status": "free",
             "subscription_paused": False,
@@ -393,10 +410,17 @@ async def register(user_data: UserRegister):
 
 @api_router.post("/auth/login", response_model=Token)
 async def login(user_data: UserLogin):
-    user = await db.users.find_one({"email": user_data.email})
+    email = normalize_email(user_data.email)
+    user = await db.users.find_one({"email": email})
+    if not user:
+        # Accounts created before emails were normalized may be stored with
+        # their original casing.
+        user = await db.users.find_one(
+            {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}}
+        )
     if not user or not verify_password(user_data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
-    
+
     user_id = str(user["_id"])
     access_token = create_access_token(data={"sub": user_id})
     
@@ -488,7 +512,7 @@ def _send_reset_email(to_email: str, name: str, reset_url: str):
 @api_router.post("/auth/forgot-password")
 async def forgot_password(payload: ForgotPasswordRequest):
     """Always reports success — otherwise this endpoint reveals which emails have accounts."""
-    email = payload.email.strip().lower()
+    email = normalize_email(payload.email)
     generic = {"message": "If that email has an account, a reset link is on its way."}
 
     user = await db.users.find_one({"email": email})
@@ -2553,6 +2577,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def ensure_indexes():
+    """Never fatal: if legacy rows already collide the index can't be built, and
+    refusing to boot over that would take the whole app down."""
+    try:
+        await db.users.create_index("email", unique=True, name="uniq_email")
+    except Exception as e:
+        logger.warning(f"Could not create unique index on users.email: {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

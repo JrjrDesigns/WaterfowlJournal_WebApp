@@ -11,6 +11,28 @@ const handleUnauthorized = () => {
 // places with poor signal. Short-running calls pass their own lower timeout.
 const DEFAULT_TIMEOUT_MS = 45000
 
+// A fetch that never gets a response rejects with a TypeError whose message is
+// raw browser jargon — "Load failed" on Safari, "Failed to fetch" on Chrome,
+// "NetworkError when attempting to fetch resource" on Firefox. Shown as-is it
+// reads like an app bug, so a tester with one bar of service blames the signup
+// form instead of their signal. Translate it into something actionable.
+export class NetworkError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'NetworkError'
+  }
+}
+
+const isNetworkFailure = (err: unknown): boolean =>
+  err instanceof TypeError ||
+  (err instanceof DOMException && err.name === 'AbortError') ||
+  err instanceof NetworkError
+
+const networkErrorMessage = (): string =>
+  typeof navigator !== 'undefined' && navigator.onLine === false
+    ? "You're offline. Reconnect and try again — nothing was saved."
+    : "Couldn't reach Blind Guide. Check your signal and try again."
+
 export const apiRequest = async (
   endpoint: string,
   options: RequestInit = {},
@@ -41,7 +63,11 @@ export const apiRequest = async (
     })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error('That took too long to respond. Check your connection and try again.')
+      throw new NetworkError('That took too long to respond. Check your connection and try again.')
+    }
+    // fetch only rejects for network-level failures; anything else is a bug.
+    if (err instanceof TypeError) {
+      throw new NetworkError(networkErrorMessage())
     }
     throw err
   } finally {
@@ -57,7 +83,59 @@ export const apiRequest = async (
     throw new Error(error.detail || 'Request failed')
   }
 
-  return response.json()
+  // A proxy or cold-start page can return 200 with an HTML body; parsing that
+  // as JSON throws a syntax error that reads like a crash. It's a transport
+  // problem, so report it as one.
+  try {
+    return await response.json()
+  } catch {
+    throw new NetworkError("Got an unexpected response from the server. Try again in a moment.")
+  }
+}
+
+// Auth — sign in / sign up. Both are quick round-trips with the user watching a
+// spinner, so they fail fast rather than riding the 45s default.
+const AUTH_TIMEOUT_MS = 20000
+
+export const loginRequest = (email: string, password: string) =>
+  apiRequest('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  }, AUTH_TIMEOUT_MS)
+
+export const registerRequest = async (email: string, password: string, name: string) => {
+  const submit = () =>
+    apiRequest('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
+    }, AUTH_TIMEOUT_MS)
+
+  try {
+    return await submit()
+  } catch (err) {
+    if (!isNetworkFailure(err)) throw err
+
+    // The request may have reached the server with only the response lost on
+    // the way back — from here that's indistinguishable from never sending it.
+    // Retrying settles it: either this one creates the account, or the server
+    // says the email is taken, which means the first attempt did land. In that
+    // case it's this user's own account and the password they just typed
+    // proves it, so finish the job by signing them in instead of stranding
+    // them at a form that insists their brand-new email is already in use.
+    try {
+      return await submit()
+    } catch (retryErr) {
+      const message = retryErr instanceof Error ? retryErr.message : ''
+      if (/already registered/i.test(message)) {
+        try {
+          return await loginRequest(email, password)
+        } catch {
+          throw new Error('That email already has an account. Try signing in instead.')
+        }
+      }
+      throw retryErr
+    }
+  }
 }
 
 // Auth — password reset
