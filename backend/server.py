@@ -22,6 +22,8 @@ import hashlib
 import re
 from collections import defaultdict, deque
 from bson import ObjectId
+from bson.errors import InvalidId
+from fastapi.responses import JSONResponse
 from pymongo.errors import DuplicateKeyError
 
 ROOT_DIR = Path(__file__).parent
@@ -2671,6 +2673,62 @@ async def stripe_webhook(request: Request):
 
     return {"received": True}
 
+# ============ ACCOUNT DELETION ============
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+
+
+@api_router.post("/account/delete")
+async def delete_account(
+    payload: DeleteAccountRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """Erase the account and everything in it. Irreversible."""
+    # The password, not just a valid token: a phone left unlocked on a tailgate
+    # shouldn't be enough to destroy someone's seasons.
+    # 403 rather than 401 on purpose: the client treats any 401 as an expired
+    # session and signs the user out, so mistyping here would eject them from
+    # the app instead of showing them the message.
+    if not verify_password(payload.password, current_user["password_hash"]):
+        raise HTTPException(status_code=403, detail="That password is incorrect.")
+
+    user_oid = current_user["_id"]
+    user_id = str(user_oid)
+
+    # Billing goes first and hard. Deleting the account while Stripe keeps
+    # charging is the one outcome worse than not deleting it at all, and once
+    # the user row is gone there's nothing left to reconcile a payment against.
+    if STRIPE_SECRET_KEY and not STRIPE_SECRET_KEY.startswith("YOUR_"):
+        try:
+            import stripe as stripe_lib
+            stripe_lib.api_key = STRIPE_SECRET_KEY
+            subscription_id = find_stripe_subscription_id(stripe_lib, current_user)
+            if subscription_id:
+                stripe_lib.Subscription.delete(subscription_id)
+                logger.info(f"Cancelled subscription {subscription_id} deleting user {user_id}")
+        except Exception as e:
+            logger.exception(f"Could not cancel Stripe subscription deleting user {user_id}: {e}")
+            raise HTTPException(
+                status_code=502,
+                detail="We couldn't cancel your subscription just now, so we've left your "
+                       "account alone rather than risk charging you again. Please try later.",
+            )
+
+    # Owned data before the account itself, so a failure part-way leaves the
+    # user able to sign in and retry rather than orphaning their records.
+    removed = {
+        "hunts": (await db.hunts.delete_many({"user_id": user_id})).deleted_count,
+        "blinds": (await db.blinds.delete_many({"user_id": user_id})).deleted_count,
+        "locations": (await db.locations.delete_many({"user_id": user_id})).deleted_count,
+    }
+    await db.password_resets.delete_many({"user_id": user_oid})
+    await db.users.delete_one({"_id": user_oid})
+
+    logger.info(f"Deleted account {user_id}: {removed}")
+    return {"deleted": True, **removed}
+
 # ============ EXPORT ROUTE ============
 
 @api_router.get("/hunts/export/csv")
@@ -2729,6 +2787,25 @@ app.include_router(api_router)
 MAX_REQUEST_BYTES = 3 * 1024 * 1024
 
 
+@app.exception_handler(InvalidId)
+async def handle_invalid_id(request: Request, exc: InvalidId):
+    """A malformed id in the URL can't match anything, so it's a miss rather
+    than a crash. Previously this surfaced as a bare 500."""
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected(request: Request, exc: Exception):
+    """Last resort. Without this an unforeseen error returns a bare
+    'Internal Server Error' with no detail field, which the client can't parse
+    into anything useful to show. The cause goes to the logs, not the user."""
+    logger.exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Something went wrong on our end. Please try again in a moment."},
+    )
+
+
 @app.middleware("http")
 async def limit_request_size(request: Request, call_next):
     declared = request.headers.get("content-length")
@@ -2738,7 +2815,6 @@ async def limit_request_size(request: Request, call_next):
         except ValueError:
             oversize = False
         if oversize:
-            from fastapi.responses import JSONResponse
             logger.warning(
                 f"Rejected {declared} byte request to {request.url.path} from {client_ip(request)}"
             )

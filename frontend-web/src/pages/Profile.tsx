@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
-import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription } from '../utils/api'
+import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription, deleteAccount } from '../utils/api'
 
 const STRIPE_PRICE_ID_MONTHLY = import.meta.env.VITE_STRIPE_PRICE_ID_MONTHLY as string | undefined
 const STRIPE_PRICE_ID_ANNUAL = import.meta.env.VITE_STRIPE_PRICE_ID_ANNUAL as string | undefined
@@ -44,6 +44,29 @@ export default function Profile() {
   const [isPausing, setIsPausing] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [activating, setActivating] = useState(false)
+  const [showDeletePanel, setShowDeletePanel] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      setDeleteError('Enter your password to confirm')
+      return
+    }
+    setDeleteError(null)
+    setIsDeleting(true)
+    try {
+      await deleteAccount(deletePassword)
+      // The account is gone, so clear the stored session before anything can
+      // try to use it and bounce off a 401.
+      logout()
+      navigate('/auth/register', { replace: true })
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete your account')
+      setIsDeleting(false)
+    }
+  }
 
   const resumeDate = formatResumeDate(user?.subscription_resumes_at)
 
@@ -427,6 +450,62 @@ export default function Profile() {
         </svg>
         Sign Out
       </button>
+
+      {/* Deliberately understated and two steps deep: irreversible, and nobody
+          should reach it by mistake while looking for sign out. */}
+      {!showDeletePanel ? (
+        <button
+          onClick={() => { setShowDeletePanel(true); setDeleteError(null) }}
+          className="w-full text-center text-muted/70 hover:text-red-600 text-xs font-semibold py-4 transition-colors"
+        >
+          Delete my account
+        </button>
+      ) : (
+        <div className="mt-4 border border-red-200 bg-red-50/50 rounded-xl p-5">
+          <p className="text-sm font-semibold text-ink">Delete your account?</p>
+          <p className="text-xs text-muted mt-1.5 leading-relaxed">
+            This erases your account and every hunt, location and blind on it. It
+            cannot be undone.{isPro && ' Your Pro subscription will be cancelled so you are not charged again.'}
+          </p>
+          <p className="text-xs text-muted mt-2 leading-relaxed">
+            Want a copy first? Close this and use Export Data.
+          </p>
+
+          {deleteError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
+              {deleteError}
+            </div>
+          )}
+
+          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-4 mb-2">
+            Confirm your password
+          </label>
+          <input
+            type="password"
+            value={deletePassword}
+            onChange={e => setDeletePassword(e.target.value)}
+            autoComplete="current-password"
+            placeholder="Your password"
+          />
+
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => { setShowDeletePanel(false); setDeletePassword(''); setDeleteError(null) }}
+              disabled={isDeleting}
+              className="flex-1 border border-hairline text-ink font-semibold py-2.5 rounded-lg text-sm disabled:opacity-50"
+            >
+              Keep my account
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={isDeleting}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
+            >
+              {isDeleting ? 'Deleting…' : 'Delete forever'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <p className="text-center text-xs mt-6 space-x-3">
         <a href="https://blindguideapp.com/terms" target="_blank" rel="noopener noreferrer"

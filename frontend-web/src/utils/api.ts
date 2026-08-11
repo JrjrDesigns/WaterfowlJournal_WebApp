@@ -138,6 +138,14 @@ export const registerRequest = async (email: string, password: string, name: str
   }
 }
 
+// Deleting an account cancels billing at Stripe first, so allow for that round
+// trip rather than timing out mid-way and leaving the user unsure what happened.
+export const deleteAccount = (password: string) =>
+  apiRequest('/api/account/delete', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  }, 30000)
+
 // Auth — password reset
 export const requestPasswordReset = (email: string) =>
   apiRequest('/api/auth/forgot-password', {
