@@ -189,6 +189,39 @@ export default function Stats() {
     }
   }
 
+  // Statistics are Pro-only, so this comes before the empty state — otherwise a
+  // free user who has logged hunts is told "No data yet", which reads as the app
+  // losing their hunts rather than as a locked feature.
+  if (!isPro) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="stats" />}
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-0.5 flex items-center gap-2">
+            <span className="inline-block w-5 h-px bg-muted/50" />
+            Season Review
+          </p>
+          <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
+        </div>
+        <button
+          onClick={() => setShowPaywall(true)}
+          className="w-full relative rounded-xl overflow-hidden border border-hairline"
+        >
+          <div className="h-56 bg-surface flex flex-col items-center justify-center px-6">
+            <svg className="w-6 h-6 text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <p className="text-ink font-semibold text-sm">Season Stats — Pro</p>
+            <p className="text-muted text-xs mt-1 mb-4 text-center max-w-xs">
+              Harvest totals, species breakdowns, best blinds and days, plus how weather, wind and moon phase shaped your season.
+            </p>
+            <span className="px-4 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
+          </div>
+        </button>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -324,27 +357,8 @@ export default function Stats() {
         </div>
       </div>
 
-      {/* Pro sections */}
-      {!isPro ? (
-        <button
-          onClick={() => setShowPaywall(true)}
-          className="w-full mb-4 relative rounded-xl overflow-hidden border border-hairline group"
-        >
-          <div className="h-48 bg-surface flex items-end justify-around px-6 pb-4 blur-sm opacity-30 pointer-events-none">
-            {[60, 30, 10].map((h, i) => (
-              <div key={i} className="w-10 bg-green rounded-t" style={{ height: `${h}%` }} />
-            ))}
-          </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80">
-            <svg className="w-5 h-5 text-muted mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <p className="text-ink font-semibold text-sm">Advanced analytics — Pro</p>
-            <p className="text-muted text-xs mt-1 mb-3">Blinds, conditions, moon phase & more</p>
-            <span className="px-4 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
-          </div>
-        </button>
-      ) : (
+      {/* Everything below is Pro; free accounts never reach this render. */}
+      {(
         <>
           {/* Species Breakdown */}
           {speciesSummary.length > 0 && (
