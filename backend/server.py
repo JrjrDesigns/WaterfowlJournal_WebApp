@@ -2434,6 +2434,25 @@ async def get_species_list():
 async def root():
     return {"message": "Waterfowl Hunting Journal API", "version": "1.0.0"}
 
+
+@api_router.get("/health")
+async def health():
+    """For uptime monitoring. Deliberately touches the database.
+
+    A check that only proves the web process is answering would report a happy
+    green tick while Mongo was unreachable and every real request returned 500 —
+    which is the outage you actually want waking you up. Returns 503 on failure
+    so any monitor treats it as down, and says nothing about why: this endpoint
+    is public.
+    """
+    try:
+        await db.command("ping")
+    except Exception as e:
+        logger.error(f"Health check failed: database unreachable: {e}")
+        return JSONResponse(status_code=503, content={"status": "unhealthy"})
+
+    return {"status": "ok"}
+
 # ============ SUBSCRIPTION ROUTES ============
 
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
@@ -2906,8 +2925,13 @@ async def purge_one_account(user: dict) -> dict:
 
 
 async def purge_expired_accounts() -> int:
+    # `$type: "date"` is belt-and-braces. Mongo's range operators are already
+    # type-bracketed, so `$lte: <date>` won't match a null or missing field —
+    # but this is the only code in the app that deletes accounts unattended, on
+    # a timer, with no backup behind it. It should not depend on a subtlety of
+    # BSON comparison ordering being remembered correctly.
     due = await db.users.find(
-        {"deletion_scheduled_for": {"$lte": datetime.utcnow()}}
+        {"deletion_scheduled_for": {"$type": "date", "$lte": datetime.utcnow()}}
     ).to_list(500)
     for user in due:
         try:
