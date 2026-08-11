@@ -271,21 +271,19 @@ def client_ip(request: Request) -> str:
 
 
 # Guessing one account's password is capped per email address, so rotating IPs
-# doesn't help — which matters because the reverse (capping only by IP) would
-# punish real users, who share carrier NAT addresses out in the field. The
-# per-IP cap is a backstop against sheer volume: every password check burns
-# real CPU by design, so unlimited attempts are a denial of service even when
-# every one of them fails.
+# doesn't help — and, just as importantly, real users are never caught by it.
+# Hunters in the field share carrier NAT addresses, so anything keyed on IP
+# alone would have a whole cell tower's worth of people locking each other out.
+#
+# Only FAILED attempts are counted, at either level. Someone signing in
+# correctly is never throttled no matter how often they do it, while an
+# attacker — whose attempts are all failures by definition — is cut off fast.
+# The per-IP failure cap is the backstop against sheer volume, since every
+# password check burns real CPU whether or not it succeeds.
 LOGIN_FAIL_LIMIT, LOGIN_FAIL_WINDOW = 8, 15 * 60
-AUTH_IP_LIMIT, AUTH_IP_WINDOW = 30, 60
-REGISTER_IP_LIMIT, REGISTER_IP_WINDOW = 10, 60 * 60
+AUTH_IP_FAIL_LIMIT, AUTH_IP_FAIL_WINDOW = 60, 60
+REGISTER_IP_LIMIT, REGISTER_IP_WINDOW = 20, 60 * 60
 RESET_EMAIL_LIMIT, RESET_EMAIL_WINDOW = 4, 60 * 60
-
-
-def guard_auth_ip(request: Request) -> None:
-    retry = rate_limit_hit(f"auth-ip:{client_ip(request)}", AUTH_IP_LIMIT, AUTH_IP_WINDOW)
-    if retry is not None:
-        raise too_many(retry, "Too many attempts. Wait a moment and try again.")
 
 
 # What a free account gets. Enforced here, not just in the client: the app on
@@ -481,7 +479,6 @@ def normalize_email(email: str) -> str:
 async def register(user_data: UserRegister, request: Request):
     email = normalize_email(user_data.email)
 
-    guard_auth_ip(request)
     retry = rate_limit_hit(
         f"register-ip:{client_ip(request)}", REGISTER_IP_LIMIT, REGISTER_IP_WINDOW
     )
@@ -532,16 +529,20 @@ async def register(user_data: UserRegister, request: Request):
 async def login(user_data: UserLogin, request: Request):
     email = normalize_email(user_data.email)
 
-    guard_auth_ip(request)
-
-    # Checked before the password is verified, so a locked-out attacker can't
-    # keep spending CPU on bcrypt.
+    # Both checked before the password is verified, so a throttled attacker
+    # can't keep spending CPU on bcrypt.
     fail_key = f"login-fail:{email}"
+    ip_fail_key = f"login-fail-ip:{client_ip(request)}"
+
     retry = rate_limit_blocked(fail_key, LOGIN_FAIL_LIMIT, LOGIN_FAIL_WINDOW)
     if retry is not None:
         raise too_many(
             retry, "Too many failed sign-in attempts. Try again in a few minutes or reset your password."
         )
+
+    retry = rate_limit_blocked(ip_fail_key, AUTH_IP_FAIL_LIMIT, AUTH_IP_FAIL_WINDOW)
+    if retry is not None:
+        raise too_many(retry, "Too many failed attempts. Wait a moment and try again.")
 
     user = await db.users.find_one({"email": email})
     if not user:
@@ -552,9 +553,11 @@ async def login(user_data: UserLogin, request: Request):
         )
     if not user or not verify_password(user_data.password, user["password_hash"]):
         rate_limit_record(fail_key, LOGIN_FAIL_WINDOW)
+        rate_limit_record(ip_fail_key, AUTH_IP_FAIL_WINDOW)
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
-    # Only failures count, so someone signing in normally is never throttled.
+    # Only failures count, so someone signing in normally is never throttled —
+    # and getting it right clears the strikes against them.
     rate_limit_clear(fail_key)
 
     user_id = str(user["_id"])
@@ -651,7 +654,6 @@ async def forgot_password(payload: ForgotPasswordRequest, request: Request):
     email = normalize_email(payload.email)
     generic = {"message": "If that email has an account, a reset link is on its way."}
 
-    guard_auth_ip(request)
     # Capped per address so this can't be used to bomb someone's inbox. The
     # generic reply above is returned either way, so the cap leaks nothing about
     # whether the account exists.
