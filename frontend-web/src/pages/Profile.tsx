@@ -48,6 +48,7 @@ export default function Profile() {
   const [isPausing, setIsPausing] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [activating, setActivating] = useState(false)
+  const [showManagePanel, setShowManagePanel] = useState(false)
   const [showDeletePanel, setShowDeletePanel] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteEmail, setDeleteEmail] = useState('')
@@ -235,9 +236,45 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* A pending deletion is never tucked away behind the Manage toggle — it's
+          a countdown on their data, and they need to see it to stop it. */}
+      {deletionDate && (
+        <div className="border border-red-300 bg-red-50 rounded-xl p-5 mb-4">
+          <p className="text-sm font-semibold text-ink">Your account is scheduled for deletion</p>
+          <p className="text-xs text-muted mt-1.5 leading-relaxed">
+            Everything on it will be erased on <span className="font-semibold text-ink">{deletionDate}</span>.
+            Until then nothing has been touched, and you can change your mind.
+          </p>
+          <p className="text-xs text-muted mt-2 leading-relaxed">
+            Billing has already stopped, so you won't be charged again. Restoring
+            the account doesn't restart a subscription — you'd resubscribe if you
+            wanted Pro back.
+          </p>
+
+          {deleteError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
+              {deleteError}
+            </div>
+          )}
+
+          <button
+            onClick={handleRestore}
+            disabled={isRestoring}
+            className="w-full bg-ink hover:bg-black text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-4 disabled:opacity-50"
+          >
+            {isRestoring ? 'Restoring…' : 'Keep my account'}
+          </button>
+        </div>
+      )}
+
+      {/* Subscription and account controls. The card shows current state at a
+          glance; anything that changes or ends the account sits one layer in
+          behind Manage, out of reach of a stray tap. */}
+      <div className="bg-surface border border-hairline rounded-xl mb-4 overflow-hidden">
+
       {/* Paused subscription — resuming is one tap; pausing lives in the Stripe portal */}
       {isPaused && (
-        <div className="bg-surface border border-amber-500/30 rounded-xl p-5 mb-4">
+        <div className="p-5 border-l-2 border-amber-500/40">
           <p className="text-sm font-semibold text-ink">Pro is paused</p>
           <p className="text-xs text-muted mt-1 leading-relaxed">
             {resumeDate
@@ -256,21 +293,14 @@ export default function Profile() {
           >
             {isResuming ? 'Resuming…' : 'Resume Pro now'}
           </button>
-          <button
-            onClick={handleManageSubscription}
-            disabled={isManaging}
-            className="w-full mt-2 text-muted hover:text-ink text-xs py-2 transition-colors disabled:opacity-60"
-          >
-            {isManaging ? 'Opening…' : 'Manage billing'}
-          </button>
         </div>
       )}
 
       {/* Upgrade panel */}
       {!isPro && !isPaused && (
-        <div className="mb-4">
+        <div>
           {showUpgradePanel ? (
-            <div className="bg-surface border border-hairline rounded-xl p-6">
+            <div className="p-6">
               <h3 className="font-display text-2xl text-ink tracking-wider leading-none mb-1">GO PRO</h3>
               <p className="text-muted text-sm mb-5">Unlock the forecast, advanced analytics, automatic weather, and unlimited hunts.</p>
 
@@ -335,7 +365,7 @@ export default function Profile() {
           ) : (
             <button
               onClick={() => setShowUpgradePanel(true)}
-              className="w-full bg-surface border border-hairline hover:border-ink rounded-xl p-4 flex items-center justify-between transition-colors group"
+              className="w-full hover:bg-bg p-4 flex items-center justify-between transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-green/10 rounded-lg flex items-center justify-center">
@@ -356,34 +386,60 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Pro subscription management */}
+      {/* Pro status */}
       {isPro && (
-        <div className="bg-surface border border-hairline rounded-xl mb-4">
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-ink">Pro — Active</p>
-              <p className="text-xs text-muted mt-0.5">All features unlocked</p>
-            </div>
+        <div className="p-4">
+          <p className="text-sm font-semibold text-ink">Pro — Active</p>
+          <p className="text-xs text-muted mt-0.5">All features unlocked</p>
+        </div>
+      )}
+
+      {/* Manage — everything that changes billing or ends the account lives
+          behind this, so none of it is one tap from the profile screen. */}
+      <button
+        onClick={() => { setShowManagePanel(v => !v); setDeleteError(null) }}
+        className="w-full flex items-center justify-between px-4 py-3 border-t border-hairline hover:bg-bg transition-colors"
+      >
+        <span className="text-xs font-semibold text-muted uppercase tracking-wider">
+          Manage account
+        </span>
+        <svg
+          className={`w-4 h-4 text-muted transition-transform ${showManagePanel ? 'rotate-90' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      {showManagePanel && (
+        <div className="border-t border-hairline bg-bg/40 p-4 space-y-3">
+
+          {/* Billing lives at Stripe; nothing to manage until there's a subscription */}
+          {(isPro || isPaused) && (
             <button
               onClick={handleManageSubscription}
               disabled={isManaging}
-              className="text-xs font-semibold text-ink underline underline-offset-2 disabled:opacity-60"
+              className="w-full text-left bg-surface border border-hairline hover:border-ink rounded-lg px-4 py-3 transition-colors disabled:opacity-60"
             >
-              {isManaging ? 'Opening…' : 'Manage'}
+              <p className="text-sm font-semibold text-ink">
+                {isManaging ? 'Opening…' : 'Billing & payment method'}
+              </p>
+              <p className="text-xs text-muted mt-0.5">Invoices, card details, cancel</p>
             </button>
-          </div>
+          )}
 
           {/* Off-season pause. Kept deliberately quiet — it's a retention valve,
               not something to advertise. */}
-          {!showPausePanel ? (
+          {isPro && (!showPausePanel ? (
             <button
               onClick={() => setShowPausePanel(true)}
-              className="w-full text-xs text-muted hover:text-ink py-3 border-t border-hairline transition-colors"
+              className="w-full text-left bg-surface border border-hairline hover:border-ink rounded-lg px-4 py-3 transition-colors"
             >
-              Hunting season over? Pause your subscription
+              <p className="text-sm font-semibold text-ink">Pause my subscription</p>
+              <p className="text-xs text-muted mt-0.5">Hunting season over? Stop billing, keep your data</p>
             </button>
           ) : (
-            <div className="border-t border-hairline p-4">
+            <div className="bg-surface border border-hairline rounded-lg p-4">
               <p className="text-sm font-semibold text-ink">Pause for the off-season</p>
               <p className="text-xs text-muted mt-1 leading-relaxed">
                 You won't be billed while paused, and Pro features turn off until it ends.
@@ -432,12 +488,91 @@ export default function Profile() {
                 </button>
               </div>
             </div>
+          ))}
+
+          {/* Deletion. Last in the panel, and still its own confirm step. */}
+          {deletionDate ? (
+            <p className="text-xs text-muted leading-relaxed px-1">
+              A deletion is already scheduled — see the notice above to cancel it.
+            </p>
+          ) : !showDeletePanel ? (
+            <button
+              onClick={() => { setShowDeletePanel(true); setDeleteError(null) }}
+              className="w-full text-left bg-surface border border-hairline hover:border-red-300 rounded-lg px-4 py-3 transition-colors group"
+            >
+              <p className="text-sm font-semibold text-ink group-hover:text-red-600 transition-colors">
+                Delete my account
+              </p>
+              <p className="text-xs text-muted mt-0.5">Erases everything after {DELETION_GRACE_DAYS} days</p>
+            </button>
+          ) : (
+            <div className="border border-red-200 bg-red-50/50 rounded-lg p-4">
+              <p className="text-sm font-semibold text-ink">Delete your account?</p>
+              <p className="text-xs text-muted mt-1.5 leading-relaxed">
+                Your account and every hunt, location and blind on it will be erased
+                after {DELETION_GRACE_DAYS} days. Nothing is deleted straight away — you can cancel
+                any time before then by coming back here.
+              </p>
+              <p className="text-xs text-muted mt-2 leading-relaxed">
+                {isPro && 'Your Pro subscription is cancelled immediately, so you are not charged again. '}
+                Want a copy of your hunts first? Close this and use Export Data.
+              </p>
+
+              {deleteError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
+                  {deleteError}
+                </div>
+              )}
+
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-4 mb-2">
+                Type your email to confirm
+              </label>
+              <input
+                type="email"
+                value={deleteEmail}
+                onChange={e => setDeleteEmail(e.target.value)}
+                autoComplete="off"
+                placeholder={user?.email || 'you@example.com'}
+              />
+
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-3 mb-2">
+                And your password
+              </label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+                autoComplete="current-password"
+                placeholder="Your password"
+              />
+
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => {
+                    setShowDeletePanel(false); setDeletePassword(''); setDeleteEmail(''); setDeleteError(null)
+                  }}
+                  disabled={isDeleting}
+                  className="flex-1 border border-hairline text-ink font-semibold py-2.5 rounded-lg text-sm disabled:opacity-50"
+                >
+                  Keep my account
+                </button>
+                <button
+                  onClick={handleRequestDeletion}
+                  disabled={isDeleting}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? 'Scheduling…' : 'Schedule deletion'}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
-      {isPro && checkoutError && (
-        <p className="text-red-600 text-xs font-semibold mb-4 text-center">{checkoutError}</p>
+
+      {(isPro || isPaused) && checkoutError && (
+        <p className="text-red-600 text-xs font-semibold px-4 pb-3 text-center">{checkoutError}</p>
       )}
+      </div>
 
       {/* Menu items */}
       <div className="bg-surface border border-hairline rounded-xl overflow-hidden divide-y divide-hairline mb-4">
@@ -476,104 +611,6 @@ export default function Profile() {
         Sign Out
       </button>
 
-      {/* A deletion already pending outranks everything else on this screen. */}
-      {deletionDate ? (
-        <div className="mt-4 border border-red-300 bg-red-50 rounded-xl p-5">
-          <p className="text-sm font-semibold text-ink">Your account is scheduled for deletion</p>
-          <p className="text-xs text-muted mt-1.5 leading-relaxed">
-            Everything on it will be erased on <span className="font-semibold text-ink">{deletionDate}</span>.
-            Until then nothing has been touched, and you can change your mind.
-          </p>
-          <p className="text-xs text-muted mt-2 leading-relaxed">
-            Billing has already stopped, so you won't be charged again. Restoring
-            the account doesn't restart a subscription — you'd resubscribe if you
-            wanted Pro back.
-          </p>
-
-          {deleteError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
-              {deleteError}
-            </div>
-          )}
-
-          <button
-            onClick={handleRestore}
-            disabled={isRestoring}
-            className="w-full bg-ink hover:bg-black text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-4 disabled:opacity-50"
-          >
-            {isRestoring ? 'Restoring…' : 'Keep my account'}
-          </button>
-        </div>
-      ) : !showDeletePanel ? (
-        /* Understated and two steps deep: nobody should reach this by mistake
-           while looking for sign out. */
-        <button
-          onClick={() => { setShowDeletePanel(true); setDeleteError(null) }}
-          className="w-full text-center text-muted/70 hover:text-red-600 text-xs font-semibold py-4 transition-colors"
-        >
-          Delete my account
-        </button>
-      ) : (
-        <div className="mt-4 border border-red-200 bg-red-50/50 rounded-xl p-5">
-          <p className="text-sm font-semibold text-ink">Delete your account?</p>
-          <p className="text-xs text-muted mt-1.5 leading-relaxed">
-            Your account and every hunt, location and blind on it will be erased
-            after {DELETION_GRACE_DAYS} days. Nothing is deleted straight away — you can cancel any
-            time before then by coming back here.
-          </p>
-          <p className="text-xs text-muted mt-2 leading-relaxed">
-            {isPro && 'Your Pro subscription is cancelled immediately, so you are not charged again. '}
-            Want a copy of your hunts first? Close this and use Export Data.
-          </p>
-
-          {deleteError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mt-3">
-              {deleteError}
-            </div>
-          )}
-
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-4 mb-2">
-            Type your email to confirm
-          </label>
-          <input
-            type="email"
-            value={deleteEmail}
-            onChange={e => setDeleteEmail(e.target.value)}
-            autoComplete="off"
-            placeholder={user?.email || 'you@example.com'}
-          />
-
-          <label className="block text-xs font-semibold text-muted uppercase tracking-wider mt-3 mb-2">
-            And your password
-          </label>
-          <input
-            type="password"
-            value={deletePassword}
-            onChange={e => setDeletePassword(e.target.value)}
-            autoComplete="current-password"
-            placeholder="Your password"
-          />
-
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() => {
-                setShowDeletePanel(false); setDeletePassword(''); setDeleteEmail(''); setDeleteError(null)
-              }}
-              disabled={isDeleting}
-              className="flex-1 border border-hairline text-ink font-semibold py-2.5 rounded-lg text-sm disabled:opacity-50"
-            >
-              Keep my account
-            </button>
-            <button
-              onClick={handleRequestDeletion}
-              disabled={isDeleting}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
-            >
-              {isDeleting ? 'Scheduling…' : 'Schedule deletion'}
-            </button>
-          </div>
-        </div>
-      )}
 
       <p className="text-center text-xs mt-6 space-x-3">
         <a href="https://blindguideapp.com/terms" target="_blank" rel="noopener noreferrer"
