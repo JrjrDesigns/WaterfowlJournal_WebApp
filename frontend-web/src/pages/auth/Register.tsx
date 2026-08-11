@@ -49,6 +49,9 @@ export default function Register() {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
                 {error}
+                <Link to="/diagnostics" className="block underline underline-offset-2 mt-1.5 font-semibold">
+                  Test my connection
+                </Link>
               </div>
             )}
 

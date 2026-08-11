@@ -15,6 +15,7 @@ import Locations from './pages/Locations'
 import Stats from './pages/Stats'
 import Forecast from './pages/Forecast'
 import Profile from './pages/Profile'
+import Diagnostics from './pages/Diagnostics'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -43,6 +44,9 @@ function AppRoutes() {
       <Route path="/auth/register" element={<AuthRoute><Register /></AuthRoute>} />
       <Route path="/auth/forgot" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
       <Route path="/auth/reset" element={<AuthRoute><ResetPassword /></AuthRoute>} />
+      {/* Deliberately outside both guards: someone who can't reach the server
+          can't sign in, and that's exactly who needs this page. */}
+      <Route path="/diagnostics" element={<Diagnostics />} />
       <Route
         element={
           <ProtectedRoute>
