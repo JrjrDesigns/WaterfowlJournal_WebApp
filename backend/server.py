@@ -20,6 +20,7 @@ import json
 import secrets
 import hashlib
 import re
+import base64
 import asyncio
 from collections import defaultdict, deque
 from bson import ObjectId
@@ -213,6 +214,117 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if user is None:
         raise credentials_exception
     return user
+
+
+# ============ PHOTO STORAGE ============
+#
+# Photos used to be stored as base64 inside the hunt document itself. A single
+# compressed photo costs ~120KB that way, so a hunter logging a full season with
+# a couple of shots per sit fills ~9MB — and Atlas's free tier is 512MB in
+# total. That put a hard ceiling of roughly fifty users on the whole product.
+# R2 gives 10GB free, which is about a thousand times the headroom.
+#
+# If these variables aren't set the app keeps its old behaviour and stores
+# base64 as before, so it works either way and nothing breaks mid-rollout.
+
+R2_ENDPOINT = os.environ.get("R2_ENDPOINT", "").strip()
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "").strip()
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "").strip()
+R2_PHOTOS_BUCKET = os.environ.get("R2_PHOTOS_BUCKET", "").strip()
+R2_PUBLIC_BASE_URL = os.environ.get("R2_PUBLIC_BASE_URL", "").strip().rstrip("/")
+
+PHOTO_STORAGE_READY = all(
+    [R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_PHOTOS_BUCKET, R2_PUBLIC_BASE_URL]
+)
+
+_DATA_URI = re.compile(r"^data:image/(png|jpe?g|webp);base64,(.+)$", re.IGNORECASE | re.DOTALL)
+_EXTENSIONS = {"jpeg": "jpg", "jpg": "jpg", "png": "png", "webp": "webp"}
+
+_s3_client = None
+
+
+def photo_client():
+    global _s3_client
+    if _s3_client is None:
+        import boto3
+        _s3_client = boto3.client(
+            "s3",
+            endpoint_url=R2_ENDPOINT,
+            aws_access_key_id=R2_ACCESS_KEY_ID,
+            aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+            region_name="auto",
+        )
+    return _s3_client
+
+
+async def store_photo(value: Optional[str], user_id: str) -> Optional[str]:
+    """Move one incoming photo to R2 and return its URL.
+
+    Anything that isn't a fresh base64 upload passes straight through — already
+    stored URLs on an edit, and old base64 rows from before this shipped, which
+    keep working because the browser renders either kind from the same <img>.
+    """
+    if not value or not PHOTO_STORAGE_READY:
+        return value
+
+    match = _DATA_URI.match(value.strip())
+    if not match:
+        return value
+
+    subtype = match.group(1).lower()
+    try:
+        blob = base64.b64decode(match.group(2), validate=False)
+    except Exception as e:
+        logger.warning(f"Could not decode an uploaded photo, storing as-is: {e}")
+        return value
+
+    key = f"{user_id}/{uuid.uuid4().hex}.{_EXTENSIONS.get(subtype, 'jpg')}"
+    try:
+        await asyncio.to_thread(
+            photo_client().put_object,
+            Bucket=R2_PHOTOS_BUCKET,
+            Key=key,
+            Body=blob,
+            ContentType=f"image/{'jpeg' if subtype in ('jpg', 'jpeg') else subtype}",
+            # Keys are random and never reused, so the file at a URL can't change.
+            CacheControl="public, max-age=31536000, immutable",
+        )
+    except Exception as e:
+        # Falling back to base64 keeps the hunt saveable. Losing someone's photo
+        # because object storage hiccuped would be a far worse outcome.
+        logger.exception(f"Photo upload to R2 failed, falling back to inline storage: {e}")
+        return value
+
+    return f"{R2_PUBLIC_BASE_URL}/{key}"
+
+
+async def store_photos(values: Optional[List[str]], user_id: str) -> List[str]:
+    return [await store_photo(v, user_id) for v in (values or [])]
+
+
+async def delete_photos(values) -> None:
+    """Remove photos from R2. Best effort — an orphaned object costs a fraction
+    of a cent, while failing someone's delete because cleanup broke does not."""
+    if not PHOTO_STORAGE_READY or not values:
+        return
+
+    prefix = R2_PUBLIC_BASE_URL + "/"
+    keys = [
+        {"Key": v[len(prefix):]}
+        for v in values
+        if isinstance(v, str) and v.startswith(prefix)
+    ]
+    if not keys:
+        return
+
+    try:
+        await asyncio.to_thread(
+            photo_client().delete_objects,
+            Bucket=R2_PHOTOS_BUCKET,
+            Delete={"Objects": keys, "Quiet": True},
+        )
+    except Exception as e:
+        logger.warning(f"Could not delete {len(keys)} photo(s) from R2: {e}")
 
 
 # ============ RATE LIMITING ============
@@ -785,7 +897,7 @@ async def create_location(loc_data: LocationCreate, current_user: dict = Depends
         "name": loc_data.name,
         "location_type": loc_data.location_type,
         "center": loc_data.center,
-        "photo_base64": loc_data.photo_base64,
+        "photo_base64": await store_photo(loc_data.photo_base64, user_id),
         "created_at": datetime.utcnow()
     }
     result = await db.locations.insert_one(doc)
@@ -799,10 +911,17 @@ async def create_location(loc_data: LocationCreate, current_user: dict = Depends
 @api_router.delete("/locations/{location_id}")
 async def delete_location(location_id: str, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
+    doomed = await db.locations.find_one({"_id": ObjectId(location_id), "user_id": user_id})
     result = await db.locations.delete_one({"_id": ObjectId(location_id), "user_id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Location not found")
+
+    blinds = await db.blinds.find({"location_id": location_id, "user_id": user_id}).to_list(1000)
     await db.blinds.delete_many({"location_id": location_id, "user_id": user_id})
+
+    await delete_photos(
+        [(doomed or {}).get("photo_base64")] + [b.get("photo_base64") for b in blinds]
+    )
     return {"message": "Location deleted"}
 
 # ============ BLINDS ROUTES ============
@@ -991,6 +1110,8 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         is_evening=hunt_data.is_evening,
     )
 
+    stored_photos = await store_photos(hunt_data.photos, user_id)
+
     hunt_doc = {
         "user_id": user_id,
         "name": hunt_data.name,
@@ -1001,7 +1122,7 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "location": hunt_data.location,
         "weather_data": weather_data,
         "notes": hunt_data.notes,
-        "photos": hunt_data.photos,
+        "photos": stored_photos,
         "harvests": [h.dict() for h in hunt_data.harvests],
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
@@ -1022,7 +1143,7 @@ async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_cu
         "location": hunt_data.location,
         "weather_data": weather_data,
         "notes": hunt_data.notes,
-        "photos": hunt_data.photos,
+        "photos": stored_photos,
         "harvests": hunt_data.harvests,
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
@@ -1074,6 +1195,15 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
             is_evening=hunt_data.is_evening,
         )
 
+    # Photos already stored come back as URLs and pass straight through; only
+    # genuinely new ones get uploaded.
+    stored_photos = await store_photos(hunt_data.photos, user_id)
+
+    # Anything the user removed from the hunt is now unreferenced, so drop it
+    # rather than paying to keep orphans forever.
+    removed = set(existing.get("photos") or []) - set(stored_photos)
+    await delete_photos(removed)
+
     await db.hunts.update_one({"_id": ObjectId(hunt_id)}, {"$set": {
         "name": hunt_data.name,
         "blind_id": blind_id,
@@ -1083,7 +1213,7 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
         "location": hunt_data.location,
         "weather_data": weather_data,
         "notes": hunt_data.notes,
-        "photos": hunt_data.photos,
+        "photos": stored_photos,
         "harvests": [h.dict() for h in hunt_data.harvests],
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
@@ -1101,7 +1231,7 @@ async def update_hunt(hunt_id: str, hunt_data: HuntCreate, current_user: dict = 
         "location": hunt_data.location,
         "weather_data": weather_data,
         "notes": hunt_data.notes,
-        "photos": hunt_data.photos,
+        "photos": stored_photos,
         "harvests": hunt_data.harvests,
         "is_morning": hunt_data.is_morning,
         "is_evening": hunt_data.is_evening,
@@ -1151,9 +1281,13 @@ async def get_hunt(hunt_id: str, current_user: dict = Depends(get_current_user))
 @api_router.delete("/hunts/{hunt_id}")
 async def delete_hunt(hunt_id: str, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
+    # Read it first so its photos can be cleaned up; deleting the row alone
+    # would leave them paid for and unreachable.
+    doomed = await db.hunts.find_one({"_id": ObjectId(hunt_id), "user_id": user_id})
     result = await db.hunts.delete_one({"_id": ObjectId(hunt_id), "user_id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Hunt not found")
+    await delete_photos((doomed or {}).get("photos"))
     return {"message": "Hunt deleted successfully"}
 
 # ============ STATISTICS ROUTES ============
@@ -2911,6 +3045,14 @@ async def purge_one_account(user: dict) -> dict:
     """Actually erase an account whose grace period has run out."""
     user_oid = user["_id"]
     user_id = str(user_oid)
+
+    # Photos live outside Mongo, so erasing the documents alone would leave the
+    # images behind — which for a deletion request is the whole point missed.
+    for coll, field in (("hunts", "photos"), ("locations", "photo_base64"), ("blinds", "photo_base64")):
+        async for doc in db[coll].find({"user_id": user_id}, {field: 1}):
+            value = doc.get(field)
+            await delete_photos(value if isinstance(value, list) else [value])
+
     # Owned data before the account itself, so a failure part-way leaves the
     # user able to sign in and retry rather than orphaning their records.
     removed = {
