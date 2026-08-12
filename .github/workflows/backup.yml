@@ -1,0 +1,71 @@
+name: Database backup
+
+# Dumps MongoDB Atlas nightly and stores it in Cloudflare R2.
+#
+# Atlas's free tier has no backups of any kind, so without this a bad delete —
+# by a bug, a script, or a person — is permanent. Runs on a schedule and can
+# also be triggered by hand from the Actions tab.
+#
+# Requires four repository secrets (Settings → Secrets and variables → Actions):
+#   MONGO_URL              the Atlas connection string (same one Railway uses)
+#   R2_ACCESS_KEY_ID       from the R2 API token
+#   R2_SECRET_ACCESS_KEY   from the R2 API token, shown only once at creation
+#   R2_ENDPOINT            https://<account-id>.r2.cloudflarestorage.com
+#
+# GitHub masks secrets in logs, and the dump is only ever written to the
+# runner's disk, which is destroyed when the job ends.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'    # 08:00 UTC daily — roughly 2-3am US central
+  workflow_dispatch:
+
+env:
+  BUCKET: blindguide-backups
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump the database
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+        run: |
+          # Run mongodump from the official image rather than installing the
+          # tools, so this doesn't break when a pinned .deb URL goes stale.
+          docker run --rm -e MONGO_URL -v "$PWD:/out" mongo:7 \
+            sh -c 'mongodump --uri="$MONGO_URL" --archive=/out/backup.gz --gzip --quiet'
+
+          ls -la backup.gz
+
+      - name: Check the dump is not empty
+        run: |
+          # A backup job that "succeeds" while writing nothing is worse than no
+          # backup job at all, because it looks like protection.
+          SIZE=$(stat -c%s backup.gz)
+          echo "Dump size: $SIZE bytes"
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "Dump is suspiciously small — treating as a failure."
+            exit 1
+          fi
+
+      - name: Upload to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          KEY="$(date -u +%Y/%m)/blindguide-$(date -u +%Y%m%dT%H%M%SZ).gz"
+          aws s3 cp backup.gz "s3://$BUCKET/$KEY" --endpoint-url "$R2_ENDPOINT"
+          echo "Stored as $KEY"
+
+      - name: Confirm it is actually there
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          # Read it back, so the job only passes if the object really landed.
+          aws s3 ls "s3://$BUCKET/$(date -u +%Y/%m)/" --endpoint-url "$R2_ENDPOINT" | tail -5

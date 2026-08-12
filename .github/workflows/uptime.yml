@@ -1,0 +1,47 @@
+name: Uptime check
+
+# Pings the live API so an outage reaches a person instead of sitting in logs
+# nobody reads. When this job fails GitHub emails the repository owner, which
+# is the whole alerting mechanism — no third-party service, no cost.
+#
+# Caveats worth knowing:
+#  - Scheduled runs are best-effort and can be delayed when GitHub is busy, so
+#    treat this as "you'll hear within ~15 minutes", not a pager.
+#  - GitHub disables scheduled workflows after 60 days with no repo activity.
+#    A push resets that; if this repo goes quiet, the alarm goes quiet too.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 minutes
+  workflow_dispatch:          # and on demand, from the Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the API is up and its database is reachable
+        run: |
+          URL="https://api.blindguideapp.com/api/health"
+
+          # Railway can cold-start, and a single blip is not an outage worth
+          # emailing about — only report after three failures half a minute apart.
+          for attempt in 1 2 3; do
+            CODE=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 25 "$URL" || echo "000")
+            BODY=$(cat /tmp/body.txt 2>/dev/null)
+
+            if [ "$CODE" = "200" ] && echo "$BODY" | grep -q '"ok"'; then
+              echo "Attempt $attempt: healthy (HTTP $CODE)"
+              exit 0
+            fi
+
+            echo "Attempt $attempt failed: HTTP $CODE — $BODY"
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+
+          echo ""
+          echo "Blind Guide is DOWN — three checks failed."
+          echo "Last response: HTTP $CODE $BODY"
+          echo ""
+          echo "HTTP 503 means the API is running but cannot reach MongoDB Atlas."
+          echo "HTTP 000 or 502 means the API itself is not responding — check Railway."
+          exit 1
