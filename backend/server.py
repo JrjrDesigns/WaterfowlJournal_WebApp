@@ -2588,7 +2588,22 @@ async def health():
     # Whether photo storage is wired up, so a misconfiguration is visible from
     # outside instead of being inferred from where photos ended up. It's a
     # boolean about our own setup — no credentials, no user data.
-    return {"status": "ok", "photo_storage": PHOTO_STORAGE_READY}
+    body = {"status": "ok", "photo_storage": PHOTO_STORAGE_READY}
+
+    if not PHOTO_STORAGE_READY:
+        # Names only, never values. Which of our own settings are blank gives an
+        # attacker nothing, and turns "why isn't this working" into one request.
+        body["photo_storage_missing"] = [
+            name for name, value in (
+                ("R2_ENDPOINT", R2_ENDPOINT),
+                ("R2_ACCESS_KEY_ID", R2_ACCESS_KEY_ID),
+                ("R2_SECRET_ACCESS_KEY", R2_SECRET_ACCESS_KEY),
+                ("R2_PHOTOS_BUCKET", R2_PHOTOS_BUCKET),
+                ("R2_PUBLIC_BASE_URL", R2_PUBLIC_BASE_URL),
+            ) if not value
+        ]
+
+    return body
 
 # ============ SUBSCRIPTION ROUTES ============
 
