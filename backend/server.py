@@ -2585,7 +2585,10 @@ async def health():
         logger.error(f"Health check failed: database unreachable: {e}")
         return JSONResponse(status_code=503, content={"status": "unhealthy"})
 
-    return {"status": "ok"}
+    # Whether photo storage is wired up, so a misconfiguration is visible from
+    # outside instead of being inferred from where photos ended up. It's a
+    # boolean about our own setup — no credentials, no user data.
+    return {"status": "ok", "photo_storage": PHOTO_STORAGE_READY}
 
 # ============ SUBSCRIPTION ROUTES ============
 
