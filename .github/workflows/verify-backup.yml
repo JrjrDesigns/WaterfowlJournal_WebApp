@@ -1,0 +1,112 @@
+name: Verify backup restore
+
+# Proves the nightly backup can actually be restored.
+#
+# A backup nobody has restored is a guess. This pulls the most recent dump out
+# of R2, restores it into a throwaway MongoDB, and compares what came back
+# against what is live right now. Run it by hand whenever you want reassurance —
+# after changing the backup job, or before doing anything risky.
+#
+# It only ever READS production, to count documents. Nothing is written to the
+# live database, and the throwaway one dies with the runner.
+
+on:
+  workflow_dispatch:
+
+env:
+  BUCKET: blindguide-backups
+  DB_NAME: waterfowl
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Fetch the most recent backup from R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          LATEST=$(aws s3 ls "s3://$BUCKET/" --recursive --endpoint-url "$R2_ENDPOINT" \
+                   | sort | tail -1 | awk '{print $4}')
+          if [ -z "$LATEST" ]; then
+            echo "No backups found in the bucket at all."
+            exit 1
+          fi
+          echo "Most recent backup: $LATEST"
+          aws s3 cp "s3://$BUCKET/$LATEST" backup.gz --endpoint-url "$R2_ENDPOINT"
+          echo "Downloaded $(stat -c%s backup.gz) bytes"
+
+      - name: Restore it into a throwaway database
+        run: |
+          docker run --rm --network host -v "$PWD:/in" mongo:7 \
+            mongorestore --uri="mongodb://localhost:27017" \
+                         --archive=/in/backup.gz --gzip --quiet
+          echo "Restore completed"
+
+      - name: Count what came back, and what is live
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+        run: |
+          # Same one-liner against both, so the comparison is apples to apples.
+          COUNT_EVAL='JSON.stringify(db.getCollectionNames().sort().reduce((a,n)=>(a[n]=db[n].countDocuments(),a),{}))'
+
+          docker run --rm --network host mongo:7 \
+            mongosh "mongodb://localhost:27017/$DB_NAME" --quiet --eval "$COUNT_EVAL" > restored.json
+
+          # MONGO_URL may or may not carry a database path, so pin it explicitly.
+          docker run --rm --network host -e MONGO_URL -e DB_NAME mongo:7 sh -c \
+            'mongosh "$MONGO_URL" --quiet --eval "db = db.getSiblingDB(\"$DB_NAME\"); '"$COUNT_EVAL"'"' > live.json
+
+          echo "restored: $(cat restored.json)"
+          echo "live:     $(cat live.json)"
+
+      - name: Verdict
+        run: |
+          python3 - <<'PY'
+          import json
+
+          def load(path):
+              with open(path) as f:
+                  raw = f.read().strip()
+              return json.loads(raw) if raw else {}
+
+          restored, live = load("restored.json"), load("live.json")
+
+          print()
+          print(f"{'collection':<20} {'in backup':>10} {'live now':>10}")
+          print("-" * 42)
+          for name in sorted(set(restored) | set(live)):
+              print(f"{name:<20} {restored.get(name, 0):>10} {live.get(name, 0):>10}")
+          print()
+
+          problems = []
+          if not restored:
+              problems.append("The restored database is EMPTY — this backup is not usable.")
+          if restored.get("users", 0) == 0:
+              problems.append("No user accounts in the backup, which alone makes it worthless.")
+          for name, n in live.items():
+              # Counts drift between the backup running and now; that's expected.
+              # Losing half a collection is not.
+              if n > 10 and restored.get(name, 0) < n * 0.5:
+                  problems.append(
+                      f"'{name}' has {n} documents live but only {restored.get(name, 0)} in the backup."
+                  )
+
+          if problems:
+              print("PROBLEMS FOUND:")
+              for p in problems:
+                  print(f"  - {p}")
+              raise SystemExit(1)
+
+          print("The backup restored cleanly, and its contents match what is live.")
+          print("Small differences are expected — a backup is a point in time.")
+          PY
