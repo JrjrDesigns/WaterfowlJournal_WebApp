@@ -286,8 +286,13 @@ async def store_photo(value: Optional[str], user_id: str) -> Optional[str]:
             Key=key,
             Body=blob,
             ContentType=f"image/{'jpeg' if subtype in ('jpg', 'jpeg') else subtype}",
-            # Keys are random and never reused, so the file at a URL can't change.
-            CacheControl="public, max-age=31536000, immutable",
+            # An hour, deliberately short. Keys are random and never reused, so
+            # a long immutable cache would be free performance — except that
+            # Cloudflare keeps serving a deleted object from its edge until the
+            # entry expires. A year of that would make "delete my account"
+            # untrue for anyone still holding the link. Cache misses cost a
+            # fraction of a cent; a broken deletion promise costs more.
+            CacheControl="public, max-age=3600",
         )
     except Exception as e:
         # Falling back to base64 keeps the hunt saveable. Losing someone's photo
