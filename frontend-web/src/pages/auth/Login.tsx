@@ -43,7 +43,7 @@ export default function Login() {
           <div className="flex justify-center mb-2">
             <LogoStacked className="h-[168px] w-auto" />
           </div>
-          <p className="text-muted text-sm mt-2">A field journal for waterfowl hunters</p>
+          <p className="text-muted text-sm mt-2">The intelligent waterfowl field journal</p>
         </div>
 
         <div className="bg-surface rounded-2xl border border-hairline p-7 shadow-sm">

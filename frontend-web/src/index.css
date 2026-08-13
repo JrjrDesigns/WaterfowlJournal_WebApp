@@ -53,6 +53,41 @@
   }
 }
 
+/* Home-screen (standalone) safe areas.
+   Installed on an iPhone there is no browser chrome, so the bottom tab bar sits
+   under the home indicator and the notch eats the edges in landscape. These
+   collapse to 0px in a normal browser tab. */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Scroll area must clear the fixed tab bar (5rem) plus the home indicator */
+.safe-pb-nav {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .safe-pb-nav {
+    padding-bottom: 0;
+  }
+}
+
+/* Floats clear of the fixed mobile tab bar (61px tall) and the home indicator */
+.above-tab-bar {
+  bottom: calc(61px + env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+
+@media (min-width: 768px) {
+  .above-tab-bar {
+    bottom: 1rem;
+  }
+}
+
 /* Leaflet light map overrides */
 .leaflet-container {
   background: #F1F2F4;

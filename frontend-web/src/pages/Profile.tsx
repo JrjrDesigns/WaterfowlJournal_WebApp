@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
+import { InstallAppRow } from '../components/InstallPrompt'
 import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pauseSubscription, resumeSubscription, requestAccountDeletion, restoreAccount } from '../utils/api'
 
 // Mirrors DELETION_GRACE_DAYS in backend/server.py — the server sets the real
@@ -576,6 +577,7 @@ export default function Profile() {
 
       {/* Menu items */}
       <div className="bg-surface border border-hairline rounded-xl overflow-hidden divide-y divide-hairline mb-4">
+        <InstallAppRow />
         <button
           onClick={handleExport}
           className="w-full flex items-center justify-between px-5 py-4 hover:bg-bg transition-colors"
