@@ -447,6 +447,12 @@ export default function HuntDetail() {
         {/* Conditions */}
         <div className={`px-5 ${(isPro && hunt.weather_data && (hunt.is_morning || hunt.is_evening)) ? '' : 'border-b border-hairline'}`}>
           <p className="text-xs font-semibold text-muted uppercase tracking-widest pt-3 pb-1">Conditions</p>
+          {/* Conditions are Pro. Free still gets a glance at the weather on the
+              hunt-list row (temp · wind · sky) — that's deliberate, so a free
+              account can see the data is there without getting the full picture.
+              The season insight on the free Stats card is likewise allowed to
+              reason from weather. Logging itself is unlimited on free, so this
+              is one of the few places the paid tier holds a line. */}
           {!isPro ? (
             <button
               onClick={() => setShowWeatherPaywall(true)}

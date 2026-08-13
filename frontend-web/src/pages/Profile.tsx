@@ -9,8 +9,6 @@ import { exportHuntsCSV, createCheckoutSession, createCustomerPortalSession, pau
 // date, this is only what we promise the user before they commit.
 const DELETION_GRACE_DAYS = 30
 
-const STRIPE_PRICE_ID_MONTHLY = import.meta.env.VITE_STRIPE_PRICE_ID_MONTHLY as string | undefined
-const STRIPE_PRICE_ID_ANNUAL = import.meta.env.VITE_STRIPE_PRICE_ID_ANNUAL as string | undefined
 
 // Mirrors add_months() in backend/server.py — whole calendar months with the
 // day clamped to the target month's length, so the date previewed here matches
@@ -144,8 +142,7 @@ export default function Profile() {
     setCheckoutError(null)
     setIsSubscribing(true)
     try {
-      const priceId = selectedPlan === 'annual' ? STRIPE_PRICE_ID_ANNUAL : STRIPE_PRICE_ID_MONTHLY
-      const { url } = await createCheckoutSession(priceId)
+      const { url } = await createCheckoutSession(selectedPlan)
       if (!url) throw new Error('Stripe did not return a checkout link. Please try again.')
       window.location.href = url
     } catch (err) {
@@ -303,15 +300,15 @@ export default function Profile() {
           {showUpgradePanel ? (
             <div className="p-6">
               <h3 className="font-display text-2xl text-ink tracking-wider leading-none mb-1">GO PRO</h3>
-              <p className="text-muted text-sm mb-5">Unlock the forecast, advanced analytics, automatic weather, and unlimited hunts.</p>
+              <p className="text-muted text-sm mb-5">Your journal stays free. Pro is Blind Guide working ahead of you — and reading everything you log.</p>
 
               <ul className="space-y-2 mb-6">
                 {[
-                  'Unlimited hunt logs',
-                  'Flight forecasts & movement scores',
-                  'Advanced season analytics',
-                  'Automatic weather on all hunts',
-                  'CSV data export',
+                  'The whole week ranked, at every spot',
+                  'Which blind to sit, matched to the wind',
+                  'Scores tuned to what has produced for you',
+                  'Your season explained — species, spots, weather',
+                  'The full conditions on every hunt, plus CSV export',
                 ].map(f => (
                   <li key={f} className="flex items-center gap-3 text-sm text-ink">
                     <svg className="w-4 h-4 text-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,7 +326,7 @@ export default function Profile() {
                     selectedPlan === 'monthly' ? 'border-ink bg-bg' : 'border-hairline'
                   }`}
                 >
-                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$4.99</p>
+                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$8.99</p>
                   <p className="text-xs text-muted mt-1">per month</p>
                 </button>
                 <button
@@ -341,8 +338,8 @@ export default function Profile() {
                   <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-white bg-green px-2 py-0.5 rounded-full whitespace-nowrap">
                     Best Value
                   </span>
-                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$39.99</p>
-                  <p className="text-xs text-muted mt-1">per year <span className="text-green font-semibold">($3.33/mo)</span></p>
+                  <p className="font-display text-2xl text-ink tracking-wider leading-none">$49.99</p>
+                  <p className="text-xs text-muted mt-1">per year <span className="text-green font-semibold">($4.17/mo)</span></p>
                 </button>
               </div>
               <p className="text-xs text-muted text-center mb-4">Cancel anytime</p>
@@ -359,8 +356,8 @@ export default function Profile() {
                 {isSubscribing
                   ? 'Redirecting to checkout…'
                   : selectedPlan === 'annual'
-                    ? 'Subscribe — $39.99/year'
-                    : 'Subscribe — $4.99/month'}
+                    ? 'Subscribe — $49.99/year'
+                    : 'Subscribe — $8.99/month'}
               </button>
             </div>
           ) : (
@@ -376,7 +373,7 @@ export default function Profile() {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-semibold text-ink">Upgrade to Pro</p>
-                  <p className="text-xs text-muted">Forecasts, analytics & more — from $3.33/mo</p>
+                  <p className="text-xs text-muted">Forecasts, analytics & more — from $4.17/mo</p>
                 </div>
               </div>
               <svg className="w-4 h-4 text-muted group-hover:text-ink transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

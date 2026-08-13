@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { fetchHunts, fetchHuntYears } from '../../utils/api'
-import { useAuth } from '../../contexts/AuthContext'
-import PaywallModal from '../../components/PaywallModal'
 
 interface Hunt {
   id: string
@@ -52,15 +50,11 @@ function ConditionIcon({ code }: { code: number | undefined }) {
   )
 }
 
-const FREE_HUNT_LIMIT = 10
-
 export default function HuntList() {
   const [hunts, setHunts] = useState<Hunt[]>([])
   const [years, setYears] = useState<number[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
-  const [showPaywall, setShowPaywall] = useState(false)
-  const { isPro } = useAuth()
   const navigate = useNavigate()
 
   const yearParam = searchParams.get('year')
@@ -93,13 +87,8 @@ export default function HuntList() {
   const totalHarvested = (harvests: Hunt['harvests']) =>
     harvests.reduce((sum, h) => sum + h.count, 0)
 
-  const handleNewHunt = () => {
-    if (!isPro && hunts.length >= FREE_HUNT_LIMIT) {
-      setShowPaywall(true)
-      return
-    }
-    navigate('/hunts/create')
-  }
+  // Logging is unlimited on every tier — no gate here by design.
+  const handleNewHunt = () => navigate('/hunts/create')
 
   const conditionSummary = (hunt: Hunt) => {
     const parts: string[] = []
@@ -111,8 +100,6 @@ export default function HuntList() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="hunt_limit" />}
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -149,19 +136,6 @@ export default function HuntList() {
               {year}
             </button>
           ))}
-        </div>
-      )}
-
-      {/* Free limit indicator */}
-      {!isPro && hunts.length > 0 && (
-        <div className="flex items-center justify-between py-2 mb-4">
-          <span className="text-xs text-muted">
-            <span className="font-semibold text-ink">{Math.min(hunts.length, FREE_HUNT_LIMIT)}</span>
-            <span> / {FREE_HUNT_LIMIT} hunts on Free</span>
-          </span>
-          <Link to="/profile?upgrade=1" className="text-xs font-semibold text-ink underline underline-offset-2">
-            Upgrade
-          </Link>
         </div>
       )}
 

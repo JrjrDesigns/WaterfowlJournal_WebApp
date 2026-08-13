@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
+import { format, isToday, isTomorrow } from 'date-fns'
 import { fetchForecast } from '../utils/api'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
@@ -83,6 +83,14 @@ interface ForecastResponse {
   uses_history: boolean
   history_sample: number
   blind_wind_by_day: BlindWindDay[]
+  // Free accounts only. The server has already trimmed the payload to one
+  // location and two days by the time these arrive — they describe what was
+  // withheld so the screen can name it.
+  tier?: 'free' | 'pro'
+  free_days?: number
+  locked_days?: number
+  locked_locations?: number
+  location_choices?: Array<{ id: string; name: string }>
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -376,23 +384,117 @@ function MigrationDial({ timing, size = 'md' }: { timing: TimingInfo; size?: 'sm
   )
 }
 
+/** The free tier's day card.
+ *
+ * Deliberately not the Pro table row. Free gets two days, so they can be shown
+ * large with the reasoning spelled out — the explanation is what proves there's
+ * a real model behind the number, and a bare score is something nobody has any
+ * reason to trust. What free withholds is the rest of the week, not the why.
+ */
+function FreeDayCard({ day }: { day: ForecastDay }) {
+  const d = new Date(day.date + 'T12:00:00')
+  const label = isToday(d) ? 'Today' : isTomorrow(d) ? 'Tomorrow' : format(d, 'EEEE')
+  return (
+    <div className="bg-surface border border-hairline rounded-xl p-5 mb-3">
+      <div className="flex items-center gap-4">
+        <ScoreBadge score={day.hunt_score} size="lg" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-ink">
+            {label}
+            <span className="text-muted font-normal"> · {format(d, 'MMM d')}</span>
+          </p>
+          <div className="flex items-center gap-x-3 gap-y-1.5 mt-1.5 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <ConditionIcon code={day.weather_code} size={15} className="text-muted" />
+              <span className="text-xs text-muted">{day.condition}</span>
+            </span>
+            {day.temp_max !== null && (
+              <span className="text-xs text-muted tabular-nums">
+                {Math.round(day.temp_max)}°{day.temp_min !== null && ` / ${Math.round(day.temp_min)}°`}
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <WindArrow direction={day.wind_direction} speed={day.wind_speed} size={14} />
+              <span className="text-xs font-semibold tabular-nums" style={{ color: windColor(day.wind_speed) }}>
+                {day.wind_cardinal} {day.wind_speed}
+              </span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <MoonIcon phase={day.moon_phase} size={13} />
+              <span className="text-xs text-muted">{day.moon_phase_name}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {(day.events.length > 0 || day.factors.length > 0) && (
+        <div className="mt-4 pt-4 border-t border-hairline">
+          {day.events.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              {day.events.map((e, i) => <EventPill key={i} event={e} />)}
+            </div>
+          )}
+          {day.factors.length > 0 && (
+            <p className="text-xs text-muted leading-relaxed">
+              <span className="font-semibold text-ink">Why this score: </span>
+              {day.factors.join(' · ')}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** What Pro adds to the forecast, named rather than teased. */
+function LockedForecast({ lockedDays, lockedLocations, onClick }: {
+  lockedDays: number; lockedLocations: number; onClick: () => void
+}) {
+  const items = [
+    lockedDays > 0 ? `The other ${lockedDays} days of the week` : 'The full seven-day outlook',
+    lockedLocations > 0
+      ? `Your other ${lockedLocations} location${lockedLocations === 1 ? '' : 's'}, scored the same way`
+      : 'Every location you add, scored the same way',
+    'Best bets — your top-scoring days ranked across every spot',
+    'Per-blind wind matching for morning and evening sits',
+  ]
+  return (
+    <button onClick={onClick} className="w-full text-left bg-surface border border-hairline rounded-xl p-5 hover:border-ink transition-colors">
+      <div className="flex items-center gap-2 mb-3">
+        <svg className="w-4 h-4 text-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest">The rest of the week — Pro</p>
+      </div>
+      <ul className="space-y-2 mb-5">
+        {items.map(i => (
+          <li key={i} className="flex items-start gap-3 text-sm text-ink leading-snug">
+            <span className="mt-1.5 w-1 h-1 rounded-full bg-muted flex-shrink-0" />
+            {i}
+          </li>
+        ))}
+      </ul>
+      <span className="inline-block px-4 py-2 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
+    </button>
+  )
+}
+
 export default function Forecast() {
   const [data, setData] = useState<ForecastResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [showPaywall, setShowPaywall] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
+  // Free accounts see one location at a time and can switch which one.
+  const [freeLocationId, setFreeLocationId] = useState<string | null>(null)
   const { isPro } = useAuth()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (isPro) loadForecast()
-    else setLoading(false)
-  }, [isPro])
+  useEffect(() => { loadForecast() }, [isPro, freeLocationId])
 
   const loadForecast = async () => {
     setLoading(true)
     try {
-      const res = await fetchForecast()
+      const res = await fetchForecast(freeLocationId ?? undefined)
       setData(res)
       if (res.locations?.length) setExpanded(res.locations[0].location_id)
     } catch { /* ignore */ } finally {
@@ -400,39 +502,15 @@ export default function Forecast() {
     }
   }
 
-  const Header = () => (
+  const Header = ({ kicker = '7-Day Outlook' }: { kicker?: string }) => (
     <div className="mb-6">
       <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-0.5 flex items-center gap-2">
         <span className="inline-block w-5 h-px bg-muted/50" />
-        7-Day Outlook
+        {kicker}
       </p>
       <h1 className="font-display text-4xl text-ink tracking-wider leading-none">FORECAST</h1>
     </div>
   )
-
-  if (!isPro) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="forecast" />}
-        <Header />
-        <button
-          onClick={() => setShowPaywall(true)}
-          className="w-full relative rounded-xl overflow-hidden border border-hairline"
-        >
-          <div className="h-56 bg-surface flex flex-col items-center justify-center px-6">
-            <svg className="w-6 h-6 text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <p className="text-ink font-semibold text-sm">Hunt Forecast — Pro</p>
-            <p className="text-muted text-xs mt-1 mb-4 text-center max-w-xs">
-              7-day scored outlook for every location, migration pressure, moon phase, and best-day picks tuned to your history.
-            </p>
-            <span className="px-4 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
-          </div>
-        </button>
-      </div>
-    )
-  }
 
   if (loading) {
     return (
@@ -445,7 +523,7 @@ export default function Forecast() {
   if (!data || data.locations.length === 0) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <Header />
+        <Header kicker={isPro ? '7-Day Outlook' : 'Next 2 Days'} />
         <div className="text-center py-20">
           <p className="text-muted font-semibold">No locations yet.</p>
           <p className="text-muted text-sm mt-1">Add a hunting location to see its forecast.</p>
@@ -453,6 +531,73 @@ export default function Forecast() {
             Add Location
           </button>
         </div>
+      </div>
+    )
+  }
+
+  // Free: two real days for one spot, reasoning intact. The server has already
+  // trimmed the payload, so there is nothing here to hide — what's missing is
+  // genuinely absent from the response rather than concealed by the client.
+  if (!isPro) {
+    const loc = data.locations[0]
+    const choices = data.location_choices ?? []
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="forecast" />}
+        <Header kicker="Next 2 Days" />
+
+        {choices.length > 1 && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+            {choices.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setFreeLocationId(c.id)}
+                className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
+                  c.id === loc.location_id
+                    ? 'bg-ink text-white border-ink'
+                    : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-ink truncate">{loc.location_name}</p>
+            <p className="text-xs text-muted truncate">
+              {loc.location_type ? LOCATION_TYPE_LABELS[loc.location_type] ?? loc.location_type : 'Location'}
+            </p>
+          </div>
+          {loc.timing && <TimingChip timing={loc.timing} />}
+        </div>
+
+        {loc.days.map(day => <FreeDayCard key={day.date} day={day} />)}
+
+        <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
+          <p className="text-sm text-ink leading-relaxed mb-4">
+            Each day gets a Hunt Score out of 100, built from
+            {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
+            cold-front pressure, freeze timing, and weather conditions.
+          </p>
+          <ScoreKey />
+          {!data.uses_history && (
+            <p className="text-xs text-muted mt-3 leading-snug">
+              Using the generic model so far — {data.history_sample} hunt
+              {data.history_sample === 1 ? '' : 's'} logged. Keep logging and these scores start
+              learning from your own results.
+            </p>
+          )}
+        </div>
+
+        <LockedForecast
+          lockedDays={data.locked_days ?? 5}
+          lockedLocations={data.locked_locations ?? 0}
+          onClick={() => setShowPaywall(true)}
+        />
       </div>
     )
   }

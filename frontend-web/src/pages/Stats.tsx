@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { fetchStatistics, fetchHuntYears } from '../utils/api'
+import { fetchStatistics, fetchSeasonSummary, fetchHuntYears } from '../utils/api'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
 import SpeciesIcon from '../components/SpeciesIcon'
+import { LogoIcon } from '../components/Logo'
 
 interface Bucket { name: string; hunts: number; harvested: number }
 interface TopEntry { name: string; hunts: number; harvested: number }
@@ -43,6 +44,18 @@ interface Statistics {
   } | null
 }
 
+/** The free tier's Season Card — counting, not analysis. */
+interface SeasonSummary {
+  total_hunts: number
+  total_harvested: number
+  species_count: number
+  days_afield: number
+  first_hunt_date: string | null
+  last_hunt_date: string | null
+  insight: { text: string; sample: number } | null
+  insight_unlocks_at: number
+}
+
 const TOOLTIP_STYLE = {
   backgroundColor: '#FFFFFF',
   border: '1px solid #E4E5E3',
@@ -67,6 +80,52 @@ function StatCol({ label, value, color = 'text-green' }: { label: string; value:
       <p className={`font-display text-5xl leading-none ${color}`}>{value}</p>
       <p className="text-xs font-semibold text-muted uppercase tracking-widest mt-2">{label}</p>
     </div>
+  )
+}
+
+/** A Season Card counter. Smaller than StatCol so four fit across a phone. */
+function SummaryTile({ label, value, color = 'text-ink' }: { label: string; value: number; color?: string }) {
+  return (
+    <div className="text-center px-2 py-4">
+      <p className={`font-display text-4xl leading-none ${color}`}>{value}</p>
+      <p className="text-[10px] font-semibold text-muted uppercase tracking-widest mt-2 leading-tight">{label}</p>
+    </div>
+  )
+}
+
+/** What Pro adds, named rather than blurred.
+ *
+ * A blurred chart reads as a tax on something the hunter already earned; a
+ * plain list of what's inside reads as an offer. This is the whole reason the
+ * old full-page lock came down, so don't reintroduce a teased-out preview here.
+ */
+function LockedPro({ onClick }: { onClick: () => void }) {
+  const items = [
+    'Every species you took, bird by bird',
+    'Your best blind, best spot and best day',
+    'Morning versus evening performance',
+    'How wind, sky, temperature and moon shaped your season',
+    'Month-by-month and year-over-year trends',
+    'CSV export of everything you have logged',
+  ]
+  return (
+    <button onClick={onClick} className="w-full text-left bg-surface border border-hairline rounded-xl p-5 hover:border-ink transition-colors">
+      <div className="flex items-center gap-2 mb-3">
+        <svg className="w-4 h-4 text-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest">The rest of your season — Pro</p>
+      </div>
+      <ul className="space-y-2 mb-5">
+        {items.map(i => (
+          <li key={i} className="flex items-start gap-3 text-sm text-ink leading-snug">
+            <span className="mt-1.5 w-1 h-1 rounded-full bg-muted flex-shrink-0" />
+            {i}
+          </li>
+        ))}
+      </ul>
+      <span className="inline-block px-4 py-2 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
+    </button>
   )
 }
 
@@ -148,6 +207,7 @@ function MoonIcon({ name, size = 16 }: { name: string; size?: number }) {
 
 export default function Stats() {
   const [stats, setStats] = useState<Statistics | null>(null)
+  const [summary, setSummary] = useState<SeasonSummary | null>(null)
   const [years, setYears] = useState<number[]>([])
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
@@ -156,11 +216,11 @@ export default function Stats() {
   const latestRequestYear = useRef<number | null>(null)
 
   useEffect(() => { loadYears() }, [])
-  // Stats are Pro-only on the server now, so asking as a free user just earns a
-  // 403. The paywall below renders from isPro either way.
+  // Two different endpoints, not one endpoint with fields hidden: the full Pro
+  // analytics payload is never sent to a free client.
   useEffect(() => {
     if (isPro) loadStats()
-    else setLoading(false)
+    else loadSummary()
   }, [selectedYear, isPro])
 
   const loadYears = async () => {
@@ -170,6 +230,21 @@ export default function Stats() {
       setYears(available)
       if (available.length > 0 && selectedYear === null) setSelectedYear(available[0])
     } catch { /* ignore */ }
+  }
+
+  const loadSummary = async () => {
+    const requestYear = selectedYear
+    latestRequestYear.current = requestYear
+    setLoading(true)
+    try {
+      const data = await fetchSeasonSummary(requestYear || undefined)
+      if (latestRequestYear.current !== requestYear) return
+      setSummary(data)
+    } catch {
+      /* ignore */
+    } finally {
+      if (latestRequestYear.current === requestYear) setLoading(false)
+    }
   }
 
   const loadStats = async () => {
@@ -189,43 +264,113 @@ export default function Stats() {
     }
   }
 
-  // Statistics are Pro-only, so this comes before the empty state — otherwise a
-  // free user who has logged hunts is told "No data yet", which reads as the app
-  // losing their hunts rather than as a locked feature.
-  if (!isPro) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="stats" />}
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-0.5 flex items-center gap-2">
-            <span className="inline-block w-5 h-px bg-muted/50" />
-            Season Review
-          </p>
-          <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
-        </div>
-        <button
-          onClick={() => setShowPaywall(true)}
-          className="w-full relative rounded-xl overflow-hidden border border-hairline"
-        >
-          <div className="h-56 bg-surface flex flex-col items-center justify-center px-6">
-            <svg className="w-6 h-6 text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <p className="text-ink font-semibold text-sm">Season Stats — Pro</p>
-            <p className="text-muted text-xs mt-1 mb-4 text-center max-w-xs">
-              Harvest totals, species breakdowns, best blinds and days, plus how weather, wind and moon phase shaped your season.
-            </p>
-            <span className="px-4 py-1.5 bg-ink text-white text-xs font-semibold rounded-lg">Go Pro</span>
-          </div>
-        </button>
-      </div>
-    )
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-ink" />
+      </div>
+    )
+  }
+
+  // Shared by both tiers' headers. Plain JSX rather than a nested component so
+  // it isn't remounted on every render.
+  const yearTabs = years.length > 0 ? (
+    <div className="flex gap-2 mt-1">
+      {years.map(year => (
+        <button
+          key={year}
+          onClick={() => setSelectedYear(year)}
+          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
+            selectedYear === year
+              ? 'bg-ink text-white border-ink'
+              : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
+          }`}
+        >
+          {year}
+        </button>
+      ))}
+    </div>
+  ) : null
+
+  // The free Season Card. This is a finished screen, not a locked one — free
+  // answers "what did I do", Pro answers "what should I do". It renders the
+  // hunter's real numbers first and names what Pro adds underneath, because the
+  // earlier version showed headline stats with the charts blurred out and that
+  // read as being taxed on their own data.
+  if (!isPro) {
+    const hasHunts = (summary?.total_hunts ?? 0) > 0
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} reason="stats" />}
+
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-0.5 flex items-center gap-2">
+              <span className="inline-block w-5 h-px bg-muted/50" />
+              Season Review
+            </p>
+            <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
+          </div>
+          {yearTabs}
+        </div>
+
+        {!hasHunts ? (
+          <div className="text-center py-14 mb-4">
+            <p className="text-muted font-semibold">No hunts logged yet.</p>
+            <p className="text-muted text-sm mt-1">Your season fills in here as you log them — free, with no limit.</p>
+          </div>
+        ) : summary && (
+          <>
+            <div className="bg-surface border border-hairline rounded-xl mb-4">
+              <div className="grid grid-cols-4 divide-x divide-hairline">
+                <SummaryTile label="Hunts" value={summary.total_hunts} />
+                <SummaryTile label="Harvested" value={summary.total_harvested} color="text-green" />
+                <SummaryTile label="Species" value={summary.species_count} />
+                <SummaryTile label="Days Afield" value={summary.days_afield} />
+              </div>
+            </div>
+
+            {/* Species stays a bare count on free. The logo sits in the slot the
+                species photograph occupies on Pro, so upgrading fills the shape
+                in rather than rearranging the screen. */}
+            <div className="bg-surface border border-hairline rounded-xl overflow-hidden mb-4 flex items-stretch">
+              <div className="w-24 flex-shrink-0 border-r border-hairline flex items-center justify-center bg-bg">
+                <LogoIcon className="w-10 h-10" />
+              </div>
+              <div className="flex-1 min-w-0 px-4 py-3.5 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink leading-tight">Species taken</p>
+                  <p className="text-xs text-muted mt-0.5 leading-snug">See every bird by name on Pro</p>
+                </div>
+                <p className="font-display text-3xl text-green leading-none flex-shrink-0">{summary.species_count}</p>
+              </div>
+            </div>
+
+            <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+              <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-2">From your season</p>
+              {summary.insight ? (
+                <>
+                  <p className="text-base font-semibold text-ink leading-snug">{summary.insight.text}</p>
+                  <p className="text-xs text-muted mt-2 leading-snug">
+                    Drawn from {summary.insight.sample} of your hunts. Pro shows every pattern behind your season, not just the strongest one.
+                  </p>
+                </>
+              ) : summary.total_hunts < summary.insight_unlocks_at ? (
+                <p className="text-sm text-muted leading-snug">
+                  Log {summary.insight_unlocks_at - summary.total_hunts} more hunt
+                  {summary.insight_unlocks_at - summary.total_hunts === 1 ? '' : 's'} and Blind Guide
+                  will start finding the patterns in your season.
+                </p>
+              ) : (
+                <p className="text-sm text-muted leading-snug">
+                  No clear pattern in this season yet — keep logging and one will surface.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        <LockedPro onClick={() => setShowPaywall(true)} />
       </div>
     )
   }
@@ -293,23 +438,7 @@ export default function Stats() {
           <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
         </div>
 
-        {years.length > 0 && (
-          <div className="flex gap-2 mt-1">
-            {years.map(year => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
-                  selectedYear === year
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
-                }`}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
-        )}
+        {yearTabs}
       </div>
 
       {/* Season summary */}

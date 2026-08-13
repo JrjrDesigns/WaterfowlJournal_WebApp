@@ -211,7 +211,17 @@ export const fetchStatistics = (year?: number) => {
   return apiRequest(url)
 }
 
-export const fetchForecast = () => apiRequest('/api/forecast')
+// The free Season Card. Its own endpoint, not a trimmed /api/statistics —
+// the Pro payload is never sent to a free client in the first place.
+export const fetchSeasonSummary = (year?: number) => {
+  const url = year ? `/api/statistics/summary?year=${year}` : '/api/statistics/summary'
+  return apiRequest(url)
+}
+
+// locationId only does anything on free accounts, which see one location at a
+// time; Pro always gets every location back.
+export const fetchForecast = (locationId?: string) =>
+  apiRequest(locationId ? `/api/forecast?location_id=${locationId}` : '/api/forecast')
 
 export const fetchSpecies = () => apiRequest('/api/species')
 
@@ -221,10 +231,13 @@ export const fetchSubscriptionStatus = () => apiRequest('/api/subscription/statu
 // staring at a spinner mid-payment, so fail fast enough to show a retry.
 const BILLING_TIMEOUT_MS = 20000
 
-export const createCheckoutSession = (priceId?: string) =>
+// Sends the plan the customer picked, not a price. The server owns the mapping
+// from plan to Stripe price — a browser that could name its own price could
+// name a cheaper one.
+export const createCheckoutSession = (plan: 'monthly' | 'annual') =>
   apiRequest('/api/subscription/create-checkout-session', {
     method: 'POST',
-    body: JSON.stringify(priceId ? { price_id: priceId } : {}),
+    body: JSON.stringify({ plan }),
   }, BILLING_TIMEOUT_MS)
 
 export const createCustomerPortalSession = () =>

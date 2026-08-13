@@ -4,34 +4,35 @@ import { useAuth } from '../contexts/AuthContext'
 
 interface Props {
   onClose: () => void
-  reason?: 'hunt_limit' | 'stats' | 'weather' | 'export' | 'forecast'
+  reason?: 'stats' | 'weather' | 'export' | 'forecast'
 }
 
+// Logging is unlimited on free, so nothing here sells hunt capacity. What Pro
+// sells is the reading of those hunts: the forecast ahead and the patterns
+// behind.
 const FEATURES = [
-  'Unlimited hunt logs',
-  'Flight forecasts & movement scores',
-  'Advanced season analytics',
-  'Automatic weather on all hunts',
-  'CSV data export',
+  'The whole week ranked, at every spot',
+  'Which blind to sit, matched to the wind',
+  'Scores tuned to what has produced for you',
+  'Your season explained — species, spots, weather',
+  'The full conditions on every hunt, plus CSV export',
 ]
 
 const titles: Record<string, string> = {
-  hunt_limit: "You've hit the free limit",
-  stats: 'Advanced Stats — Pro',
+  stats: 'The rest of your season — Pro',
   weather: 'Weather Data — Pro',
   export: 'Data Export — Pro',
-  forecast: 'Hunt Forecast — Pro',
+  forecast: 'The rest of the week — Pro',
 }
 
 const descriptions: Record<string, string> = {
-  hunt_limit: 'Free accounts log up to 10 hunts. Go Pro for unlimited hunts plus the forecast that reads them.',
-  stats: 'Full analytics and charts are available on Pro.',
-  weather: 'Automatic weather data on your hunts is a Pro feature.',
+  stats: 'You keep your season totals for free. Pro shows what is behind them — every species, blind, and condition that shaped the year.',
+  weather: 'Pro opens the full conditions on every hunt — sky, temperature, pressure, and the wind hour by hour through your sit.',
   export: 'Exporting your hunt history as CSV requires Pro.',
-  forecast: 'The 7-day scored hunt forecast for every location is a Pro feature.',
+  forecast: 'Free covers today and tomorrow at one spot. Pro scores all seven days at every location you hunt.',
 }
 
-export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) {
+export default function PaywallModal({ onClose, reason = 'forecast' }: Props) {
   const navigate = useNavigate()
   const { isPaused } = useAuth()
 
@@ -67,7 +68,7 @@ export default function PaywallModal({ onClose, reason = 'hunt_limit' }: Props) 
           onClick={() => { onClose(); navigate('/profile?upgrade=1') }}
           className="w-full bg-ink hover:bg-black text-white font-semibold py-3 rounded-xl transition-colors text-sm mb-3"
         >
-          {isPaused ? 'Resume Pro' : 'Go Pro — from $3.33/mo'}
+          {isPaused ? 'Resume Pro' : 'Go Pro — from $4.17/mo'}
         </button>
         <button
           onClick={onClose}

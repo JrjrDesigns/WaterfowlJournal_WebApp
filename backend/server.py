@@ -424,7 +424,13 @@ RESET_EMAIL_LIMIT, RESET_EMAIL_WINDOW = 4, 60 * 60
 # the user's phone can be told anything, so a gate that only lives there is
 # decoration. The client keeps its own copy purely to show the paywall without
 # a round trip.
-FREE_HUNT_LIMIT = 10
+#
+# Journaling itself is deliberately unlimited on free. The forecast is weighted
+# by the hunter's own history, so capping entries would cap the value of the
+# thing Pro is selling — and someone who hits a cap mid-season stops logging
+# rather than upgrading, which strands the data that makes Pro worth buying.
+FREE_FORECAST_DAYS = 2         # today + tomorrow, for one location
+FREE_INSIGHT_MIN_HUNTS = 5     # below this, a single season insight is just noise
 
 PRO_STATUSES = ("pro", "premium")
 
@@ -1084,16 +1090,6 @@ async def get_hunt_years(current_user: dict = Depends(get_current_user)):
 async def create_hunt(hunt_data: HuntCreate, current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
 
-    # Only blocks logging new hunts. Existing ones stay readable either way —
-    # a lapsed subscriber never loses access to what they already recorded.
-    if not user_is_pro(current_user):
-        hunt_count = await db.hunts.count_documents({"user_id": user_id})
-        if hunt_count >= FREE_HUNT_LIMIT:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Free accounts are limited to {FREE_HUNT_LIMIT} hunts. Upgrade to Pro to keep logging.",
-            )
-
     blind_name = hunt_data.blind_name or "Unknown Location"
     blind_id = hunt_data.blind_id
     location_type = None
@@ -1534,9 +1530,178 @@ async def get_statistics(year: Optional[int] = None, current_user: dict = Depend
         } if group_hunts > 0 else None,
     }
 
+
+# A free insight is drawn from whichever of these dimensions shows the widest
+# gap. The thresholds exist so a hunter with one lucky morning isn't told it's
+# a pattern — better to show nothing than to invent a signal.
+INSIGHT_MIN_BUCKET_HUNTS = 2
+INSIGHT_MIN_RATIO = 1.3
+# Small samples throw enormous ratios — five hunts can honestly produce "9×",
+# which reads as a broken stat rather than an impressive one. Past this the
+# claim is softened instead of quoted, since free accounts see their first
+# insight at exactly the sample size where this happens most.
+INSIGHT_MAX_QUOTED_RATIO = 3.0
+
+SKY_ADJECTIVES = {
+    "Clear": "clear", "Cloudy": "cloudy", "Fog": "foggy",
+    "Rain": "rainy", "Snow": "snowy", "Storm": "stormy",
+}
+
+
+def _season_insight(rows: list) -> Optional[dict]:
+    """The single strongest pattern in a hunter's season, as one sentence.
+
+    Free accounts get exactly one of these. A true fact about someone's own
+    hunting sells the forecast far harder than a feature list, so it's worth
+    computing honestly: a bucket has to carry enough hunts and beat the rest by
+    a wide enough margin, or this returns None and the screen asks for more
+    hunts instead.
+    """
+    dims: Dict[str, Dict[str, dict]] = {
+        k: {} for k in ("wind", "sky", "temp", "moon", "time")
+    }
+
+    def bump(dim: str, bucket: str, harvested: int):
+        entry = dims[dim].setdefault(bucket, {"hunts": 0, "harvested": 0})
+        entry["hunts"] += 1
+        entry["harvested"] += harvested
+
+    for row in rows:
+        harvested = row["harvested"]
+        wd = row["weather"]
+        # Gated on `condition` exactly the way the Pro stats gate their weather
+        # buckets. If the free insight counted hunts Pro's charts skip, the
+        # numbers would visibly disagree the moment someone upgrades.
+        if wd.get("condition") not in (None, "Unknown"):
+            sky = _sky_category(wd.get("weather_code"))
+            if sky != "Unknown":
+                bump("sky", sky, harvested)
+            if wd.get("temp") is not None:
+                bump("temp", _temp_bucket(wd["temp"]), harvested)
+            if wd.get("wind_speed") is not None:
+                bump("wind", _wind_bucket(wd["wind_speed"]), harvested)
+        if row["moon"]:
+            bump("moon", row["moon"], harvested)
+        # Only hunts that are clearly one or the other — an all-day sit says
+        # nothing about which end of the day works better.
+        if row["is_morning"] and not row["is_evening"]:
+            bump("time", "morning", harvested)
+        elif row["is_evening"] and not row["is_morning"]:
+            bump("time", "evening", harvested)
+
+    phrases = {
+        "wind": lambda b: f"when the wind is {b.split(' (')[0].lower()}",
+        "sky": lambda b: f"on {SKY_ADJECTIVES.get(b, b.lower())} days",
+        "temp": lambda b: f"when it's {b}",
+        "moon": lambda b: f"on a {b.lower()}",
+        "time": lambda b: f"on {b} hunts",
+    }
+
+    best = None
+    for dim, buckets in dims.items():
+        if len(buckets) < 2:
+            continue  # nothing to compare against
+        for bucket, v in buckets.items():
+            if v["hunts"] < INSIGHT_MIN_BUCKET_HUNTS:
+                continue
+            rest_hunts = sum(o["hunts"] for b, o in buckets.items() if b != bucket)
+            rest_harvested = sum(o["harvested"] for b, o in buckets.items() if b != bucket)
+            if rest_hunts < INSIGHT_MIN_BUCKET_HUNTS or rest_harvested == 0:
+                continue
+            ratio = (v["harvested"] / v["hunts"]) / (rest_harvested / rest_hunts)
+            if ratio < INSIGHT_MIN_RATIO:
+                continue
+            if best is None or ratio > best["ratio"]:
+                amount = (f"{ratio:.1f}×" if ratio <= INSIGHT_MAX_QUOTED_RATIO
+                          else f"over {INSIGHT_MAX_QUOTED_RATIO:.0f}×")
+                best = {
+                    "ratio": ratio,
+                    "text": f"You average {amount} as many birds {phrases[dim](bucket)}.",
+                    "hunts": v["hunts"],
+                }
+
+    return {"text": best["text"], "sample": best["hunts"]} if best else None
+
+
+@api_router.get("/statistics/summary")
+async def get_statistics_summary(year: Optional[int] = None,
+                                 current_user: dict = Depends(get_current_user)):
+    """The free tier's Season Card: what the hunter did, not what it means.
+
+    Deliberately its own endpoint rather than a trimmed `/statistics`. That one
+    builds the entire Pro analytics payload, so stripping fields afterwards
+    would still compute all of it — and anything merely hidden by the client is
+    readable straight out of the network tab.
+    """
+    user_id = str(current_user["_id"])
+
+    query_filter = {"user_id": user_id}
+    if year:
+        query_filter["date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+
+    cursor = db.hunts.find(
+        query_filter,
+        {"date": 1, "harvests": 1, "weather_data": 1, "is_morning": 1, "is_evening": 1},
+    )
+    hunts = await fetch_capped(cursor, 10000, "hunts for season summary", user_id)
+
+    total_harvested = 0
+    species_taken = set()
+    days = set()
+    rows = []
+
+    for hunt in hunts:
+        harvested = 0
+        for harvest in hunt.get("harvests", []):
+            count = harvest.get("count") if harvest.get("count") is not None else harvest.get("harvested", 0)
+            # Same mine-over-count rule the Pro stats use, so the two screens
+            # can never disagree on the headline number.
+            mine = harvest.get("mine") if harvest.get("mine") is not None else count
+            harvested += mine
+            if mine:
+                species_taken.add(harvest.get("species_name") or harvest.get("species", "Unknown"))
+        total_harvested += harvested
+
+        date_str = hunt.get("date", "")
+        if date_str:
+            days.add(date_str)
+
+        wd = hunt.get("weather_data") or {}
+        moon = wd.get("moon_phase_name")
+        if not moon and date_str:
+            try:
+                moon = _moon_phase(date_str)["name"]
+            except ValueError:
+                moon = None
+
+        rows.append({
+            "harvested": harvested,
+            "weather": wd,
+            "moon": moon,
+            "is_morning": bool(hunt.get("is_morning")),
+            "is_evening": bool(hunt.get("is_evening")),
+        })
+
+    total_hunts = len(hunts)
+    ordered_days = sorted(days)
+
+    return {
+        "total_hunts": total_hunts,
+        "total_harvested": total_harvested,
+        # A count only. The per-species breakdown is Pro.
+        "species_count": len(species_taken),
+        "days_afield": len(days),
+        "first_hunt_date": ordered_days[0] if ordered_days else None,
+        "last_hunt_date": ordered_days[-1] if ordered_days else None,
+        "insight": _season_insight(rows) if total_hunts >= FREE_INSIGHT_MIN_HUNTS else None,
+        "insight_unlocks_at": FREE_INSIGHT_MIN_HUNTS,
+    }
+
+
 # ============ FORECAST ROUTES ============
 #
 # Tunable model constants — adjust these to change how days are scored.
+FORECAST_DAYS = 7             # length of the Pro outlook
 # Migration index: cold-front proxy (temp drop + N wind + falling pressure).
 MIG_TEMP_DROP_STRONG = 15.0   # °F drop vs prior day → full temp points
 MIG_TEMP_DROP_MOD = 8.0       # °F drop → partial temp points
@@ -2408,9 +2573,25 @@ def fetch_forecast_data(lat: float, lng: float, days: int = 7):
 
 
 @api_router.get("/forecast")
-async def get_forecast(current_user: dict = Depends(require_pro)):
+async def get_forecast(location_id: Optional[str] = None,
+                       current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
+    is_pro = user_is_pro(current_user)
     locations = await fetch_capped(db.locations.find({"user_id": user_id}).sort("name", 1), 1000, "locations", user_id)
+
+    # Free accounts get one location for two days, reasoning intact. The score
+    # on its own is a number nobody has reason to trust, and the model only
+    # looks like a model across a spread of days — so what's withheld is the
+    # rest of the week and the other spots, not the explanation.
+    #
+    # Trimmed here rather than in the client: days hidden by the frontend are
+    # still sitting in the response for anyone who opens the network tab.
+    location_choices = [{"id": str(l["_id"]), "name": l["name"]} for l in locations]
+    total_locations = len(locations)
+    if not is_pro and locations:
+        chosen = next((l for l in locations if str(l["_id"]) == location_id), None)
+        locations = [chosen or locations[0]]
+
     profile = await _user_condition_profile(user_id)
     use_history = profile["sample"] >= HISTORY_MIN_HUNTS
     timing_profile = await _migration_timing_profile(user_id)
@@ -2429,7 +2610,11 @@ async def get_forecast(current_user: dict = Depends(require_pro)):
         lat, lng = center.get("lat"), center.get("lng")
         if lat is None or lng is None:
             continue
-        days = await forecast_for(lat, lng, 7)
+        # Always scored across the full week, even for free accounts: day two's
+        # score depends on day one's temperature, and the fetch is cached per
+        # coordinate anyway, so trimming early would change the numbers without
+        # saving a call. The slice happens once the scoring is done.
+        days = await forecast_for(lat, lng, FORECAST_DAYS)
         loc_days = []
         for day in days:
             prev_temp = day.pop("_prev_temp")
@@ -2541,21 +2726,43 @@ async def get_forecast(current_user: dict = Depends(require_pro)):
                 "factors": factors[:3],
             })
 
+        # Per-blind wind matching is Pro, so it comes back out of the free days
+        # rather than never going in — the scoring loop above needs it either way.
+        days_out = loc_days if is_pro else [
+            {**d, "blind_wind": []} for d in loc_days[:FREE_FORECAST_DAYS]
+        ]
+
         results.append({
             "location_id": str(loc["_id"]),
             "location_name": loc["name"],
             "location_type": loc.get("location_type"),
             "timing": loc_days[0]["timing"] if loc_days else None,
-            "days": loc_days,
+            "days": days_out,
         })
 
     best_bets.sort(key=lambda b: b["hunt_score"], reverse=True)
+
+    if not is_pro:
+        return {
+            "locations": results,
+            "best_bets": [],
+            "uses_history": use_history,
+            "history_sample": profile["sample"],
+            "blind_wind_by_day": [],
+            "tier": "free",
+            "free_days": FREE_FORECAST_DAYS,
+            "locked_days": max(0, FORECAST_DAYS - FREE_FORECAST_DAYS),
+            "locked_locations": max(0, total_locations - len(results)),
+            "location_choices": location_choices,
+        }
+
     return {
         "locations": results,
         "best_bets": best_bets[:5],
         "uses_history": use_history,
         "history_sample": profile["sample"],
         "blind_wind_by_day": [blind_wind_by_day[d] for d in sorted(blind_wind_by_day)],
+        "tier": "pro",
     }
 
 # ============ UTILITY ROUTES ============
@@ -2595,6 +2802,17 @@ async def health():
     # boolean about our own setup — no credentials, no user data.
     body = {"status": "ok", "photo_storage": PHOTO_STORAGE_READY}
 
+    # Same idea for subscription pricing, so "did the new pricing actually go
+    # live" is one public request instead of a test purchase. Booleans about our
+    # own configuration; the price ids themselves stay out of the response.
+    body["pricing"] = {
+        plan: bool(price_id) for plan, price_id in PLAN_PRICE_IDS.items()
+    }
+    # False means every plan resolves to the same price — the state where the
+    # monthly/annual toggle silently bills everyone the same amount, which is
+    # exactly how that went unnoticed before.
+    body["pricing"]["distinct"] = len({p for p in PLAN_PRICE_IDS.values() if p}) > 1
+
     if not PHOTO_STORAGE_READY:
         # Names only, never values. Which of our own settings are blank gives an
         # attacker nothing, and turns "why isn't this working" into one request.
@@ -2613,8 +2831,49 @@ async def health():
 # ============ SUBSCRIPTION ROUTES ============
 
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
-STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# One price per plan, chosen here rather than by the browser.
+#
+# Checkout used to bill whatever `price_id` the client posted, defaulting to a
+# single STRIPE_PRO_PRICE_ID when it sent none — which it always did, because
+# the frontend variables holding those ids were never set. The monthly/annual
+# toggle therefore had no effect on what Stripe charged, and separately, anyone
+# could have posted any price id on the account and billed themselves at it.
+#
+# STRIPE_PRO_PRICE_ID stays as a fallback so a deploy that lands before the two
+# new variables are set keeps checkout working instead of failing outright.
+STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID", "")
+PLAN_PRICE_IDS = {
+    "monthly": os.environ.get("STRIPE_PRICE_ID_MONTHLY", "") or STRIPE_PRO_PRICE_ID,
+    "annual": os.environ.get("STRIPE_PRICE_ID_ANNUAL", "") or STRIPE_PRO_PRICE_ID,
+}
+
+
+def resolve_plan_price(plan, plan_prices: dict, legacy_price: str) -> str:
+    """Stripe price for a requested plan. Raises rather than guessing.
+
+    A missing plan is an old cached bundle, not a choice — it gets the legacy
+    single price, because picking one here would risk billing someone for a
+    year when they clicked monthly. A known plan with no price configured is a
+    deployment problem (503), deliberately distinguished from a plan name we
+    don't recognise (400); collapsing the two sends an operator hunting for a
+    bad request when the real fault is an unset variable.
+    """
+    if plan is None:
+        price_id = legacy_price
+    else:
+        key = str(plan).lower()
+        if key not in plan_prices:
+            raise HTTPException(status_code=400, detail="Unknown subscription plan.")
+        price_id = plan_prices[key]
+
+    if not price_id:
+        raise HTTPException(
+            status_code=503,
+            detail="Subscription pricing is not configured. Please try again shortly.",
+        )
+    return price_id
 
 
 def stripe_field(obj, key, default=None):
@@ -2688,7 +2947,11 @@ async def create_checkout_session(
     import stripe as stripe_lib
     stripe_lib.api_key = STRIPE_SECRET_KEY
     user_id = str(current_user["_id"])
-    price_id = request_data.get("price_id", STRIPE_PRO_PRICE_ID)
+
+    # The client sends a plan name, never a price.
+    price_id = resolve_plan_price(
+        request_data.get("plan"), PLAN_PRICE_IDS, STRIPE_PRO_PRICE_ID
+    )
 
     # A paused subscriber still has a live subscription in Stripe. Sending them
     # through checkout again would bill them for a second one.
