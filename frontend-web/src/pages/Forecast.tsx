@@ -48,6 +48,13 @@ interface TimingInfo {
   label: 'Peak' | 'Building' | 'Tapering' | 'Active' | 'Slow'
   source: 'personal' | 'mixed' | 'typical'
   flyway: string
+  /** What the generic flyway curve alone would have said, so the tooltip can
+      show how far this spot's own history moved it rather than just asserting. */
+  generic_score: number
+  confidence: number
+  basis: 'location' | 'overall' | 'generic'
+  hunts_here: number
+  seasons_here: number
 }
 
 interface WeatherEvent {
@@ -77,11 +84,23 @@ interface BestBet {
   factors: string[]
 }
 
+interface HistoryStatus {
+  hunts_logged: number
+  seasons_logged: number
+  /** Locations whose own timing curve has taken shape (2+ populated half-months). */
+  timing_locations: number
+  trim_confidence: number
+  trim_sample: number
+  trim_max_points: number
+  trim_full_hunts: number
+}
+
 interface ForecastResponse {
   locations: ForecastLocation[]
   best_bets: BestBet[]
   uses_history: boolean
   history_sample: number
+  history: HistoryStatus
   blind_wind_by_day: BlindWindDay[]
   // Free accounts only. The server has already trimmed the payload to one
   // location and two days by the time these arrive — they describe what was
@@ -302,6 +321,67 @@ function ScoreKey() {
   )
 }
 
+/** Where the hunter's own logs currently stand.
+ *
+ * This block publishes real numbers, which the previous model could not
+ * honestly do: it handed history half the score off five hunts, so any figure
+ * shown would have been a number we intended to change. The two channels now
+ * have defensible caps, so the progress is worth stating plainly — and a hunter
+ * who can see that a second season at a spot is what unlocks it has a reason to
+ * keep logging that "we use your history" never gives them.
+ */
+function HistoryPanel({ h, spots }: { h: HistoryStatus; spots: number }) {
+  const seasons = h.seasons_logged
+  const trimPts = (h.trim_max_points * h.trim_confidence) / 100
+  const rows = [
+    {
+      label: 'Migration timing',
+      value: spots > 0 ? `${h.timing_locations} of ${spots} spot${spots === 1 ? '' : 's'}` : '—',
+      pct: spots > 0 ? (h.timing_locations / spots) * 100 : 0,
+      note: 'when each of your places peaks',
+    },
+    {
+      label: 'Weather trim',
+      value: `±${trimPts.toFixed(1)} of ±${h.trim_max_points} pts`,
+      pct: h.trim_confidence,
+      note: `full strength at ${h.trim_full_hunts} hunts`,
+    },
+  ]
+  return (
+    <div className="mt-4 pt-4 border-t border-hairline">
+      <div className="flex items-baseline justify-between gap-3 mb-3">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest">Your hunt history</p>
+        <p className="text-xs text-muted">
+          {h.hunts_logged} hunt{h.hunts_logged === 1 ? '' : 's'}
+          {seasons > 0 && ` · ${seasons} season${seasons === 1 ? '' : 's'}`}
+        </p>
+      </div>
+      <div className="space-y-2.5 mb-3">
+        {rows.map(r => (
+          <div key={r.label}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-xs font-semibold text-ink">{r.label}</span>
+              <span className="text-xs text-muted tabular-nums">{r.value}</span>
+            </div>
+            <div className="h-1 mt-1 rounded-full bg-hairline overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${Math.max(0, Math.min(100, r.pct))}%`, backgroundColor: '#1B5E45' }}
+              />
+            </div>
+            <p className="text-[11px] text-muted mt-1 leading-snug">{r.note}</p>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-muted leading-snug">
+        {seasons < 2
+          ? 'Timing needs two seasons at a spot before it carries full weight — one good season is a story, two is a pattern.'
+          : 'Your logs now set when each spot peaks. Weather nudges stay capped, so they break ties without reordering your week.'}
+      </p>
+    </div>
+  )
+}
+
 function ColHeader({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[9px] font-semibold uppercase text-muted whitespace-nowrap" style={{ letterSpacing: '0.02em' }}>
@@ -338,13 +418,29 @@ const SOURCE_NOTE: Record<TimingInfo['source'], string> = {
   personal: 'from your logs', mixed: 'your logs + typical', typical: 'typical timing',
 }
 
+/** Spell out what actually backs this number. A timing score that leans on the
+    hunter's own logs should say how many hunts and how many seasons stand
+    behind it — the same figure means something different at 2 hunts than at 30,
+    and hiding that is how a model earns undeserved trust. */
+function timingTitle(timing: TimingInfo): string {
+  const head = `Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`
+  if (timing.basis === 'generic') return head
+  const moved = timing.score - timing.generic_score
+  const shift = moved === 0 ? 'matching typical timing'
+    : `${moved > 0 ? '+' : ''}${moved} vs typical (${timing.generic_score})`
+  if (timing.basis === 'overall') return `${head}\nBased on your other spots — ${shift}`
+  const seasons = `${timing.seasons_here} season${timing.seasons_here === 1 ? '' : 's'}`
+  const cap = timing.seasons_here < 2 ? ' · a second season here unlocks full trust' : ''
+  return `${head}\n${timing.hunts_here} hunts here across ${seasons} · ${timing.confidence}% weight — ${shift}${cap}`
+}
+
 function TimingChip({ timing }: { timing: TimingInfo }) {
   const color = TIMING_COLOR[timing.label]
   return (
     <span
       className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
       style={{ color, backgroundColor: `${color}14` }}
-      title={`Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`}
+      title={timingTitle(timing)}
     >
       <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 12h4l3 8 4-16 3 8h4" />
@@ -372,7 +468,7 @@ function MigrationDial({ timing, size = 'md' }: { timing: TimingInfo; size?: 'sm
   return (
     <div
       className="flex flex-col items-center flex-shrink-0"
-      title={`Migration timing: ${timing.label} — ${SOURCE_NOTE[timing.source]} (${timing.flyway} flyway)`}
+      title={timingTitle(timing)}
     >
       <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
         <path d={`M${start.x} ${start.y} A${r} ${r} 0 0 1 ${end.x} ${end.y}`} fill="none" stroke="#E4E5E3" strokeWidth={5 * scale} strokeLinecap="round" />
@@ -584,12 +680,15 @@ export default function Forecast() {
             cold-front pressure, freeze timing, and weather conditions.
           </p>
           <ScoreKey />
-          {!data.uses_history && (
-            <p className="text-xs text-muted mt-3 leading-snug">
-              Using the generic model so far — {data.history_sample} hunt
-              {data.history_sample === 1 ? '' : 's'} logged. Keep logging and these scores start
-              learning from your own results.
-            </p>
+          {data.history && (
+            data.history.hunts_logged > 0
+              ? <HistoryPanel h={data.history} spots={data.locations.length + (data.locked_locations ?? 0)} />
+              : (
+                <p className="text-xs text-muted mt-3 leading-snug">
+                  Using the generic model so far — no hunts logged yet. Log your hunts and the
+                  score starts learning when your own spots turn on.
+                </p>
+              )
           )}
         </div>
 
@@ -606,8 +705,9 @@ export default function Forecast() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Header />
 
-      {/* What the score is, and how to read it. Deliberately qualitative — the
-          blend weights are due a rework, so no percentages are published here. */}
+      {/* What the score is, how to read it, and exactly how far the hunter's own
+          logs currently reach. The weights were reworked and now have defensible
+          caps, so this publishes real numbers instead of staying vague. */}
       <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
         <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
         <p className="text-sm text-ink leading-relaxed mb-4">
@@ -616,6 +716,9 @@ export default function Forecast() {
           cold-front pressure, freeze timing, and weather conditions.
         </p>
         <ScoreKey />
+        {data.history && data.history.hunts_logged > 0 && (
+          <HistoryPanel h={data.history} spots={data.locations.length} />
+        )}
       </div>
 
       {/* Best bets */}
@@ -624,7 +727,7 @@ export default function Forecast() {
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-muted uppercase tracking-widest">Best Bets This Week</p>
             {!data.uses_history && (
-              <span className="text-xs text-muted">generic model · {data.history_sample} hunts logged</span>
+              <span className="text-xs text-muted">generic model · no hunts logged yet</span>
             )}
           </div>
           <div className="space-y-2.5">

@@ -517,13 +517,28 @@ def _filter_wind_window(times, speeds, directions, start_hour: int, end_hour: in
     return result
 
 def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool = False, is_evening: bool = False):
-    """Fetch weather data from Open-Meteo API (free, supports historical data)"""
+    """Fetch weather data from Open-Meteo API (free, supports historical data).
+
+    Fetches the day BEFORE the hunt as well as the hunt day itself. Only the
+    hunt day is ever displayed, but the cold-front detector runs on the change
+    between the two: 38° on a north wind is a front on the heels of a 55° day
+    and a stale cold snap on the heels of a 36° one. Those are very different
+    mornings and a single-day snapshot cannot tell them apart.
+
+    This matters beyond display. `_condition_trim_profile` grades each logged
+    hunt against what the model WOULD have predicted that morning, and that
+    prediction needs the temperature drop and the pressure trend. Storing them
+    with the hunt is what makes the personal trim reconstructable later. Same
+    API call with one extra day of range, so it costs no additional quota
+    against a limit this app is already careful with.
+    """
     try:
         from datetime import datetime, timedelta
 
         hunt_date = datetime.strptime(date_str, "%Y-%m-%d").date()
         today = datetime.now().date()
         days_difference = (hunt_date - today).days
+        prev_date_str = (hunt_date - timedelta(days=1)).isoformat()
 
         if days_difference < 0:
             url = "https://archive-api.open-meteo.com/v1/archive"
@@ -533,8 +548,8 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
         params = {
             "latitude": lat,
             "longitude": lng,
-            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode,sunrise,sunset",
-            "hourly": "windspeed_10m,winddirection_10m",
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,winddirection_10m_dominant,weathercode,sunrise,sunset",
+            "hourly": "surface_pressure,windspeed_10m,winddirection_10m",
             "temperature_unit": "fahrenheit",
             "windspeed_unit": "mph",
             # Open-Meteo defaults precipitation to MILLIMETERS. Everything
@@ -542,7 +557,7 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
             # threshold) assumes inches, so ask for inches explicitly.
             "precipitation_unit": "inch",
             "timezone": "auto",
-            "start_date": date_str,
+            "start_date": prev_date_str,
             "end_date": date_str
         }
 
@@ -566,13 +581,43 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
                 95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail"
             }
 
-            temp_max = daily.get("temperature_2m_max", [None])[0]
-            temp_min = daily.get("temperature_2m_min", [None])[0]
-            precipitation = daily.get("precipitation_sum", [0])[0]
-            wind_speed = daily.get("windspeed_10m_max", [0])[0]
-            weather_code = daily.get("weathercode", [0])[0]
-            sunrise_str = (daily.get("sunrise", [""])[0] or "")
-            sunset_str = (daily.get("sunset", [""])[0] or "")
+            # The response now spans two days. Locate the hunt day by date
+            # rather than by position: the archive endpoint occasionally returns
+            # a short array, and silently reading the PRIOR day's temperature as
+            # the hunt's would be both invisible and wrong.
+            dates = daily.get("time", []) or []
+            try:
+                i = dates.index(date_str)
+            except ValueError:
+                i = len(dates) - 1 if dates else 0
+            prev_i = dates.index(prev_date_str) if prev_date_str in dates else None
+
+            def d(field, idx=-1, default=None):
+                arr = daily.get(field) or []
+                j = i if idx == -1 else idx
+                return arr[j] if (j is not None and 0 <= j < len(arr)) else default
+
+            temp_max = d("temperature_2m_max")
+            temp_min = d("temperature_2m_min")
+            precipitation = d("precipitation_sum", default=0)
+            wind_speed = d("windspeed_10m_max", default=0)
+            wind_dir_dom = d("winddirection_10m_dominant")
+            weather_code = d("weathercode", default=0)
+            sunrise_str = d("sunrise", default="") or ""
+            sunset_str = d("sunset", default="") or ""
+
+            # Cold-front inputs: yesterday's high and the day-over-day pressure
+            # change, matching how the forecast path derives them.
+            prev_temp_max = d("temperature_2m_max", idx=prev_i)
+
+            def mean_pressure(day_str):
+                vals = [p for t, p in zip(hourly.get("time", []) or [],
+                                          hourly.get("surface_pressure", []) or [])
+                        if p is not None and t[:10] == day_str]
+                return (sum(vals) / len(vals)) if vals else None
+
+            press, prev_press = mean_pressure(date_str), mean_pressure(prev_date_str)
+            pressure_delta = (press - prev_press) if (press is not None and prev_press is not None) else None
 
             avg_temp = round((temp_max + temp_min) / 2, 1) if temp_max and temp_min else None
             condition = weather_codes.get(weather_code, "Unknown")
@@ -582,9 +627,16 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
             sunset_hour = int(sunset_str[11:13]) if len(sunset_str) >= 13 else 19
             evening_start = max(sunrise_hour, sunset_hour - 5)
 
-            times = hourly.get("time", [])
-            speeds = hourly.get("windspeed_10m", [])
-            directions = hourly.get("winddirection_10m", [])
+            # _filter_wind_window matches on hour-of-day alone, so the prior
+            # day's hours have to come out here or every window would be doubled.
+            times, speeds, directions = [], [], []
+            for t, sp, di in zip(hourly.get("time", []) or [],
+                                 hourly.get("windspeed_10m", []) or [],
+                                 hourly.get("winddirection_10m", []) or []):
+                if t[:10] == date_str:
+                    times.append(t)
+                    speeds.append(sp)
+                    directions.append(di)
 
             wind_morning = _filter_wind_window(times, speeds, directions, sunrise_hour, 12)
             wind_evening = _filter_wind_window(times, speeds, directions, evening_start, sunset_hour)
@@ -597,6 +649,8 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
                 "condition": condition,
                 "weather_code": weather_code,
                 "wind_speed": wind_speed or 0,
+                "wind_direction": round(wind_dir_dom) if wind_dir_dom is not None else None,
+                "wind_cardinal": _deg_to_cardinal(wind_dir_dom) if wind_dir_dom is not None else None,
                 "precipitation": precipitation or 0,
                 "description": f"{condition}, {precipitation}\" precip" if precipitation else condition,
                 "sunrise": sunrise_str[11:16] if len(sunrise_str) >= 16 else "",
@@ -606,6 +660,12 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
                 "moon_phase": moon["phase"],
                 "moon_phase_name": moon["name"],
                 "moon_illumination": moon["illumination"],
+                # Cold-front reconstruction inputs. Absent on hunts logged
+                # before this shipped; _condition_trim_profile degrades to a
+                # timing-only expectation when they are missing.
+                "prev_temp_max": round(prev_temp_max, 1) if prev_temp_max is not None else None,
+                "pressure_delta": round(pressure_delta, 2) if pressure_delta is not None else None,
+                "pressure_trend": _pressure_trend(pressure_delta) if pressure_delta is not None else None,
             }
         else:
             logger.error(f"Open-Meteo API error: {response.status_code} - {response.text}")
@@ -621,6 +681,8 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
         "condition": "Unknown",
         "weather_code": 0,
         "wind_speed": 0,
+        "wind_direction": None,
+        "wind_cardinal": None,
         "precipitation": 0,
         "description": "Weather data unavailable",
         "sunrise": "",
@@ -630,6 +692,9 @@ def fetch_weather_data(lat: float, lng: float, date_str: str, is_morning: bool =
         "moon_phase": moon["phase"],
         "moon_phase_name": moon["name"],
         "moon_illumination": moon["illumination"],
+        "prev_temp_max": None,
+        "pressure_delta": None,
+        "pressure_trend": None,
     }
 
 # ============ AUTH ROUTES ============
@@ -1709,11 +1774,33 @@ MIG_TEMP_PTS = 40
 MIG_WIND_PTS = 30
 MIG_PRESSURE_PTS = 30
 MIG_PRESSURE_FALL = 2.0       # hPa daily-mean drop counts as "falling"
-# Hunt Score blend weights (must sum to 1.0)
-SCORE_W_HISTORY = 0.5
-SCORE_W_MIGRATION = 0.3
-SCORE_W_BASE = 0.2
-HISTORY_MIN_HUNTS = 5         # below this, lean on generic prior instead of history
+# Hunt Score generic base (must sum to 1.0). Weather and the cold-front signal
+# are fixed here and are NOT negotiable by personal history.
+#
+# History used to be a third term at 0.5 — half the score, unlocked by a hard
+# cliff at five logged hunts. Two things were wrong with that. The obvious one
+# is the sample size. The subtler and worse one is that the condition buckets it
+# read from were season-blind: a September hunt and a January hunt in the same
+# 12 mph wind landed in the same bucket, so "you do well in wind" was frequently
+# just "you do well in November" wearing a disguise — re-counting migration,
+# which the model already scores separately. Half the number was double-counted
+# calendar.
+#
+# History now enters through two channels instead, neither of them a weighted
+# term here: a per-location migration timing curve (_migration_timing_profile)
+# and a small residual trim (_condition_trim_profile). Both are described where
+# they are defined.
+#
+# These two numbers are NOT new. They are exactly the fallback blend the model
+# already used whenever history was unavailable, which — with history gated
+# behind five logged hunts — was the path nearly every real day took. The
+# multipliers below (SCORE_RAW_SCALE, TIMING_MULT_*, MOON_MULT_*) were fitted
+# against 2,604 real in-season days on top of this blend, so reusing it means a
+# hunter with no history sees byte-identical scores to before and the
+# calibration carries over untouched. Changing either number re-opens that
+# backtest.
+SCORE_W_MIGRATION = 0.45
+SCORE_W_BASE = 0.55
 
 NORTH_CARDINALS = {"N", "NE", "NW"}
 
@@ -1856,13 +1943,31 @@ def _freeze_adjustment(location_type, frozen_recent, frozen_extended):
 
 # --- Migration timing model ------------------------------------------------
 # "Typical timing" — the seasonal calendar of when birds are usually in the
-# area. Two sources, blended by how much real data backs each:
-#   1. Generic latitude curve (works day one, no user data).
-#   2. The user's own history binned by half-month (birds SEEN preferred,
-#      harvested as fallback). Personalizes as data accumulates.
-# Coverage-based confidence de-emphasizes any source that isn't well-supported.
-TIMING_CONFIDENT_HUNTS = 18   # personal curve fully trusted at this many hunts
-TIMING_MIN_BINS = 3           # need this many populated half-months to personalize
+# area, and the primary channel through which a user's own hunts reach the
+# score. Three sources, each falling back to the next as evidence runs out:
+#   1. This location's own curve, by half-month.
+#   2. The user's curve across all their locations.
+#   3. The generic latitude/flyway curve (works on day one, no user data).
+#
+# THE CURVE ANSWERS "WHEN IS THIS SPOT AT ITS BEST", NEVER "WHICH SPOT IS BEST".
+# Every curve is normalized against its own peak, so a lake with 40 logged hunts
+# and a pond with 2 both read 100 in their best half-month. Hunting one place
+# more can therefore never make that place outscore another; what separates two
+# spots on a given morning stays with the weather at their coordinates, the wind
+# against their blinds, and how each behaves at freeze-up. That matters because
+# hunters go where the app points, so any spot-vs-spot preference learned from
+# where they chose to hunt would feed on itself and quietly bury a new place.
+#
+# Trust is the product of two independent gates, because one good season is a
+# story and two is a pattern:
+#   - hunts in that slot: n / (n + 3)   → 3 hunts ≈ 50%, 9 ≈ 75%
+#   - distinct seasons:   1 → 0.50, 2 → 0.85, 3+ → 1.00
+# A single season is capped at half trust no matter how many hunts fill it. A
+# first-year pond with two November hunts lands at ~12% — enough to nudge, not
+# enough to bury the place on one slow morning, in either direction.
+TIMING_BIN_HALF_TRUST = 3     # hunts in one slot for 50% trust on count alone
+TIMING_SEASON_TRUST = {0: 0.0, 1: 0.50, 2: 0.85}   # 3+ seasons → 1.0
+TIMING_MIN_BINS = 2           # a curve needs two populated half-months to have a shape
 SEEN_CONFIDENT_HUNTS = 8      # "seen" fully trusted at this many hunts-with-seen
 TIMING_BONUS_MAX = 10
 TIMING_BONUS_MIN = -6
@@ -2070,72 +2175,156 @@ def _season_bin(date_str: str):
     return pos * 2 + (0 if d.day <= 15 else 1)
 
 
+def _season_year(date_str: str):
+    """Which waterfowl season a date belongs to. Sep–Feb spans a year boundary,
+    so January 8th 2026 is part of the 2025 season, not a season of its own."""
+    from datetime import date as _d
+    try:
+        d = _d.fromisoformat(date_str)
+    except (ValueError, TypeError):
+        return None
+    if d.month not in SEASON_MONTH_ORDER:
+        return None
+    return d.year if d.month >= 9 else d.year - 1
+
+
+def _bin_trust(n_hunts: int, n_seasons: int) -> float:
+    """How far a single (location, half-month) slot may pull the generic curve."""
+    if n_hunts <= 0 or n_seasons <= 0:
+        return 0.0
+    by_count = n_hunts / (n_hunts + TIMING_BIN_HALF_TRUST)
+    by_season = TIMING_SEASON_TRUST.get(n_seasons, 1.0)
+    return by_count * by_season
+
+
+def _build_timing_curve(bins: dict, seen_hunts: int) -> dict:
+    """Turn accumulated half-month bins into a normalized curve plus per-bin trust.
+
+    Normalized against this curve's OWN peak (v / max), matching how the
+    MIGRATION_ANCHORS curves are built. The previous min-max normalization was
+    inconsistent with them and unusable at low bin counts besides: with two
+    populated half-months it forced the weaker one to a hard 0, which is the
+    difference between "quieter here" and "birds are absent", and drove the
+    timing multiplier to its floor off a couple of hunts.
+    """
+    if len(bins) < TIMING_MIN_BINS:
+        return {"curve": {}, "trust": {}, "bins": {}}
+
+    def avg(rec, metric):
+        return rec[metric] / rec["hunts"] if rec["hunts"] else 0.0
+
+    # Birds SEEN is the cleaner signal for "were birds here" — harvested folds
+    # in whether the hunter shot well. Lean on seen as it accumulates, and fall
+    # back to harvested for anyone who does not log it.
+    seen_conf = min(1.0, seen_hunts / SEEN_CONFIDENT_HUNTS) if seen_hunts else 0.0
+    vals = {}
+    for b, rec in bins.items():
+        if rec["hunts"] <= 0:
+            continue
+        vals[b] = seen_conf * avg(rec, "seen") + (1 - seen_conf) * avg(rec, "harv")
+
+    peak = max(vals.values()) if vals else 0.0
+    curve = ({b: v / peak * 100 for b, v in vals.items()} if peak > 0
+             else {b: 50.0 for b in vals})
+    trust = {b: _bin_trust(rec["hunts"], len(rec["seasons"])) for b, rec in bins.items()
+             if rec["hunts"] > 0}
+    meta = {b: {"hunts": rec["hunts"], "seasons": len(rec["seasons"])}
+            for b, rec in bins.items() if rec["hunts"] > 0}
+    return {"curve": curve, "trust": trust, "bins": meta}
+
+
 async def _migration_timing_profile(user_id: str):
-    """Bin the user's hunts by half-month; track birds seen vs harvested."""
+    """Per-location and user-wide half-month curves, each with per-bin trust."""
     hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
-    bins = {}  # bin -> {seen, harv, hunts}
+
+    def new_bin():
+        return {"seen": 0, "harv": 0, "hunts": 0, "seasons": set()}
+
+    by_loc: Dict[str, dict] = {}
+    overall: Dict[int, dict] = {}
+    loc_seen_hunts: Dict[str, int] = {}
     seen_hunts = 0
     total = 0
+    seasons = set()
+
     for hunt in hunts:
-        b = _season_bin(hunt.get("date", "")) if hunt.get("date") else None
+        date_str = hunt.get("date") or ""
+        b = _season_bin(date_str) if date_str else None
         if b is None:
             continue
+        yr = _season_year(date_str)
         seen = sum(h.get("seen", 0) for h in hunt.get("harvests", []))
         harv = sum((h.get("count") if h.get("count") is not None else h.get("harvested", 0))
                    for h in hunt.get("harvests", []))
-        rec = bins.setdefault(b, {"seen": 0, "harv": 0, "hunts": 0})
-        rec["seen"] += seen
-        rec["harv"] += harv
-        rec["hunts"] += 1
+
+        for target in (overall.setdefault(b, new_bin()),
+                       by_loc.setdefault(str(hunt.get("location_id") or ""), {}).setdefault(b, new_bin())):
+            target["seen"] += seen
+            target["harv"] += harv
+            target["hunts"] += 1
+            if yr is not None:
+                target["seasons"].add(yr)
+
         total += 1
+        if yr is not None:
+            seasons.add(yr)
         if seen > 0:
             seen_hunts += 1
-
-    def norm_curve(metric):
-        vals = {b: r[metric] / r["hunts"] for b, r in bins.items() if r["hunts"] > 0}
-        if len(vals) < 2:
-            return {}
-        lo, hi = min(vals.values()), max(vals.values())
-        if hi <= lo:
-            return {b: 50.0 for b in vals}
-        return {b: (v - lo) / (hi - lo) * 100 for b, v in vals.items()}
+            loc_seen_hunts[str(hunt.get("location_id") or "")] = \
+                loc_seen_hunts.get(str(hunt.get("location_id") or ""), 0) + 1
 
     return {
-        "seen_norm": norm_curve("seen"),
-        "harv_norm": norm_curve("harv"),
-        "populated_bins": len(bins),
+        "by_location": {loc_id: _build_timing_curve(bins, loc_seen_hunts.get(loc_id, 0))
+                        for loc_id, bins in by_loc.items()},
+        "overall": _build_timing_curve(overall, seen_hunts),
         "total_hunts": total,
-        "seen_hunts": seen_hunts,
-        "has_seen": seen_hunts > 0,
+        "seasons": len(seasons),
     }
 
 
-def _blended_timing(date_str: str, lat: float, lng: float, profile: dict) -> dict:
-    """Blend generic calendar with personal history by data confidence."""
+def _blended_timing(date_str: str, lat: float, lng: float, profile: dict,
+                    location_id: Optional[str] = None) -> dict:
+    """Blend this spot's curve over the user's overall curve over the generic one.
+
+    Each level only displaces the level beneath it by as much as its own
+    evidence has earned, so a thin slot never falls off a cliff — a brand-new
+    blind starts out looking like the rest of the user's places, and those in
+    turn sit on the generic flyway curve.
+    """
     generic = _generic_migration_timing(lat, lng, date_str)
     b = _season_bin(date_str)
+    if b is None:
+        return _timing_result(generic, generic, lat, lng, date_str, 0.0, "generic", {})
 
-    personal_conf = 0.0
-    personal_val = None
-    if profile["populated_bins"] >= TIMING_MIN_BINS and b is not None:
-        seen_v = profile["seen_norm"].get(b)
-        harv_v = profile["harv_norm"].get(b)
-        if profile["has_seen"] and seen_v is not None:
-            seen_conf = min(1.0, profile["seen_hunts"] / SEEN_CONFIDENT_HUNTS)
-            if harv_v is not None:
-                personal_val = seen_conf * seen_v + (1 - seen_conf) * harv_v
-            else:
-                personal_val = seen_v
-        elif harv_v is not None:
-            personal_val = harv_v
-        if personal_val is not None:
-            personal_conf = min(1.0, profile["total_hunts"] / TIMING_CONFIDENT_HUNTS)
+    def level(src):
+        v = (src.get("curve") or {}).get(b)
+        t = (src.get("trust") or {}).get(b, 0.0) if v is not None else 0.0
+        return v, t
 
-    if personal_val is not None and personal_conf > 0:
-        score = personal_conf * personal_val + (1 - personal_conf) * generic
-        source = "personal" if personal_conf >= 0.5 else "mixed"
+    user_v, user_t = level(profile.get("overall") or {})
+    loc_src = (profile.get("by_location") or {}).get(str(location_id or ""), {})
+    loc_v, loc_t = level(loc_src)
+
+    score = generic
+    if user_v is not None and user_t > 0:
+        score = user_t * user_v + (1 - user_t) * score
+    if loc_v is not None and loc_t > 0:
+        score = loc_t * loc_v + (1 - loc_t) * score
+
+    # Total personal displacement: the location layer first, then whatever the
+    # overall layer contributes through the share the location layer left.
+    applied = loc_t + (1 - loc_t) * user_t
+    basis = "location" if loc_t > 0 else ("overall" if user_t > 0 else "generic")
+    meta = (loc_src.get("bins") or {}).get(b) if loc_t > 0 else None
+    return _timing_result(score, generic, lat, lng, date_str, applied, basis, meta or {})
+
+
+def _timing_result(score, generic, lat, lng, date_str, applied, basis, meta) -> dict:
+    if applied >= 0.5:
+        source = "personal"
+    elif applied > 0:
+        source = "mixed"
     else:
-        score = generic
         source = "typical"
 
     # Direction: is the season building toward peak or tapering off?
@@ -2154,7 +2343,19 @@ def _blended_timing(date_str: str, lat: float, lng: float, profile: dict) -> dic
     else:
         label = "Active"
 
-    return {"score": round(score), "label": label, "source": source, "flyway": _flyway(lng)}
+    return {
+        "score": round(score),
+        "label": label,
+        "source": source,
+        "flyway": _flyway(lng),
+        # What the generic curve alone would have said, so the UI can show how
+        # far this spot's own history has moved it rather than just asserting.
+        "generic_score": round(generic),
+        "confidence": round(applied * 100),
+        "basis": basis,
+        "hunts_here": meta.get("hunts", 0),
+        "seasons_here": meta.get("seasons", 0),
+    }
 
 
 def _timing_bonus(score: float) -> int:
@@ -2317,65 +2518,168 @@ def _base_conditions_score(wind_speed, weather_code, temp_max):
     return max(0, min(100, score))
 
 
-async def _user_condition_profile(user_id: str):
-    """Avg birds/hunt per condition bucket from the user's full history."""
+# --- Personal condition trim -----------------------------------------------
+# The second, deliberately much smaller channel for personal history.
+#
+# The old version asked "how many birds does he average in a 12 mph wind?" and
+# handed the answer half the score. The question is unanswerable from a hunt log:
+# cold days are windy days are November days, so a good morning credits every
+# bucket at once and there is no way to divide the credit among them. With no
+# hunts where ONLY the moon differed, no amount of arithmetic separates the
+# moon's effect from the front's. Worse, the buckets pooled the whole season, so
+# a September and a January hunt in identical weather landed together and the
+# calendar leaked in disguised as a weather preference.
+#
+# So this no longer asks which factor mattered. It asks a much narrower question
+# the data can actually answer: WHERE IS THE GENERIC MODEL WRONG ABOUT THIS
+# HUNTER? Each logged hunt is replayed through the model as it stood that
+# morning, and only the gap between prediction and result is learned. Migration
+# and season are inside the prediction, so they net out — a good January hunt at
+# peak migration was already predicted and teaches nothing, while the same
+# weather beating a slow September forecast is genuine information.
+#
+# The replayed prediction deliberately uses GENERIC timing, never the user's
+# personal curve. Feeding the personalized score back in would let the two
+# channels chase each other's output.
+CONDITION_TRIM_MAX_PTS = 8.0       # most it can ever move a day, at full confidence
+CONDITION_TRIM_FULL_HUNTS = 40     # ~two seasons before the cap is reachable
+CONDITION_BUCKET_HALF_TRUST = 6    # hunts in one bucket for 50% of its measured gap
+CONDITION_TRIM_FULL_GAP = 50.0     # percentile points of gap that earn the full swing
+
+
+def _expected_day_score(wd: dict, date_str: str, lat: float, lng: float):
+    """Replay the generic model on a past hunt: what would it have predicted?
+
+    Mirrors the forecast pipeline minus freeze state and event bonuses, neither
+    of which is recoverable from a stored hunt. Hunts logged before the
+    prior-day temperature and pressure were saved still work — the cold-front
+    term simply reads as absent, which makes their expectation blurrier and
+    their contribution correspondingly weaker, not wrong.
+    """
+    temp_max = wd.get("temp_max") or wd.get("temp")
+    if temp_max is None or wd.get("condition") in (None, "Unknown"):
+        return None
+
+    base = _base_conditions_score(wd.get("wind_speed"), wd.get("weather_code"), temp_max)
+    mig = _migration_index(temp_max, wd.get("prev_temp_max"),
+                           wd.get("wind_cardinal"), wd.get("pressure_delta"))["score"]
+    score = SCORE_W_BASE * base + SCORE_W_MIGRATION * mig
+
+    timing = _generic_migration_timing(lat, lng, date_str)
+    eff = _effective_timing(timing, mig, _past_peak(lat, lng, date_str))
+    illum = wd.get("moon_illumination")
+    if illum is None:
+        illum = _moon_phase(date_str)["illumination"]
+
+    score = score * SCORE_RAW_SCALE * _timing_multiplier(eff) \
+        * _moon_multiplier(illum, _drive_strength(mig, 0))
+    return max(0.0, min(100.0, score))
+
+
+def _percentiles(values: list) -> dict:
+    """Map each distinct value to its percentile rank, splitting ties evenly.
+
+    Bird counts are heavy-tailed and full of zeros, so a raw average lets one
+    limit day define a bucket. Ranking is immune to that: a 15-bird morning is
+    simply the best one, worth no more than the next best.
+    """
+    n = len(values)
+    if n == 0:
+        return {}
+    ordered = sorted(values)
+    out = {}
+    for v in set(values):
+        below = sum(1 for x in ordered if x < v)
+        equal = sum(1 for x in ordered if x == v)
+        out[v] = (below + equal / 2) / n * 100
+    return out
+
+
+async def _condition_trim_profile(user_id: str, locations_by_id: dict):
+    """Average prediction gap per weather bucket, with per-bucket trust.
+
+    Moon is deliberately absent. It is already applied downstream as
+    _moon_multiplier, and having it here as well counted it twice.
+    """
     hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
-    buckets = {"wind": {}, "temp": {}, "sky": {}, "moon": {}}
-    total_birds = 0
-    sample = 0
+
+    graded = []
+    seen_count = 0
     for hunt in hunts:
-        birds = sum(
-            (h.get("count") if h.get("count") is not None else h.get("harvested", 0))
-            for h in hunt.get("harvests", [])
-        )
-        total_birds += birds
-        sample += 1
         wd = hunt.get("weather_data") or {}
+        date_str = hunt.get("date") or ""
+        loc = locations_by_id.get(str(hunt.get("location_id") or ""))
+        center = (loc or {}).get("center") or {}
+        lat, lng = center.get("lat"), center.get("lng")
+        if not date_str or lat is None or lng is None:
+            continue
+        expected = _expected_day_score(wd, date_str, lat, lng)
+        if expected is None:
+            continue
+        seen = sum(h.get("seen", 0) for h in hunt.get("harvests", []))
+        harv = sum((h.get("count") if h.get("count") is not None else h.get("harvested", 0))
+                   for h in hunt.get("harvests", []))
+        if seen > 0:
+            seen_count += 1
+        graded.append({"wd": wd, "expected": expected, "seen": seen, "harv": harv})
 
-        def add(cat, key):
+    total = len(graded)
+    if total == 0:
+        return {"buckets": {}, "sample": 0, "confidence": 0.0, "metric": None}
+
+    # One metric for the whole profile: ranking hunts against each other only
+    # means anything if they are all measured the same way.
+    use_seen = seen_count >= max(SEEN_CONFIDENT_HUNTS, total / 2)
+    metric = "seen" if use_seen else "harv"
+    ranks = _percentiles([g[metric] for g in graded])
+
+    buckets: Dict[str, Dict[Any, dict]] = {"wind": {}, "temp": {}, "sky": {}}
+    for g in graded:
+        wd, gap = g["wd"], ranks[g[metric]] - g["expected"]
+        keys = {
+            "wind": _wind_bucket(wd["wind_speed"]) if wd.get("wind_speed") is not None else None,
+            "temp": _temp_bucket(wd["temp"]) if wd.get("temp") is not None else None,
+            "sky": _sky_category(wd.get("weather_code")),
+        }
+        for cat, key in keys.items():
             if key is None:
-                return
-            b = buckets[cat].setdefault(key, {"birds": 0, "hunts": 0})
-            b["birds"] += birds
-            b["hunts"] += 1
+                continue
+            rec = buckets[cat].setdefault(key, {"gap": 0.0, "hunts": 0})
+            rec["gap"] += gap
+            rec["hunts"] += 1
 
-        if wd.get("condition") not in (None, "Unknown"):
-            if wd.get("wind_speed") is not None:
-                add("wind", _wind_bucket(wd["wind_speed"]))
-            if wd.get("temp") is not None:
-                add("temp", _temp_bucket(wd["temp"]))
-            add("sky", _sky_category(wd.get("weather_code")))
-        moon_name = wd.get("moon_phase_name")
-        if not moon_name and hunt.get("date"):
-            try:
-                moon_name = _moon_phase(hunt["date"])["name"]
-            except ValueError:
-                moon_name = None
-        add("moon", moon_name)
-
-    overall_avg = (total_birds / sample) if sample else 0
-    avgs = {cat: {k: v["birds"] / v["hunts"] for k, v in d.items() if v["hunts"] > 0}
-            for cat, d in buckets.items()}
-    return {"avgs": avgs, "overall_avg": overall_avg, "sample": sample}
+    out = {cat: {k: {"gap": v["gap"] / v["hunts"],
+                     "trust": v["hunts"] / (v["hunts"] + CONDITION_BUCKET_HALF_TRUST),
+                     "hunts": v["hunts"]}
+                 for k, v in d.items() if v["hunts"] > 0}
+           for cat, d in buckets.items()}
+    return {
+        "buckets": out,
+        "sample": total,
+        "confidence": min(1.0, total / CONDITION_TRIM_FULL_HUNTS),
+        "metric": metric,
+    }
 
 
-def _history_match_score(profile, wind_speed, temp, weather_code, moon_name):
-    """0–100: how much this day's buckets resemble the user's productive conditions."""
-    overall = profile["overall_avg"]
-    if overall <= 0:
-        return None
-    avgs = profile["avgs"]
-    lookups = [
-        avgs["wind"].get(_wind_bucket(wind_speed)) if wind_speed is not None else None,
-        avgs["temp"].get(_temp_bucket(temp)) if temp is not None else None,
-        avgs["sky"].get(_sky_category(weather_code)) if weather_code is not None else None,
-        avgs["moon"].get(moon_name) if moon_name else None,
+def _condition_trim(profile, wind_speed, temp, weather_code) -> float:
+    """Points to add to (or subtract from) a day's score. Capped, and small."""
+    if not profile or profile["sample"] == 0:
+        return 0.0
+    b = profile["buckets"]
+    hits = [
+        b["wind"].get(_wind_bucket(wind_speed)) if wind_speed is not None else None,
+        b["temp"].get(_temp_bucket(temp)) if temp is not None else None,
+        b["sky"].get(_sky_category(weather_code)) if weather_code is not None else None,
     ]
-    ratios = [v / overall for v in lookups if v is not None]
-    if not ratios:
-        return None
-    # ratio 1.0 = average day → 50; 2x average → 100; 0 → 0
-    return max(0, min(100, (sum(ratios) / len(ratios)) * 50))
+    hits = [h for h in hits if h]
+    if not hits:
+        return 0.0
+    # Each bucket is shrunk by its own trust BEFORE averaging, so a bucket
+    # standing on two hunts contributes nearly nothing rather than carrying
+    # equal weight with one standing on twenty.
+    weighted = sum(h["trust"] * h["gap"] for h in hits) / len(hits)
+    scaled = max(-1.0, min(1.0, weighted / CONDITION_TRIM_FULL_GAP))
+    return CONDITION_TRIM_MAX_PTS * profile["confidence"] * scaled
 
 
 # Open-Meteo's free tier has a daily request cap shared across every Railway
@@ -2588,13 +2892,15 @@ async def get_forecast(location_id: Optional[str] = None,
     # still sitting in the response for anyone who opens the network tab.
     location_choices = [{"id": str(l["_id"]), "name": l["name"]} for l in locations]
     total_locations = len(locations)
+    # Captured before the free-tier trim below: a hunt logged at a location that
+    # isn't being scored right now still has something to teach the profiles.
+    locations_by_id = {str(l["_id"]): l for l in locations}
     if not is_pro and locations:
         chosen = next((l for l in locations if str(l["_id"]) == location_id), None)
         locations = [chosen or locations[0]]
 
-    profile = await _user_condition_profile(user_id)
-    use_history = profile["sample"] >= HISTORY_MIN_HUNTS
     timing_profile = await _migration_timing_profile(user_id)
+    trim_profile = await _condition_trim_profile(user_id, locations_by_id)
 
     all_blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
     blinds_by_location: Dict[str, list] = {}
@@ -2624,16 +2930,7 @@ async def get_forecast(location_id: Optional[str] = None,
             evt = _weather_events(day["temp_max"], prev_temp, day["temp_min"],
                                   day["weather_code"], day["precipitation"])
             base = _base_conditions_score(day["wind_speed"], day["weather_code"], day["temp_max"])
-            hist = _history_match_score(profile, day["wind_speed"], day["temp_max"],
-                                        day["weather_code"], moon["name"]) if use_history else None
-
-            if hist is not None:
-                score = (SCORE_W_HISTORY * hist
-                         + SCORE_W_MIGRATION * mig["score"]
-                         + SCORE_W_BASE * base)
-            else:
-                # No usable history: reweight migration + base to fill history's share
-                score = (0.55 * base + 0.45 * mig["score"])
+            score = SCORE_W_BASE * base + SCORE_W_MIGRATION * mig["score"]
             score = min(100, score + evt["bonus"])
 
             # Freeze-up: shallow water locks first, big water lags ~a week
@@ -2645,7 +2942,7 @@ async def get_forecast(location_id: Optional[str] = None,
             # Timing, moon and freeze-concentration all apply multiplicatively, so
             # a missing ingredient scales the day down instead of being covered by
             # another. See the block above _past_peak for what each one encodes.
-            timing = _blended_timing(day["date"], lat, lng, timing_profile)
+            timing = _blended_timing(day["date"], lat, lng, timing_profile, str(loc["_id"]))
             eff_timing = _effective_timing(timing["score"], mig["score"],
                                            _past_peak(lat, lng, day["date"]))
             drive = _drive_strength(mig["score"], fz["delta"])
@@ -2655,6 +2952,13 @@ async def get_forecast(location_id: Optional[str] = None,
                 * _freeze_concentration_multiplier(loc.get("location_type"),
                                                    day["frozen_recent"])
             score = max(0, min(100, score))
+
+            # Personal trim last, on the finished score, so the cap means what
+            # it says: at most CONDITION_TRIM_MAX_PTS on the number the hunter
+            # actually reads, not on some intermediate the UI never shows.
+            trim = _condition_trim(trim_profile, day["wind_speed"],
+                                   day["temp_max"], day["weather_code"])
+            score = max(0, min(100, score + trim))
 
             # Narrative: lead with weather/water events, then wind / pressure / timing.
             factors = [e["label"] for e in events]
@@ -2666,8 +2970,12 @@ async def get_forecast(location_id: Optional[str] = None,
                 factors.append("peak migration")
             elif timing["label"] == "Building":
                 factors.append("migration building")
-            if hist is not None and hist >= 65:
+            # Only claim a personal read when the trim is actually carrying
+            # weight — a fraction of a point is not "your best hunts".
+            if trim >= 2.0:
                 factors.append("matches your best hunts")
+            if timing["basis"] == "location" and timing["confidence"] >= 50:
+                factors.append("your window at this spot")
             if not factors and base >= 65:
                 factors.append("solid conditions")
 
@@ -2742,12 +3050,23 @@ async def get_forecast(location_id: Optional[str] = None,
 
     best_bets.sort(key=lambda b: b["hunt_score"], reverse=True)
 
+    history_payload = {
+        "hunts_logged": timing_profile["total_hunts"],
+        "seasons_logged": timing_profile["seasons"],
+        "timing_locations": sum(1 for v in timing_profile["by_location"].values() if v["curve"]),
+        "trim_confidence": round(trim_profile["confidence"] * 100),
+        "trim_sample": trim_profile["sample"],
+        "trim_max_points": CONDITION_TRIM_MAX_PTS,
+        "trim_full_hunts": CONDITION_TRIM_FULL_HUNTS,
+    }
+
     if not is_pro:
         return {
             "locations": results,
             "best_bets": [],
-            "uses_history": use_history,
-            "history_sample": profile["sample"],
+            "uses_history": timing_profile["total_hunts"] > 0,
+            "history_sample": timing_profile["total_hunts"],
+            "history": history_payload,
             "blind_wind_by_day": [],
             "tier": "free",
             "free_days": FREE_FORECAST_DAYS,
@@ -2759,8 +3078,9 @@ async def get_forecast(location_id: Optional[str] = None,
     return {
         "locations": results,
         "best_bets": best_bets[:5],
-        "uses_history": use_history,
-        "history_sample": profile["sample"],
+        "uses_history": timing_profile["total_hunts"] > 0,
+        "history_sample": timing_profile["total_hunts"],
+        "history": history_payload,
         "blind_wind_by_day": [blind_wind_by_day[d] for d in sorted(blind_wind_by_day)],
         "tier": "pro",
     }
