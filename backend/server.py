@@ -3177,6 +3177,19 @@ async def root():
     return {"message": "Waterfowl Hunting Journal API", "version": "1.0.0"}
 
 
+# Which commit is actually answering requests. Railway injects this at build
+# time. Without it, "did my change go live" is unanswerable from outside — and a
+# local working tree that looks correct has already been mistaken for a deployed
+# one. A short SHA is not sensitive; the repo it names is the same one whose
+# frontend bundle is public anyway.
+DEPLOYED_COMMIT = (
+    os.environ.get("RAILWAY_GIT_COMMIT_SHA")
+    or os.environ.get("SOURCE_VERSION")
+    or os.environ.get("GIT_COMMIT")
+    or ""
+)[:7] or "unknown"
+
+
 @api_router.get("/health")
 async def health():
     """For uptime monitoring. Deliberately touches the database.
@@ -3196,7 +3209,7 @@ async def health():
     # Whether photo storage is wired up, so a misconfiguration is visible from
     # outside instead of being inferred from where photos ended up. It's a
     # boolean about our own setup — no credentials, no user data.
-    body = {"status": "ok", "photo_storage": PHOTO_STORAGE_READY}
+    body = {"status": "ok", "commit": DEPLOYED_COMMIT, "photo_storage": PHOTO_STORAGE_READY}
 
     # Same idea for subscription pricing, so "did the new pricing actually go
     # live" is one public request instead of a test purchase. Booleans about our
