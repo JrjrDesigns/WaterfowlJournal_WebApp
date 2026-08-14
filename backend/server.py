@@ -23,6 +23,7 @@ import re
 import base64
 import asyncio
 from collections import defaultdict, deque
+from functools import lru_cache
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi.responses import JSONResponse
@@ -2138,10 +2139,18 @@ def _curve_at(curve, x: float) -> float:
     return curve[lo] + (curve[lo + 1] - curve[lo]) * (x - lo)
 
 
-def _blend_curve(lat: float, lng: float):
-    """Anisotropic IDW blend of the anchor curves at (lat,lng) -> 10-bin list 0-100.
-    distance = sqrt(dlat^2 + (R*dlng)^2); weight = (1/dist^P) * abundance^ABUND_EXP.
-    Exact-hit on an anchor returns that anchor's curve."""
+@lru_cache(maxsize=1024)
+def _blend_curve_cached(lat: float, lng: float) -> tuple:
+    """The actual IDW blend. Memoized because a single forecast request asks for
+    the same handful of coordinates over and over: once per location per day via
+    _generic_migration_timing and _past_peak, and twice more per logged hunt
+    while the condition trim replays history. A user with three spots and 100
+    hunts made 263 calls for 3 distinct answers.
+
+    Keyed on the raw floats, not rounded ones — location centers are stored
+    values that repeat exactly, and rounding here would change the curve.
+    Returns a tuple so the cached value cannot be mutated by a caller.
+    """
     num = [0.0] * 10
     den = 0.0
     for _nm, alat, alng, _fw, ab, curve in MIGRATION_ANCHORS:
@@ -2149,12 +2158,19 @@ def _blend_curve(lat: float, lng: float):
         dlng = lng - alng
         dist = (dlat * dlat + (_MIG_R * dlng) * (_MIG_R * dlng)) ** 0.5
         if dist < 1e-9:
-            return list(curve)
+            return tuple(curve)
         w = (1.0 / dist ** _MIG_P) * (ab or _MIG_ABUND_DEFAULT) ** _MIG_ABUND_EXP
         for i in range(10):
             num[i] += w * curve[i]
         den += w
-    return [num[i] / den for i in range(10)] if den else [0.0] * 10
+    return tuple(num[i] / den for i in range(10)) if den else (0.0,) * 10
+
+
+def _blend_curve(lat: float, lng: float):
+    """Anisotropic IDW blend of the anchor curves at (lat,lng) -> 10-bin list 0-100.
+    distance = sqrt(dlat^2 + (R*dlng)^2); weight = (1/dist^P) * abundance^ABUND_EXP.
+    Exact-hit on an anchor returns that anchor's curve."""
+    return list(_blend_curve_cached(lat, lng))
 
 
 def _generic_migration_timing(lat: float, lng: float, date_str: str) -> float:
@@ -2233,9 +2249,14 @@ def _build_timing_curve(bins: dict, seen_hunts: int) -> dict:
     return {"curve": curve, "trust": trust, "bins": meta}
 
 
-async def _migration_timing_profile(user_id: str):
-    """Per-location and user-wide half-month curves, each with per-bin trust."""
-    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
+def _migration_timing_profile(hunts: list):
+    """Per-location and user-wide half-month curves, each with per-bin trust.
+
+    Takes the already-fetched hunts rather than querying: this and
+    _condition_trim_profile both need every hunt the user has, and reading the
+    same collection twice per forecast request is a round trip and a full scan
+    for nothing.
+    """
 
     def new_bin():
         return {"seen": 0, "harv": 0, "hunts": 0, "seasons": set()}
@@ -2595,14 +2616,14 @@ def _percentiles(values: list) -> dict:
     return out
 
 
-async def _condition_trim_profile(user_id: str, locations_by_id: dict):
+def _condition_trim_profile(hunts: list, locations_by_id: dict):
     """Average prediction gap per weather bucket, with per-bucket trust.
 
     Moon is deliberately absent. It is already applied downstream as
     _moon_multiplier, and having it here as well counted it twice.
-    """
-    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
 
+    Shares the caller's hunt list with _migration_timing_profile — see there.
+    """
     graded = []
     seen_count = 0
     for hunt in hunts:
@@ -2722,7 +2743,12 @@ async def forecast_for(lat: float, lng: float, days: int = 7):
         _forecast_cache[key] = (time.time(), doc["data"])
         return copy.deepcopy(doc["data"])
 
-    data = fetch_forecast_data(lat, lng, days)
+    # `requests` is synchronous, so calling it directly here would block the
+    # whole event loop for the length of the round trip — up to the 12s timeout,
+    # during which this worker cannot serve anybody, not just this request.
+    # Handing it to a thread frees the loop and is what lets the caller fetch
+    # several locations at once.
+    data = await asyncio.to_thread(fetch_forecast_data, lat, lng, days)
 
     # Failures come back as [] and are deliberately not stored — caching an
     # outage for six hours would turn a blip into an empty Forecast tab.
@@ -2744,6 +2770,45 @@ async def forecast_for(lat: float, lng: float, days: int = 7):
             logger.warning(f"Forecast cache write failed for {key}: {e}")
 
     return data
+
+
+async def forecasts_for_all(locations: list, days: int = 7) -> dict:
+    """Every location's forecast at once, keyed by cache key.
+
+    The scoring loop used to `await forecast_for(...)` one location at a time,
+    which on a cold cache meant paying each round trip end to end in sequence.
+    They don't depend on each other, so they go out together instead.
+
+    Deduplicated by cache key first, so two spots that round to the same
+    coordinate share a single fetch rather than racing each other into two
+    identical calls against a quota that has no API key and is shared with
+    every other tenant on this host.
+    """
+    wanted = {}
+    for loc in locations:
+        center = loc.get("center") or {}
+        lat, lng = center.get("lat"), center.get("lng")
+        if lat is None or lng is None:
+            continue
+        wanted.setdefault(_forecast_cache_key(lat, lng, days), (lat, lng))
+
+    if not wanted:
+        return {}
+
+    keys = list(wanted)
+    results = await asyncio.gather(
+        *(forecast_for(*wanted[k], days) for k in keys),
+        return_exceptions=True,
+    )
+    out = {}
+    for key, res in zip(keys, results):
+        if isinstance(res, Exception):
+            # One bad coordinate shouldn't blank the whole tab; that location
+            # gets skipped downstream exactly as an empty fetch already would.
+            logger.error(f"Forecast fetch failed for {key}: {res}")
+            continue
+        out[key] = res
+    return out
 
 
 def fetch_forecast_data(lat: float, lng: float, days: int = 7):
@@ -2899,8 +2964,14 @@ async def get_forecast(location_id: Optional[str] = None,
         chosen = next((l for l in locations if str(l["_id"]) == location_id), None)
         locations = [chosen or locations[0]]
 
-    timing_profile = await _migration_timing_profile(user_id)
-    trim_profile = await _condition_trim_profile(user_id, locations_by_id)
+    # One read of the hunt log feeds both profiles, and the week's forecasts go
+    # out concurrently alongside it rather than after it.
+    all_hunts, forecasts = await asyncio.gather(
+        fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id),
+        forecasts_for_all(locations, FORECAST_DAYS),
+    )
+    timing_profile = _migration_timing_profile(all_hunts)
+    trim_profile = _condition_trim_profile(all_hunts, locations_by_id)
 
     all_blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
     blinds_by_location: Dict[str, list] = {}
@@ -2920,7 +2991,12 @@ async def get_forecast(location_id: Optional[str] = None,
         # score depends on day one's temperature, and the fetch is cached per
         # coordinate anyway, so trimming early would change the numbers without
         # saving a call. The slice happens once the scoring is done.
-        days = await forecast_for(lat, lng, FORECAST_DAYS)
+        #
+        # Copied per location because the loop below pops `_prev_temp` and
+        # `_press_delta` off each day. Two spots close enough to share a cache
+        # key share the fetched list, and the second one would otherwise find
+        # those keys already removed by the first.
+        days = copy.deepcopy(forecasts.get(_forecast_cache_key(lat, lng, FORECAST_DAYS)) or [])
         loc_days = []
         for day in days:
             prev_temp = day.pop("_prev_temp")
