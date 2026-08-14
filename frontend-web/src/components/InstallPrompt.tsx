@@ -29,6 +29,25 @@ function PlusSquareIcon({ className = 'w-4 h-4' }: { className?: string }) {
   )
 }
 
+/**
+ * The real home-screen icon, drawn as an app tile.
+ *
+ * Deliberately the same PNG iOS installs (`apple-touch-icon.png`) rather than
+ * the logo SVG, so what sits next to "Add to Home Screen" is exactly what lands
+ * on the phone. The radius is a percentage rather than a fixed px so the tile
+ * keeps its proportions at any size — 22.5% is roughly iOS's own corner.
+ */
+function AppIcon({ className = 'w-9 h-9' }: { className?: string }) {
+  return (
+    <img
+      src="/brand/apple-touch-icon.png"
+      alt=""
+      aria-hidden="true"
+      className={`${className} flex-shrink-0 rounded-[22.5%] border border-hairline bg-white object-cover`}
+    />
+  )
+}
+
 function PhoneIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -83,7 +102,7 @@ export function InstallInstructionsSheet({ onClose }: { onClose: () => void }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-5 py-4 border-b border-hairline">
-          <LogoIcon className="w-9 h-9 flex-shrink-0" />
+          <AppIcon className="w-9 h-9" />
           <div className="flex-1 min-w-0">
             <p className="font-display text-lg tracking-wide text-ink leading-none">ADD TO HOME SCREEN</p>
             <p className="text-xs text-muted mt-1">Opens full screen, just like an app</p>
@@ -210,7 +229,7 @@ export function InstallAppRow() {
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-bg transition-colors"
       >
         <div className="flex items-center gap-3">
-          <PhoneIcon className="w-4 h-4 text-muted" />
+          <AppIcon className="w-9 h-9" />
           <div className="text-left">
             <p className="text-sm font-semibold text-ink">Add to Home Screen</p>
             <p className="text-xs text-muted">Open Blind Guide like a real app</p>
