@@ -2249,22 +2249,13 @@ def _build_timing_curve(bins: dict, seen_hunts: int) -> dict:
     return {"curve": curve, "trust": trust, "bins": meta}
 
 
-def _migration_timing_profile(hunts: list, blind_to_location: dict):
+def _migration_timing_profile(hunts: list):
     """Per-location and user-wide half-month curves, each with per-bin trust.
 
     Takes the already-fetched hunts rather than querying: this and
     _condition_trim_profile both need every hunt the user has, and reading the
     same collection twice per forecast request is a round trip and a full scan
     for nothing.
-
-    A hunt records the BLIND it was sat in, not the location — there is no
-    `location_id` on a hunt document — so the location has to be resolved
-    through `blind_to_location`. Reading `hunt["location_id"]` directly returns
-    None for every hunt ever logged, which silently collapsed every spot into a
-    single phantom group that no real location id could ever match, and left
-    the per-location curve permanently unused. Hunts with no blind (logged
-    before blinds existed, or entered freehand) still count toward the
-    user-wide curve; they just cannot belong to a spot.
     """
 
     def new_bin():
@@ -2287,12 +2278,8 @@ def _migration_timing_profile(hunts: list, blind_to_location: dict):
         harv = sum((h.get("count") if h.get("count") is not None else h.get("harvested", 0))
                    for h in hunt.get("harvests", []))
 
-        loc_id = blind_to_location.get(str(hunt.get("blind_id") or ""))
-
-        targets = [overall.setdefault(b, new_bin())]
-        if loc_id:
-            targets.append(by_loc.setdefault(loc_id, {}).setdefault(b, new_bin()))
-        for target in targets:
+        for target in (overall.setdefault(b, new_bin()),
+                       by_loc.setdefault(str(hunt.get("location_id") or ""), {}).setdefault(b, new_bin())):
             target["seen"] += seen
             target["harv"] += harv
             target["hunts"] += 1
@@ -2304,8 +2291,8 @@ def _migration_timing_profile(hunts: list, blind_to_location: dict):
             seasons.add(yr)
         if seen > 0:
             seen_hunts += 1
-            if loc_id:
-                loc_seen_hunts[loc_id] = loc_seen_hunts.get(loc_id, 0) + 1
+            loc_seen_hunts[str(hunt.get("location_id") or "")] = \
+                loc_seen_hunts.get(str(hunt.get("location_id") or ""), 0) + 1
 
     return {
         "by_location": {loc_id: _build_timing_curve(bins, loc_seen_hunts.get(loc_id, 0))
@@ -2629,28 +2616,22 @@ def _percentiles(values: list) -> dict:
     return out
 
 
-def _condition_trim_profile(hunts: list):
+def _condition_trim_profile(hunts: list, locations_by_id: dict):
     """Average prediction gap per weather bucket, with per-bucket trust.
 
     Moon is deliberately absent. It is already applied downstream as
     _moon_multiplier, and having it here as well counted it twice.
 
     Shares the caller's hunt list with _migration_timing_profile — see there.
-
-    Coordinates come from the hunt's own `location` field, which is where it
-    was actually sat. This used to resolve a location document by
-    `hunt["location_id"]`, a key that does not exist on a hunt — so every hunt
-    failed the lookup and this profile was empty for every user, permanently.
-    Reading the hunt's own coordinates is also the more durable choice: it
-    still works for a hunt whose spot was later renamed, moved or deleted.
     """
     graded = []
     seen_count = 0
     for hunt in hunts:
         wd = hunt.get("weather_data") or {}
         date_str = hunt.get("date") or ""
-        where = hunt.get("location") or {}
-        lat, lng = where.get("lat"), where.get("lng")
+        loc = locations_by_id.get(str(hunt.get("location_id") or ""))
+        center = (loc or {}).get("center") or {}
+        lat, lng = center.get("lat"), center.get("lng")
         if not date_str or lat is None or lng is None:
             continue
         expected = _expected_day_score(wd, date_str, lat, lng)
@@ -2984,19 +2965,15 @@ async def get_forecast(location_id: Optional[str] = None,
         locations = [chosen or locations[0]]
 
     # One read of the hunt log feeds both profiles, and the week's forecasts go
-    # out concurrently alongside it rather than after it. Blinds come along in
-    # the same round because a hunt only records which blind it was sat in —
-    # mapping that back to a location is what lets the timing curve be
-    # per-spot at all.
-    all_hunts, all_blinds, forecasts = await asyncio.gather(
+    # out concurrently alongside it rather than after it.
+    all_hunts, forecasts = await asyncio.gather(
         fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id),
-        fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id),
         forecasts_for_all(locations, FORECAST_DAYS),
     )
-    blind_to_location = {str(b["_id"]): str(b.get("location_id") or "") for b in all_blinds}
-    timing_profile = _migration_timing_profile(all_hunts, blind_to_location)
-    trim_profile = _condition_trim_profile(all_hunts)
+    timing_profile = _migration_timing_profile(all_hunts)
+    trim_profile = _condition_trim_profile(all_hunts, locations_by_id)
 
+    all_blinds = await fetch_capped(db.blinds.find({"user_id": user_id}), 1000, "blinds", user_id)
     blinds_by_location: Dict[str, list] = {}
     for b in all_blinds:
         if b.get("ideal_wind_directions"):

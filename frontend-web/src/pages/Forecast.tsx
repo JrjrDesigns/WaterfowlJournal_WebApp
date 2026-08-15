@@ -321,27 +321,73 @@ function ScoreKey() {
   )
 }
 
-/** How far the hunter's own logs have got. One line.
+/** How far the hunter's own logs have got, in their words rather than ours.
  *
- * This was a card with two labelled progress bars, one per channel of the
- * scoring model, each with its own caption explaining what the channel meant.
- * It was the model's internals wearing a UI, and no amount of rewording fixed
- * that — the reader has two questions, "is it using my hunts yet" and "what
- * makes it better", and the honest answers fit in a sentence.
- *
- * Nothing about caps, points, or the names of the channels. The spots count is
- * the one number that is both true and actionable: it tells a hunter which of
- * their places still need hunts before the app can say anything about them.
+ * Every label here was internal model vocabulary first — "migration timing",
+ * "weather trim" — and none of it survived contact with a reader. A hunter does
+ * not need the names of the two channels; they need to know what the app has
+ * worked out about them, and what would teach it more. So each row says the
+ * thing it knows, and the caption says what unlocks the rest.
  */
 function HistoryPanel({ h, spots }: { h: HistoryStatus; spots: number }) {
-  const hunts = `${h.hunts_logged} logged hunt${h.hunts_logged === 1 ? '' : 's'}`
+  const seasons = h.seasons_logged
+  const trimPts = (h.trim_max_points * h.trim_confidence) / 100
+  const rows = [
+    {
+      label: 'When your spots turn on',
+      value: spots > 0 ? `${h.timing_locations} of ${spots}` : '—',
+      pct: spots > 0 ? (h.timing_locations / spots) * 100 : 0,
+      note: 'Which stretch of the season actually holds birds at each place. '
+          + 'A spot needs hunts in two different months before it can tell.',
+    },
+    {
+      label: 'How far your results move a score',
+      value: `±${trimPts.toFixed(1)} of ±${h.trim_max_points}`,
+      pct: h.trim_confidence,
+      note: `Points added or taken off a day's Hunt Score when the weather matches what has `
+          + `worked for you. Reaches the full ±${h.trim_max_points} at ${h.trim_full_hunts} hunts.`,
+    },
+  ]
   return (
-    <p className="text-xs text-muted text-center leading-relaxed px-6 mt-4">
-      Learning from your {hunts} — your forecast leans further on your own results
-      with every season you log.
-      {spots > 0 && ` ${h.timing_locations} of ${spots} spot${spots === 1 ? '' : 's'} `
-        + `${h.timing_locations === 1 ? 'has' : 'have'} enough history to be personalized.`}
-    </p>
+    <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
+      {/* Wraps rather than squeezing: on a narrow screen the count drops to its
+          own line instead of forcing the title to break mid-phrase. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest">Learned from your hunts</p>
+        <p className="text-xs text-muted whitespace-nowrap">
+          {h.hunts_logged} hunt{h.hunts_logged === 1 ? '' : 's'}
+          {seasons > 0 && ` · ${seasons} season${seasons === 1 ? '' : 's'}`}
+        </p>
+      </div>
+      <p className="text-xs text-muted leading-snug mb-4">
+        Everything else in your forecast is the same duck-behaviour model everyone gets.
+        These two are the parts built from your own logs.
+      </p>
+      <div className="space-y-3.5 mb-3">
+        {rows.map(r => (
+          <div key={r.label}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-xs font-semibold text-ink">{r.label}</span>
+              <span className="text-xs text-muted tabular-nums whitespace-nowrap">{r.value}</span>
+            </div>
+            <div className="h-1 mt-1.5 rounded-full bg-hairline overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${Math.max(0, Math.min(100, r.pct))}%`, backgroundColor: '#1B5E45' }}
+              />
+            </div>
+            <p className="text-[11px] text-muted mt-1.5 leading-snug">{r.note}</p>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-muted leading-snug border-t border-hairline pt-3">
+        {seasons < 2
+          ? 'One season can only count for so much — a good November might be the spot, or might be that '
+            + 'November. Hunt the same weeks again next year and your logs start carrying real weight.'
+          : 'Your logs now set when each spot peaks. The weather adjustment stays capped, so it breaks '
+            + 'ties between similar days without rearranging your week.'}
+      </p>
+    </div>
   )
 }
 
