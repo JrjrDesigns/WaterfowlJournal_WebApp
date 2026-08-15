@@ -321,62 +321,71 @@ function ScoreKey() {
   )
 }
 
-/** Where the hunter's own logs currently stand.
+/** How far the hunter's own logs have got, in their words rather than ours.
  *
- * This block publishes real numbers, which the previous model could not
- * honestly do: it handed history half the score off five hunts, so any figure
- * shown would have been a number we intended to change. The two channels now
- * have defensible caps, so the progress is worth stating plainly — and a hunter
- * who can see that a second season at a spot is what unlocks it has a reason to
- * keep logging that "we use your history" never gives them.
+ * Every label here was internal model vocabulary first — "migration timing",
+ * "weather trim" — and none of it survived contact with a reader. A hunter does
+ * not need the names of the two channels; they need to know what the app has
+ * worked out about them, and what would teach it more. So each row says the
+ * thing it knows, and the caption says what unlocks the rest.
  */
 function HistoryPanel({ h, spots }: { h: HistoryStatus; spots: number }) {
   const seasons = h.seasons_logged
   const trimPts = (h.trim_max_points * h.trim_confidence) / 100
   const rows = [
     {
-      label: 'Migration timing',
-      value: spots > 0 ? `${h.timing_locations} of ${spots} spot${spots === 1 ? '' : 's'}` : '—',
+      label: 'When your spots turn on',
+      value: spots > 0 ? `${h.timing_locations} of ${spots}` : '—',
       pct: spots > 0 ? (h.timing_locations / spots) * 100 : 0,
-      note: 'when each of your places peaks',
+      note: 'Which stretch of the season actually holds birds at each place. '
+          + 'A spot needs hunts in two different months before it can tell.',
     },
     {
-      label: 'Weather trim',
-      value: `±${trimPts.toFixed(1)} of ±${h.trim_max_points} pts`,
+      label: 'How far your results move a score',
+      value: `±${trimPts.toFixed(1)} of ±${h.trim_max_points}`,
       pct: h.trim_confidence,
-      note: `full strength at ${h.trim_full_hunts} hunts`,
+      note: `Points added or taken off a day's Hunt Score when the weather matches what has `
+          + `worked for you. Reaches the full ±${h.trim_max_points} at ${h.trim_full_hunts} hunts.`,
     },
   ]
   return (
-    <div className="mt-4 pt-4 border-t border-hairline">
-      <div className="flex items-baseline justify-between gap-3 mb-3">
-        <p className="text-xs font-semibold text-muted uppercase tracking-widest">Your hunt history</p>
-        <p className="text-xs text-muted">
+    <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
+      {/* Wraps rather than squeezing: on a narrow screen the count drops to its
+          own line instead of forcing the title to break mid-phrase. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest">Learned from your hunts</p>
+        <p className="text-xs text-muted whitespace-nowrap">
           {h.hunts_logged} hunt{h.hunts_logged === 1 ? '' : 's'}
           {seasons > 0 && ` · ${seasons} season${seasons === 1 ? '' : 's'}`}
         </p>
       </div>
-      <div className="space-y-2.5 mb-3">
+      <p className="text-xs text-muted leading-snug mb-4">
+        Everything else in your forecast is the same duck-behaviour model everyone gets.
+        These two are the parts built from your own logs.
+      </p>
+      <div className="space-y-3.5 mb-3">
         {rows.map(r => (
           <div key={r.label}>
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-xs font-semibold text-ink">{r.label}</span>
-              <span className="text-xs text-muted tabular-nums">{r.value}</span>
+              <span className="text-xs text-muted tabular-nums whitespace-nowrap">{r.value}</span>
             </div>
-            <div className="h-1 mt-1 rounded-full bg-hairline overflow-hidden">
+            <div className="h-1 mt-1.5 rounded-full bg-hairline overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${Math.max(0, Math.min(100, r.pct))}%`, backgroundColor: '#1B5E45' }}
               />
             </div>
-            <p className="text-[11px] text-muted mt-1 leading-snug">{r.note}</p>
+            <p className="text-[11px] text-muted mt-1.5 leading-snug">{r.note}</p>
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-muted leading-snug">
+      <p className="text-[11px] text-muted leading-snug border-t border-hairline pt-3">
         {seasons < 2
-          ? 'Timing needs two seasons at a spot before it carries full weight — one good season is a story, two is a pattern.'
-          : 'Your logs now set when each spot peaks. Weather nudges stay capped, so they break ties without reordering your week.'}
+          ? 'One season can only count for so much — a good November might be the spot, or might be that '
+            + 'November. Hunt the same weeks again next year and your logs start carrying real weight.'
+          : 'Your logs now set when each spot peaks. The weather adjustment stays capped, so it breaks '
+            + 'ties between similar days without rearranging your week.'}
       </p>
     </div>
   )
@@ -672,14 +681,8 @@ export default function Forecast() {
 
         {loc.days.map(day => <FreeDayCard key={day.date} day={day} />)}
 
-        <LockedForecast
-          lockedDays={data.locked_days ?? 5}
-          lockedLocations={data.locked_locations ?? 0}
-          onClick={() => setShowPaywall(true)}
-        />
-
-        {/* Reference material, deliberately last — see the note on the Pro view. */}
-        <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
+        {/* What the score means — stays here, next to the scores it explains. */}
+        <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
           <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
           <p className="text-sm text-ink leading-relaxed mb-4">
             Each day gets a Hunt Score out of 100, built from
@@ -687,17 +690,25 @@ export default function Forecast() {
             cold-front pressure, freeze timing, and weather conditions.
           </p>
           <ScoreKey />
-          {data.history && (
-            data.history.hunts_logged > 0
-              ? <HistoryPanel h={data.history} spots={data.locations.length + (data.locked_locations ?? 0)} />
-              : (
-                <p className="text-xs text-muted mt-3 leading-snug">
-                  Running on the baseline model so far — no hunts logged yet. Log your hunts and
-                  the score starts learning when your own spots turn on.
-                </p>
-              )
+          {data.history && data.history.hunts_logged === 0 && (
+            <p className="text-xs text-muted mt-3 leading-snug">
+              Running on the baseline model so far — no hunts logged yet. Log your hunts and
+              the score starts learning when your own spots turn on.
+            </p>
           )}
         </div>
+
+        <LockedForecast
+          lockedDays={data.locked_days ?? 5}
+          lockedLocations={data.locked_locations ?? 0}
+          onClick={() => setShowPaywall(true)}
+        />
+
+        {/* Progress, not reference — last, because it is the least urgent thing
+            on the screen and it was pushing the forecast down from the top. */}
+        {data.history && data.history.hunts_logged > 0 && (
+          <HistoryPanel h={data.history} spots={data.locations.length + (data.locked_locations ?? 0)} />
+        )}
       </div>
     )
   }
@@ -705,6 +716,18 @@ export default function Forecast() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Header />
+
+      {/* What the score is and how to read it. Belongs up here: it is the legend
+          for every number below, and it is read once and then skipped. */}
+      <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
+        <p className="text-sm text-ink leading-relaxed mb-4">
+          Every day, each of your locations gets a Hunt Score out of 100, built from
+          {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
+          cold-front pressure, freeze timing, and weather conditions.
+        </p>
+        <ScoreKey />
+      </div>
 
       {/* Best bets */}
       {data.best_bets.length > 0 && (
@@ -912,22 +935,11 @@ export default function Forecast() {
         </div>
       )}
 
-      {/* Reference material, deliberately last. What the score means and how far
-          the hunter's own logs currently reach are worth being able to look up,
-          but they are not what someone opens this tab to find out — the week's
-          scores are. This sat at the top and pushed the actual forecast down. */}
-      <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
-        <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
-        <p className="text-sm text-ink leading-relaxed mb-4">
-          Every day, each of your locations gets a Hunt Score out of 100, built from
-          {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
-          cold-front pressure, freeze timing, and weather conditions.
-        </p>
-        <ScoreKey />
-        {data.history && data.history.hunts_logged > 0 && (
-          <HistoryPanel h={data.history} spots={data.locations.length} />
-        )}
-      </div>
+      {/* Progress, not reference — last, because it is the least urgent thing on
+          the screen and it was pushing the actual forecast down from the top. */}
+      {data.history && data.history.hunts_logged > 0 && (
+        <HistoryPanel h={data.history} spots={data.locations.length} />
+      )}
 
       <p className="text-xs text-muted text-center px-6 mt-4">
         Forecasts beyond ~5 days are less reliable.
