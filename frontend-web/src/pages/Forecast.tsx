@@ -336,12 +336,14 @@ function ScoreKey() {
 function HistoryPanel({ h, spots }: { h: HistoryStatus; spots: number }) {
   const hunts = `${h.hunts_logged} logged hunt${h.hunts_logged === 1 ? '' : 's'}`
   return (
-    <p className="text-xs text-muted text-center leading-relaxed px-6 mt-4">
-      Learning from your {hunts} — your forecast leans further on your own results
-      with every season you log.
-      {spots > 0 && ` ${h.timing_locations} of ${spots} spot${spots === 1 ? '' : 's'} `
-        + `${h.timing_locations === 1 ? 'has' : 'have'} enough history to be personalized.`}
-    </p>
+    <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
+      <p className="text-xs text-muted leading-relaxed">
+        Learning from your {hunts} — your forecast leans further on your own results
+        with every season you log.
+        {spots > 0 && ` ${h.timing_locations} of ${spots} spot${spots === 1 ? '' : 's'} `
+          + `${h.timing_locations === 1 ? 'has' : 'have'} enough history to be personalized.`}
+      </p>
+    </div>
   )
 }
 
