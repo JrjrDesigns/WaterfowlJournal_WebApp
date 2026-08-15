@@ -672,7 +672,14 @@ export default function Forecast() {
 
         {loc.days.map(day => <FreeDayCard key={day.date} day={day} />)}
 
-        <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
+        <LockedForecast
+          lockedDays={data.locked_days ?? 5}
+          lockedLocations={data.locked_locations ?? 0}
+          onClick={() => setShowPaywall(true)}
+        />
+
+        {/* Reference material, deliberately last — see the note on the Pro view. */}
+        <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
           <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
           <p className="text-sm text-ink leading-relaxed mb-4">
             Each day gets a Hunt Score out of 100, built from
@@ -685,18 +692,12 @@ export default function Forecast() {
               ? <HistoryPanel h={data.history} spots={data.locations.length + (data.locked_locations ?? 0)} />
               : (
                 <p className="text-xs text-muted mt-3 leading-snug">
-                  Using the generic model so far — no hunts logged yet. Log your hunts and the
-                  score starts learning when your own spots turn on.
+                  Running on the baseline model so far — no hunts logged yet. Log your hunts and
+                  the score starts learning when your own spots turn on.
                 </p>
               )
           )}
         </div>
-
-        <LockedForecast
-          lockedDays={data.locked_days ?? 5}
-          lockedLocations={data.locked_locations ?? 0}
-          onClick={() => setShowPaywall(true)}
-        />
       </div>
     )
   }
@@ -705,29 +706,13 @@ export default function Forecast() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Header />
 
-      {/* What the score is, how to read it, and exactly how far the hunter's own
-          logs currently reach. The weights were reworked and now have defensible
-          caps, so this publishes real numbers instead of staying vague. */}
-      <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
-        <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
-        <p className="text-sm text-ink leading-relaxed mb-4">
-          Every day, each of your locations gets a Hunt Score out of 100, built from
-          {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
-          cold-front pressure, freeze timing, and weather conditions.
-        </p>
-        <ScoreKey />
-        {data.history && data.history.hunts_logged > 0 && (
-          <HistoryPanel h={data.history} spots={data.locations.length} />
-        )}
-      </div>
-
       {/* Best bets */}
       {data.best_bets.length > 0 && (
         <div className="bg-surface border border-hairline rounded-xl p-5 mb-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-semibold text-muted uppercase tracking-widest">Best Bets This Week</p>
             {!data.uses_history && (
-              <span className="text-xs text-muted">generic model · no hunts logged yet</span>
+              <span className="text-xs text-muted">baseline model · no hunts logged yet</span>
             )}
           </div>
           <div className="space-y-2.5">
@@ -927,7 +912,24 @@ export default function Forecast() {
         </div>
       )}
 
-      <p className="text-xs text-muted text-center px-6 mt-2">
+      {/* Reference material, deliberately last. What the score means and how far
+          the hunter's own logs currently reach are worth being able to look up,
+          but they are not what someone opens this tab to find out — the week's
+          scores are. This sat at the top and pushed the actual forecast down. */}
+      <div className="bg-surface border border-hairline rounded-xl p-5 mt-4">
+        <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3">Hunt Score</p>
+        <p className="text-sm text-ink leading-relaxed mb-4">
+          Every day, each of your locations gets a Hunt Score out of 100, built from
+          {data.uses_history ? ' your hunt history,' : ''} seasonal migration timing,
+          cold-front pressure, freeze timing, and weather conditions.
+        </p>
+        <ScoreKey />
+        {data.history && data.history.hunts_logged > 0 && (
+          <HistoryPanel h={data.history} spots={data.locations.length} />
+        )}
+      </div>
+
+      <p className="text-xs text-muted text-center px-6 mt-4">
         Forecasts beyond ~5 days are less reliable.
       </p>
     </div>
