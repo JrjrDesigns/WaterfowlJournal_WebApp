@@ -3909,6 +3909,17 @@ INDEXES = [
     # so the periodic purge sweep doesn't read every user.
     ("users", [("deletion_scheduled_for", 1)],
      {"name": "users_deletion_due", "sparse": True}),
+    # Stripe webhooks arrive knowing only the customer id, so every event has to
+    # look the account up by it. Unindexed that reads the whole users collection,
+    # and it is the lookup that decides whether someone's subscription actually
+    # activates — the one query where being slow costs money rather than time.
+    # Sparse for the same reason as above: only paying accounts carry the field.
+    # Deliberately NOT unique. One customer id should only ever map to one
+    # account, but a unique index refuses to build if any pair already collides,
+    # and ensure_indexes swallows that into a log line — leaving no index at all,
+    # which is worse than the duplicate it was meant to catch.
+    ("users", [("stripe_customer_id", 1)],
+     {"name": "users_stripe_customer", "sparse": True}),
     # Covers filtering by user, the year range filter, and the newest-first sort
     # in one pass. A compound index also serves its own prefix, so plain
     # "this user's hunts" lookups and the free-tier count use it too.
