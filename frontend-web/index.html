@@ -2,7 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Raster fallbacks are not optional here. A browser that won't take the
+         SVG falls back to /favicon.ico, and Cloudflare's SPA catch-all answered
+         that with index.html as text/html - an HTML document where an image was
+         expected, so the tab got no usable icon at all. All of these carry the
+         white backing circle, so the mark never disappears into a dark tab. -->
     <link rel="icon" type="image/svg+xml" href="/brand/logo-icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/brand/favicon-16.png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Blind Guide</title>
