@@ -151,6 +151,56 @@ export default function Diagnostics() {
       })
     }
 
+    // 6 — only when signed in: does the newest hunt carry the cold-front data?
+    //
+    // A hunt stores the day before it as well as the day itself, because the
+    // difference between the two is what says "a front came through" rather
+    // than "it was cold". Nothing on any screen displays those two values, so
+    // without this check there is no way to tell whether they are being saved —
+    // and the gap would only surface a season later, as a personal forecast
+    // quietly built on less than it should have been.
+    const token = localStorage.getItem('token')
+    if (token) {
+      t = performance.now()
+      try {
+        const res = await withTimeout(signal =>
+          fetch(`${API_URL}/api/hunts`, { headers: { Authorization: `Bearer ${token}` }, signal }))
+        const body = await res.json()
+        const hunts = Array.isArray(body) ? body : (body?.hunts ?? [])
+        const newest = hunts[0]
+        // An account with no hunts yet has nothing to check — recording that as
+        // a failure would report a brand-new account as broken.
+        if (newest) {
+          const wx = newest.weather_data ?? {}
+          const missing = [
+            ['previous day temperature', wx.prev_temp_max],
+            ['pressure trend', wx.pressure_delta],
+          ].filter(([, v]) => v === null || v === undefined).map(([n]) => n)
+
+          record({
+            key: 'hunt-weather',
+            label: 'Your latest hunt saved its cold-front data',
+            meaning: missing.length
+              ? 'This hunt saved the weather but not the day before it, so the forecast '
+                + 'cannot tell a front from a cold snap when it learns from this hunt.'
+              : 'The hunt stored yesterday alongside the hunt day, which is what lets the '
+                + 'forecast learn from it later.',
+            status: missing.length ? 'fail' : 'pass',
+            detail: `${newest.date} — ${missing.length ? `missing: ${missing.join(', ')}` : 'complete'}`
+              + ` (yesterday ${wx.prev_temp_max ?? '—'}°F, pressure ${wx.pressure_delta ?? '—'} hPa,`
+              + ` ${wx.pressure_trend ?? 'unknown'})`,
+            ms: Math.round(performance.now() - t),
+          })
+        }
+      } catch (err) {
+        record({
+          key: 'hunt-weather', label: 'Your latest hunt saved its cold-front data',
+          meaning: 'Could not read your hunts to check.',
+          status: 'fail', detail: describe(err), ms: Math.round(performance.now() - t),
+        })
+      }
+    }
+
     setDone(true)
     return out
   }
@@ -172,6 +222,17 @@ export default function Diagnostics() {
         title: 'The server is reachable but the reply was refused',
         body: 'This one is on our side, or something is rewriting traffic in between. '
             + 'Send this screenshot over.',
+      }
+    // Deliberately below the connection checks and above the all-clear: this one
+    // is not a network fault, and it must not be reported as one — but it also
+    // must not let the page say everything is fine when a hunt saved short.
+    if (get('hunt-weather')?.status === 'fail')
+      return {
+        title: 'Your connection is fine — but a hunt saved incomplete',
+        body: 'Every network check passed, so nothing is blocked. The problem is that your '
+            + 'most recent hunt did not store the day before it, which the forecast needs in '
+            + 'order to learn from that hunt later. Nothing is broken on your end; send this '
+            + 'screenshot over.',
       }
     if (done)
       return {
