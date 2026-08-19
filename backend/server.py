@@ -2102,6 +2102,33 @@ MIGRATION_ANCHORS = [
     ("Lower Columbia OR", 45.72, -122.8, "Pacific", 120000, [10, 16, 38, 60, 82, 94, 100, 94, 84, 70]),
     ("Freezeout Lake MT", 47.6, -112.0, "Central", 50000, [30, 55, 82, 100, 80, 50, 25, 12, 6, 3]),
     ("Downeast Maine", 45.1, -67.3, "Atlantic", 365977, [15, 25, 48, 70, 90, 100, 82, 62, 45, 35]),
+    # --- Michigan (Mississippi flyway, 41.98-43.85N) --------------------------
+    # The Mississippi flyway had NO anchor above 41.6N (Lake Erie marshes), so
+    # every Michigan, Wisconsin, Minnesota and Ontario location was predicted by
+    # extrapolating upward from Ohio: for Shiawassee, 97% of the blend came from
+    # anchors SOUTH of it, which pushed its peak about a half-month late.
+    #
+    # Source: Michigan DNR "Wetland Wonders" weekly managed-area counts
+    # (michigan.gov/dnr .../wetland-wonders/<area>/waterfowl-counts), teal-excluded
+    # like the rest of the cloud. Built by backend/data/parse_michigan.py from
+    # backend/data/surveys/michigan.csv.
+    #
+    # PROVENANCE CAVEAT: one season (2025-26) -- the DNR publishes only the
+    # current season and the Wayback captures of these pages start Sept 2024.
+    # Ohio has 40 years behind it, Kentucky 9, Arkansas 35. Treat the SHAPE as
+    # provisional and the DECEMBER TAIL as the weakest part: 2025 had a hard
+    # ice-up Nov 28-Dec 2 that emptied the Saginaw Bay marshes in a single week.
+    # Note the model already handles ice separately (_freeze_adjustment,
+    # _freeze_concentration_multiplier), so a frozen December is at some risk of
+    # being counted twice here. Adding seasons is the fix; the parser averages
+    # across years by half-month automatically once more rows land in the CSV.
+    ("Nayanquing Point MI", 43.85, -83.93, "Mississippi", 7422, [22, 39, 67, 100, 83, 60, 27, 12, 5, 3]),
+    ("Fish Point MI", 43.72, -83.5, "Mississippi", 18130, [1, 7, 49, 84, 100, 69, 0, 0, 3, 3]),
+    ("Shiawassee River SGA MI", 43.38, -84.08, "Mississippi", 14145, [7, 17, 35, 88, 100, 85, 38, 17, 8, 3]),
+    ("Muskegon County MI", 43.24, -86.14, "Mississippi", 14508, [20, 45, 100, 81, 83, 33, 6, 4, 3, 3]),
+    ("Fennville Farm Unit MI", 42.58, -86.0, "Mississippi", 8191, [2, 2, 7, 19, 35, 63, 100, 100, 54, 24]),
+    ("Harsens Island MI", 42.57, -82.6, "Mississippi", 11763, [3, 9, 44, 53, 62, 100, 18, 11, 4, 3]),
+    ("Pointe Mouillee MI", 41.98, -83.25, "Mississippi", 5965, [5, 7, 67, 79, 100, 81, 28, 32, 14, 6]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power

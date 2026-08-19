@@ -1,0 +1,108 @@
+# Michigan DNR "Wetland Wonders" managed waterfowl area weekly counts.
+# Source: michigan.gov/dnr .../wetland-wonders/<area>/waterfowl-counts
+# Season: 2025-26 (the only season the DNR publishes on those pages).
+# total_ducks is the DNR's own "Total ducks"; bwt/gwt are blue- and green-winged
+# teal, broken out so the curve can be built teal-excluded like the other anchors.
+location,latitude,longitude,survey_date,total_ducks,bwt,gwt
+Nayanquing Point MI,43.85,-83.93,2025-09-07,1700,150,200
+Nayanquing Point MI,43.85,-83.93,2025-09-14,2325,200,200
+Nayanquing Point MI,43.85,-83.93,2025-09-21,2750,200,250
+Nayanquing Point MI,43.85,-83.93,2025-09-28,4225,200,500
+Nayanquing Point MI,43.85,-83.93,2025-10-05,5200,250,650
+Nayanquing Point MI,43.85,-83.93,2025-10-12,6875,250,1000
+Nayanquing Point MI,43.85,-83.93,2025-10-19,7775,200,1200
+Nayanquing Point MI,43.85,-83.93,2025-10-26,10120,150,1500
+Nayanquing Point MI,43.85,-83.93,2025-11-02,12000,200,1800
+Nayanquing Point MI,43.85,-83.93,2025-11-09,3250,0,1000
+Nayanquing Point MI,43.85,-83.93,2025-11-16,4550,0,100
+Nayanquing Point MI,43.85,-83.93,2025-11-23,4600,0,200
+Fish Point MI,43.72,-83.50,2025-09-07,143,2,0
+Fish Point MI,43.72,-83.50,2025-09-14,164,5,0
+Fish Point MI,43.72,-83.50,2025-09-21,811,279,107
+Fish Point MI,43.72,-83.50,2025-09-28,2683,465,210
+Fish Point MI,43.72,-83.50,2025-10-05,11034,910,1138
+Fish Point MI,43.72,-83.50,2025-10-12,9895,365,670
+Fish Point MI,43.72,-83.50,2025-10-19,15300,350,1500
+Fish Point MI,43.72,-83.50,2025-10-26,19800,500,2250
+Fish Point MI,43.72,-83.50,2025-11-02,21385,250,2400
+Fish Point MI,43.72,-83.50,2025-11-09,19475,150,1800
+Fish Point MI,43.72,-83.50,2025-11-16,17260,0,250
+Fish Point MI,43.72,-83.50,2025-11-23,19555,0,200
+Fish Point MI,43.72,-83.50,2025-11-30,1087,0,0
+Fish Point MI,43.72,-83.50,2025-12-07,71,0,0
+Fish Point MI,43.72,-83.50,2025-12-14,15,0,0
+Fish Point MI,43.72,-83.50,2025-12-21,7,0,0
+Shiawassee River SGA MI,43.38,-84.08,2025-09-07,430,15,30
+Shiawassee River SGA MI,43.38,-84.08,2025-09-14,1700,50,75
+Shiawassee River SGA MI,43.38,-84.08,2025-09-21,1835,10,50
+Shiawassee River SGA MI,43.38,-84.08,2025-09-28,3205,0,50
+Shiawassee River SGA MI,43.38,-84.08,2025-10-05,3590,0,75
+Shiawassee River SGA MI,43.38,-84.08,2025-10-12,6595,0,225
+Shiawassee River SGA MI,43.38,-84.08,2025-10-26,12740,0,275
+Shiawassee River SGA MI,43.38,-84.08,2025-11-02,16865,0,750
+Shiawassee River SGA MI,43.38,-84.08,2025-11-09,12575,0,400
+Shiawassee River SGA MI,43.38,-84.08,2025-11-16,17310,0,400
+Shiawassee River SGA MI,43.38,-84.08,2025-11-23,19310,0,50
+Shiawassee River SGA MI,43.38,-84.08,2025-11-30,29,0,0
+Muskegon County MI,43.24,-86.14,2025-10-05,11200,350,0
+Muskegon County MI,43.24,-86.14,2025-10-12,18167,0,0
+Muskegon County MI,43.24,-86.14,2025-10-19,12850,0,0
+Muskegon County MI,43.24,-86.14,2025-10-26,10717,0,0
+Muskegon County MI,43.24,-86.14,2025-11-02,13418,0,0
+Muskegon County MI,43.24,-86.14,2025-11-09,10650,0,0
+Muskegon County MI,43.24,-86.14,2025-11-16,3720,0,0
+Muskegon County MI,43.24,-86.14,2025-11-23,5460,0,0
+Muskegon County MI,43.24,-86.14,2025-11-30,5040,0,0
+Muskegon County MI,43.24,-86.14,2025-12-07,1245,0,0
+Muskegon County MI,43.24,-86.14,2025-12-14,360,0,0
+Muskegon County MI,43.24,-86.14,2025-12-21,581,0,0
+Harsens Island MI,42.57,-82.60,2025-09-07,475,50,200
+Harsens Island MI,42.57,-82.60,2025-09-14,721,6,300
+Harsens Island MI,42.57,-82.60,2025-09-21,1220,0,350
+Harsens Island MI,42.57,-82.60,2025-09-28,1690,0,400
+Harsens Island MI,42.57,-82.60,2025-10-05,3346,0,800
+Harsens Island MI,42.57,-82.60,2025-10-12,8426,0,700
+Harsens Island MI,42.57,-82.60,2025-10-19,7340,0,500
+Harsens Island MI,42.57,-82.60,2025-10-26,6037,0,400
+Harsens Island MI,42.57,-82.60,2025-11-02,6371,0,200
+Harsens Island MI,42.57,-82.60,2025-11-09,8812,0,500
+Harsens Island MI,42.57,-82.60,2025-11-16,14305,0,400
+Harsens Island MI,42.57,-82.60,2025-11-23,15185,0,300
+Harsens Island MI,42.57,-82.60,2025-11-30,6500,0,0
+Harsens Island MI,42.57,-82.60,2025-12-08,3200,0,0
+Harsens Island MI,42.57,-82.60,2025-12-14,1050,0,0
+Harsens Island MI,42.57,-82.60,2025-12-21,1252,0,0
+Harsens Island MI,42.57,-82.60,2026-01-04,525,0,0
+Fennville Farm Unit MI,42.58,-86.00,2025-09-07,195,2,3
+Fennville Farm Unit MI,42.58,-86.00,2025-09-14,84,12,15
+Fennville Farm Unit MI,42.58,-86.00,2025-09-21,300,35,5
+Fennville Farm Unit MI,42.58,-86.00,2025-09-28,124,0,0
+Fennville Farm Unit MI,42.58,-86.00,2025-10-05,483,10,20
+Fennville Farm Unit MI,42.58,-86.00,2025-10-12,665,5,35
+Fennville Farm Unit MI,42.58,-86.00,2025-10-19,1490,50,75
+Fennville Farm Unit MI,42.58,-86.00,2025-10-26,1765,35,40
+Fennville Farm Unit MI,42.58,-86.00,2025-11-02,2025,0,50
+Fennville Farm Unit MI,42.58,-86.00,2025-11-09,3750,0,25
+Fennville Farm Unit MI,42.58,-86.00,2025-11-16,4192,0,30
+Fennville Farm Unit MI,42.58,-86.00,2025-11-23,4800,0,15
+Fennville Farm Unit MI,42.58,-86.00,2025-11-30,6460,0,10
+Fennville Farm Unit MI,42.58,-86.00,2025-12-07,8527,0,0
+Fennville Farm Unit MI,42.58,-86.00,2025-12-14,7855,0,0
+Fennville Farm Unit MI,42.58,-86.00,2025-12-21,8180,0,20
+Fennville Farm Unit MI,42.58,-86.00,2026-01-04,5210,0,0
+Fennville Farm Unit MI,42.58,-86.00,2026-01-11,3625,0,0
+Pointe Mouillee MI,41.98,-83.25,2025-09-07,345,75,10
+Pointe Mouillee MI,41.98,-83.25,2025-09-14,445,50,8
+Pointe Mouillee MI,41.98,-83.25,2025-09-21,373,32,2
+Pointe Mouillee MI,41.98,-83.25,2025-09-28,499,30,10
+Pointe Mouillee MI,41.98,-83.25,2025-10-05,3804,245,375
+Pointe Mouillee MI,41.98,-83.25,2025-10-12,5523,250,500
+Pointe Mouillee MI,41.98,-83.25,2025-10-26,5010,35,260
+Pointe Mouillee MI,41.98,-83.25,2025-11-02,6535,10,1200
+Pointe Mouillee MI,41.98,-83.25,2025-11-09,7605,0,1000
+Pointe Mouillee MI,41.98,-83.25,2025-11-16,5697,0,725
+Pointe Mouillee MI,41.98,-83.25,2025-11-23,5785,0,500
+Pointe Mouillee MI,41.98,-83.25,2025-11-30,4425,0,250
+Pointe Mouillee MI,41.98,-83.25,2025-12-07,1693,0,100
+Pointe Mouillee MI,41.98,-83.25,2025-12-14,1819,0,100
+Pointe Mouillee MI,41.98,-83.25,2025-12-21,1913,0,0
