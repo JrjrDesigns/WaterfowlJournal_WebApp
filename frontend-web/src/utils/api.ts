@@ -270,3 +270,16 @@ export const exportHuntsCSV = () => {
       URL.revokeObjectURL(objectUrl)
     })
 }
+
+// Admin — the private signups dashboard. Every one of these 404s for anyone
+// whose account isn't on the server's allowlist.
+export const fetchAdminOverview = () => apiRequest('/api/admin/overview', {}, 20000)
+
+export const fetchAdminUser = (id: string) =>
+  apiRequest(`/api/admin/users/${id}`, {}, 20000)
+
+export const setAdminUserCategory = (id: string, category: 'user' | 'tester' | 'insider') =>
+  apiRequest(`/api/admin/users/${id}/category`, {
+    method: 'POST',
+    body: JSON.stringify({ category }),
+  }, 20000)

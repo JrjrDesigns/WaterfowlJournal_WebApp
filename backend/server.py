@@ -3890,6 +3890,277 @@ async def export_hunts_csv(current_user: dict = Depends(require_pro)):
         headers={"Content-Disposition": "attachment; filename=hunts.csv"},
     )
 
+
+# ============ ADMIN DASHBOARD ============
+#
+# A private view of who has signed up and what they actually did with the app.
+# The headline number is real new users, which means everyone I know has to be
+# subtracted out — my own account, family and friends trying it, and the beta
+# testers. Every account is still listed; only the count changes.
+#
+# Gated on the signed-in account's email. There is no separate password and no
+# shared key: the owner already signs in, and a second credential is a second
+# thing to leak.
+
+ADMIN_EMAILS = {
+    e.strip().lower()
+    for e in os.environ.get("ADMIN_EMAILS", "jrjrdesigns@gmail.com").split(",")
+    if e.strip()
+}
+
+# Accounts that belong to me, my family, or my friends. Not customers.
+INSIDER_EMAILS = {
+    "jrjrdesigns@gmail.com",
+    "oheicheyeoh@yahoo.com",
+    "shanfran416@gmail.com",
+    "james.francis@trailmarkops.com",
+}
+
+# Beta testers, matched on the name they signed up with because their addresses
+# were never recorded here. A mismatch is not a problem: the dashboard can
+# reclassify any account by hand, and that choice is stored on the user and wins
+# over both of these lists.
+TESTER_NAMES = {
+    "matt dove",
+    "wesley lapland",
+    "paul clifford",
+    "bowman",
+}
+
+CATEGORIES = ("user", "tester", "insider")
+
+
+def account_category(user: dict) -> str:
+    """user = a real signup, tester = beta tester, insider = me/family/friends.
+
+    A hand-set category always wins, so anyone these lists miss (or wrongly
+    catch) can be fixed from the dashboard in one tap.
+    """
+    stored = user.get("admin_category")
+    if stored in CATEGORIES:
+        return stored
+    if (user.get("email") or "").strip().lower() in INSIDER_EMAILS:
+        return "insider"
+    if (user.get("name") or "").strip().lower() in TESTER_NAMES:
+        return "tester"
+    return "user"
+
+
+async def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    if (current_user.get("email") or "").strip().lower() not in ADMIN_EMAILS:
+        # 404, not 403: a 403 confirms the endpoint exists to anyone who pokes at
+        # it. Nobody but me has any business knowing it's here.
+        raise HTTPException(status_code=404, detail="Not found")
+    return current_user
+
+
+def _iso(value) -> Optional[str]:
+    return value.isoformat() + "Z" if isinstance(value, datetime) else None
+
+
+def _birds(hunt: dict) -> int:
+    return sum(h.get("count", 0) for h in hunt.get("harvests", []) or [])
+
+
+async def _counts_by_user(collection: str) -> dict:
+    """{user_id: {"count": n, "last": datetime|None}} for one collection.
+
+    One grouped pass per collection rather than three queries per user — with
+    the per-user loop this endpoint would issue a query per account per
+    collection, which grows with signups.
+    """
+    pipeline = [
+        {"$group": {
+            "_id": "$user_id",
+            "count": {"$sum": 1},
+            "last": {"$max": "$created_at"},
+        }}
+    ]
+    out = {}
+    async for row in db[collection].aggregate(pipeline):
+        out[row["_id"]] = {"count": row.get("count", 0), "last": row.get("last")}
+    return out
+
+
+@api_router.get("/admin/overview")
+async def admin_overview(_: dict = Depends(require_admin)):
+    users = await db.users.find(
+        {},
+        # Never pull password_hash or reset material into a response, even one
+        # only I can read.
+        {"email": 1, "name": 1, "subscription_status": 1, "subscription_paused": 1,
+         "created_at": 1, "admin_category": 1, "deletion_scheduled_for": 1,
+         "stripe_customer_id": 1},
+    ).sort("created_at", -1).to_list(1000)
+
+    hunts = await _counts_by_user("hunts")
+    locations = await _counts_by_user("locations")
+    blinds = await _counts_by_user("blinds")
+
+    # Birds and photos need the documents themselves, but only three small
+    # fields of them — never the photo payloads.
+    birds_by_user: dict = {}
+    photos_by_user: dict = {}
+    async for hunt in db.hunts.find({}, {"user_id": 1, "harvests": 1, "photos": 1}):
+        uid = hunt.get("user_id")
+        birds_by_user[uid] = birds_by_user.get(uid, 0) + _birds(hunt)
+        photos_by_user[uid] = photos_by_user.get(uid, 0) + len(hunt.get("photos") or [])
+
+    now = datetime.utcnow()
+    rows = []
+    for user in users:
+        uid = str(user["_id"])
+        created = user.get("created_at")
+        hunt_stat = hunts.get(uid, {})
+        loc_stat = locations.get(uid, {})
+        blind_stat = blinds.get(uid, {})
+
+        # The most recent thing they created, of any kind. Signing up is itself
+        # the first act, so an account that did nothing else still reads as
+        # active on its signup day rather than showing a blank.
+        stamps = [s for s in (created, hunt_stat.get("last"), loc_stat.get("last"),
+                              blind_stat.get("last")) if isinstance(s, datetime)]
+        last_active = max(stamps) if stamps else None
+
+        rows.append({
+            "id": uid,
+            "name": user.get("name") or "(no name)",
+            "email": user.get("email") or "",
+            "category": account_category(user),
+            "plan": "pro" if user_is_pro(user) else "free",
+            "subscription_status": user.get("subscription_status", "free"),
+            "ever_paid": bool(user.get("stripe_customer_id")),
+            "created_at": _iso(created),
+            "days_since_signup": (now - created).days if isinstance(created, datetime) else None,
+            "last_active": _iso(last_active),
+            "hunts": hunt_stat.get("count", 0),
+            "locations": loc_stat.get("count", 0),
+            "blinds": blind_stat.get("count", 0),
+            "photos": photos_by_user.get(uid, 0),
+            "birds": birds_by_user.get(uid, 0),
+            "deletion_scheduled_for": _iso(user.get("deletion_scheduled_for")),
+        })
+
+    real = [r for r in rows if r["category"] == "user"]
+
+    # "Today" and "yesterday" are deliberately not counted here. This process
+    # runs on UTC, so a 9pm signup would land on tomorrow's tally — the browser
+    # knows what day it is where I'm reading this and the timestamps are all in
+    # the response, so it does that arithmetic instead.
+    return {
+        "generated_at": _iso(now),
+        "totals": {
+            "new_users": len(real),
+            # The number that matters more than signups: how many got as far as
+            # doing anything at all.
+            "activated": sum(1 for r in real if r["hunts"] or r["locations"]),
+            "pro": sum(1 for r in real if r["plan"] == "pro"),
+            "testers": sum(1 for r in rows if r["category"] == "tester"),
+            "insiders": sum(1 for r in rows if r["category"] == "insider"),
+        },
+        "users": rows,
+    }
+
+
+@api_router.get("/admin/users/{user_id}")
+async def admin_user_detail(user_id: str, _: dict = Depends(require_admin)):
+    try:
+        oid = ObjectId(user_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="No such user")
+
+    user = await db.users.find_one(
+        {"_id": oid},
+        {"email": 1, "name": 1, "subscription_status": 1, "subscription_paused": 1,
+         "created_at": 1, "admin_category": 1, "deletion_scheduled_for": 1,
+         "stripe_customer_id": 1},
+    )
+    if not user:
+        raise HTTPException(status_code=404, detail="No such user")
+
+    locations = await db.locations.find(
+        {"user_id": user_id}, {"name": 1, "location_type": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(500)
+
+    blinds = await db.blinds.find(
+        {"user_id": user_id}, {"name": 1, "location_id": 1, "blind_type": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(500)
+
+    hunts = await db.hunts.find(
+        {"user_id": user_id},
+        {"name": 1, "date": 1, "blind_name": 1, "harvests": 1, "photos": 1,
+         "notes": 1, "party": 1, "is_morning": 1, "is_evening": 1, "created_at": 1},
+    ).sort("date", -1).to_list(500)
+
+    blinds_per_location: dict = {}
+    for b in blinds:
+        blinds_per_location[b.get("location_id")] = blinds_per_location.get(b.get("location_id"), 0) + 1
+
+    return {
+        "user": {
+            "id": user_id,
+            "name": user.get("name") or "(no name)",
+            "email": user.get("email") or "",
+            "category": account_category(user),
+            "plan": "pro" if user_is_pro(user) else "free",
+            "subscription_status": user.get("subscription_status", "free"),
+            "ever_paid": bool(user.get("stripe_customer_id")),
+            "created_at": _iso(user.get("created_at")),
+            "deletion_scheduled_for": _iso(user.get("deletion_scheduled_for")),
+        },
+        "locations": [{
+            "id": str(l["_id"]),
+            "name": l.get("name") or "(unnamed)",
+            "location_type": l.get("location_type") or "",
+            "blinds": blinds_per_location.get(str(l["_id"]), 0),
+            "created_at": _iso(l.get("created_at")),
+        } for l in locations],
+        "blinds": [{
+            "id": str(b["_id"]),
+            "name": b.get("name") or "(unnamed)",
+            "blind_type": b.get("blind_type") or "",
+            "created_at": _iso(b.get("created_at")),
+        } for b in blinds],
+        "hunts": [{
+            "id": str(h["_id"]),
+            "name": h.get("name") or "(unnamed)",
+            "date": h.get("date") or "",
+            "blind_name": h.get("blind_name") or "",
+            "birds": _birds(h),
+            "photos": len(h.get("photos") or []),
+            "party": len(h.get("party") or []),
+            "has_notes": bool((h.get("notes") or "").strip()),
+            "time_of_day": ("Morning" if h.get("is_morning") else
+                            "Evening" if h.get("is_evening") else ""),
+            "created_at": _iso(h.get("created_at")),
+        } for h in hunts],
+    }
+
+
+class AdminCategoryUpdate(BaseModel):
+    category: str
+
+
+@api_router.post("/admin/users/{user_id}/category")
+async def admin_set_category(
+    user_id: str, payload: AdminCategoryUpdate, _: dict = Depends(require_admin)
+):
+    """Reclassify an account by hand. Only ever writes this one field."""
+    if payload.category not in CATEGORIES:
+        raise HTTPException(status_code=400, detail="Unknown category")
+    try:
+        oid = ObjectId(user_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="No such user")
+
+    result = await db.users.update_one(
+        {"_id": oid}, {"$set": {"admin_category": payload.category}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="No such user")
+    return {"id": user_id, "category": payload.category}
+
+
 # Include router
 app.include_router(api_router)
 

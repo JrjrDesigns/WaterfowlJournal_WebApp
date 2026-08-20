@@ -16,6 +16,7 @@ import Stats from './pages/Stats'
 import Forecast from './pages/Forecast'
 import Profile from './pages/Profile'
 import Diagnostics from './pages/Diagnostics'
+import Admin from './pages/Admin'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -62,6 +63,9 @@ function AppRoutes() {
         <Route path="/stats" element={<Stats />} />
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/profile" element={<Profile />} />
+        {/* Private signups dashboard. Unlisted on purpose — the server 404s
+            it for any account that isn't on the admin allowlist. */}
+        <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="/" element={<Navigate to="/hunts" replace />} />
       <Route path="*" element={<Navigate to="/hunts" replace />} />
