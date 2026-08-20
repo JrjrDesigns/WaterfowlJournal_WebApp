@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-import { fetchHunts, fetchHuntYears } from '../../utils/api'
+import { fetchHunts, fetchHuntYears, fetchLocations } from '../../utils/api'
 
 interface Hunt {
   id: string
@@ -53,6 +53,10 @@ function ConditionIcon({ code }: { code: number | undefined }) {
 export default function HuntList() {
   const [hunts, setHunts] = useState<Hunt[]>([])
   const [years, setYears] = useState<number[]>([])
+  const [yearsLoaded, setYearsLoaded] = useState(false)
+  // null while unknown — a failed check falls back to the plain empty state
+  // rather than guessing and sending someone to Locations they don't need.
+  const [hasLocations, setHasLocations] = useState<boolean | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -63,6 +67,23 @@ export default function HuntList() {
   useEffect(() => { loadYears() }, [])
   useEffect(() => { loadHunts() }, [selectedYear])
 
+  // "First run" means no hunts on the account at all — not a season tab that
+  // happens to be empty. Someone with 2025 hunts looking at an empty 2026
+  // shouldn't be walked through onboarding again, so the year list is what
+  // separates the two cases.
+  const noHuntsEver = yearsLoaded && years.length === 0 && !loading && hunts.length === 0
+
+  // Only a genuinely empty account pays for this request; everyone else never
+  // fires it.
+  useEffect(() => {
+    if (!noHuntsEver || hasLocations !== null) return
+    let cancelled = false
+    fetchLocations()
+      .then((locs: unknown[]) => { if (!cancelled) setHasLocations(locs.length > 0) })
+      .catch(() => { /* leave null — falls back to the plain empty state */ })
+    return () => { cancelled = true }
+  }, [noHuntsEver])
+
   const loadYears = async () => {
     try {
       const data = await fetchHuntYears()
@@ -71,7 +92,9 @@ export default function HuntList() {
       if (available.length > 0 && !yearParam) {
         setSearchParams({ year: String(available[0]) }, { replace: true })
       }
-    } catch { /* ignore */ }
+    } catch { /* ignore */ } finally {
+      setYearsLoaded(true)
+    }
   }
 
   const loadHunts = async () => {
@@ -145,8 +168,39 @@ export default function HuntList() {
         </div>
       ) : hunts.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-muted font-semibold">No hunts logged yet.</p>
-          <p className="text-muted text-sm mt-1">Tap "Log Hunt" to record your first sit.</p>
+          {noHuntsEver && hasLocations === false ? (
+            <>
+              <p className="text-ink font-semibold">First, mark where you hunt.</p>
+              <p className="text-muted text-sm mt-1.5 max-w-xs mx-auto leading-relaxed">
+                Drop a pin on your marsh, field or river spot. Once it's on the map you can log
+                sits there and get a forecast for it.
+              </p>
+              <button
+                onClick={() => navigate('/locations?new=1&next=/hunts/create')}
+                className="mt-6 inline-flex items-center gap-2 bg-ink hover:bg-black text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
+              >
+                Add your first location
+              </button>
+            </>
+          ) : noHuntsEver ? (
+            <>
+              <p className="text-ink font-semibold">No hunts logged yet.</p>
+              <p className="text-muted text-sm mt-1.5">Your spots are on the map — record your first sit.</p>
+              <button
+                onClick={handleNewHunt}
+                className="mt-6 inline-flex items-center gap-2 bg-ink hover:bg-black text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
+              >
+                Log your first hunt
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-muted font-semibold">
+                {selectedYear ? `No hunts logged for ${selectedYear}.` : 'No hunts logged yet.'}
+              </p>
+              <p className="text-muted text-sm mt-1">Tap "Log Hunt" to record a sit.</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="bg-surface rounded-xl border border-hairline overflow-hidden">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MapContainer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { fetchLocations, createLocation, deleteLocation, fetchBlindsForLocation, createBlind, updateBlind, deleteBlind } from '../utils/api'
@@ -98,6 +99,11 @@ function FlyTo({ coords }: { coords: [number, number] | null }) {
 }
 
 export default function Locations() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Set when another screen sent the user here to create a spot before they
+  // could continue — we owe them a trip back to what they were doing.
+  const returnTo = searchParams.get('next')
   const [locations, setLocations] = useState<LocationData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
@@ -155,6 +161,13 @@ export default function Locations() {
 
   useEffect(() => { loadLocations() }, [])
 
+  // Arriving from an empty-state prompt: open the form straight away rather
+  // than leaving someone on a map wondering which button starts the thing they
+  // just asked for.
+  useEffect(() => {
+    if (searchParams.get('new') === '1') setShowNewLocation(true)
+  }, [])
+
   const loadLocations = async () => {
     setLoading(true)
     try {
@@ -187,6 +200,10 @@ export default function Locations() {
       setShowNewLocation(false)
       setLocName(''); setLocType('marsh'); setLocCenter(null)
       await loadLocations()
+      // Straight into the new location's detail view, which is where the map
+      // prompts for the first blind pin. The trip back to whatever sent them
+      // here waits until a blind actually exists — see handleSaveBlind — since
+      // a location on its own still can't carry a hunt.
       openLocation(newLoc)
     } catch (err: unknown) {
       setLocError(err instanceof Error ? err.message : 'Failed to create location')
@@ -248,6 +265,7 @@ export default function Locations() {
         ideal_wind_directions: blindIdealWind.directions,
         ideal_wind_center: blindIdealWind.center,
       }
+      const wasNew = !editingBlindId
       if (editingBlindId) {
         await updateBlind(editingBlindId, payload)
       } else {
@@ -256,6 +274,13 @@ export default function Locations() {
       resetBlindForm()
       const data = await fetchBlindsForLocation(selectedLocation.id)
       setBlinds(data)
+      // Someone sent here mid-task now has everything a hunt needs, so hand
+      // them back rather than leaving them on a map to find their own way. Only
+      // on the first blind — after that they're deliberately managing spots.
+      if (wasNew && returnTo && data.length === 1) {
+        navigate(returnTo)
+        return
+      }
     } catch (err: unknown) {
       setBlindError(err instanceof Error ? err.message : 'Failed to save blind')
     } finally {

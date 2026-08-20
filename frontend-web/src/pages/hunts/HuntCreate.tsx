@@ -60,6 +60,8 @@ export default function HuntCreate() {
   const [party, setParty] = useState<string[]>([])
   const [partyInput, setPartyInput] = useState('')
   const [error, setError] = useState('')
+  // Gates the no-locations panel so it can't flash before the fetch lands.
+  const [dataLoaded, setDataLoaded] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { loadData() }, [])
@@ -69,7 +71,9 @@ export default function HuntCreate() {
       const [locsData, speciesData] = await Promise.all([fetchLocations(), fetchSpecies()])
       setLocations(locsData)
       setAllSpecies([...speciesData.ducks, ...speciesData.geese, ...speciesData.others])
-    } catch { /* ignore */ }
+    } catch { /* ignore */ } finally {
+      setDataLoaded(true)
+    }
   }
 
   const handleLocationChange = async (locId: string) => {
@@ -170,6 +174,27 @@ export default function HuntCreate() {
         <h1 className="font-display text-3xl text-ink tracking-wider leading-none">LOG HUNT</h1>
       </div>
 
+      {dataLoaded && locations.length === 0 ? (
+        /* A hunt attaches to a blind, so with no locations on the account this
+           form cannot be completed at all. Showing the whole thing — date,
+           weather, harvests, photos — and letting someone fill it in before
+           they hit an unsatisfiable dropdown is worse than naming the one step
+           that actually comes first. */
+        <div className="bg-surface rounded-xl border border-hairline px-6 py-10 text-center">
+          <p className="text-ink font-semibold">You'll need a spot on the map first.</p>
+          <p className="text-muted text-sm mt-1.5 max-w-sm mx-auto leading-relaxed">
+            Hunts are logged against a blind, so start by adding the marsh, field or river you
+            hunt. It takes a moment and you'll come straight back here.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/locations?new=1&next=/hunts/create')}
+            className="mt-6 inline-flex items-center gap-2 bg-ink hover:bg-black text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
+          >
+            Add your first location
+          </button>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
@@ -431,6 +456,7 @@ export default function HuntCreate() {
           {loading ? 'Saving…' : 'Record Hunt'}
         </button>
       </form>
+      )}
     </div>
   )
 }
