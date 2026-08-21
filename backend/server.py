@@ -2129,6 +2129,23 @@ MIGRATION_ANCHORS = [
     ("Fennville Farm Unit MI", 42.58, -86.0, "Mississippi", 8191, [2, 2, 7, 19, 35, 63, 100, 100, 54, 24]),
     ("Harsens Island MI", 42.57, -82.6, "Mississippi", 11763, [3, 9, 44, 53, 62, 100, 18, 11, 4, 3]),
     ("Pointe Mouillee MI", 41.98, -83.25, "Mississippi", 5965, [5, 7, 67, 79, 100, 81, 28, 32, 14, 6]),
+    # --- Wisconsin: Upper Mississippi River, Pools 7-9 -----------------------
+    # 17 seasons (1996-2012), 149 weekly aerial counts, divers and dabblers
+    # tabulated separately and summed here to match the Ohio build's
+    # {'Dabblers','Divers'} definition. Pooled across all 17 years by half-month,
+    # so no single season's weather shapes it -- the deepest-backed anchor in
+    # the northern Mississippi flyway, and a corrective to Michigan's single
+    # season next door.
+    #
+    # Source: Wisconsin DNR "Mississippi River Historical Data -- Diving/Dabbling
+    # Duck Use, Pools 7, 8, 9" (dnr.wisconsin.gov/topic/WildlifeHabitat/wfsurveys).
+    # Rebuild: backend/data/parse_wisconsin.py from surveys/wisconsin_pools789.csv.
+    #
+    # Coordinates are the centroid of Pools 7-9 (Lake Onalaska down to Lynxville).
+    # Surveys run 1 Oct - 2 Dec only, so Sep and late-Dec/Jan decay toward the
+    # floor rather than being invented -- the river ices and the divers move
+    # south, which the shape reflects.
+    ("Mississippi Pools 7-9 WI", 43.55, -91.22, "Mississippi", 452406, [3, 5, 12, 76, 100, 63, 29, 13, 6, 3]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power
