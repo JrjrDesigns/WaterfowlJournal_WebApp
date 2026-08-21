@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
+  ActionSheetIOS,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -151,7 +153,36 @@ export function HuntForm({ mode, huntId, onSaved, onCancel }: HuntFormProps) {
     setCoords(blind ? { lat: blind.lat, lng: blind.lng } : null);
   };
 
-  const addPhotos = async () => {
+  // Both picker paths land here: shrink and compress to the web app's exact
+  // settings, then inline as base64 the way the API expects.
+  const attachAssets = async (assets: ImagePicker.ImagePickerAsset[]) => {
+    const encoded = await Promise.all(
+      assets.map(async asset => {
+        const context = ImageManipulator.manipulate(asset.uri).resize({ width: PHOTO_MAX_WIDTH });
+        const image = await context.renderAsync();
+        const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: PHOTO_QUALITY, base64: true });
+        return `data:image/jpeg;base64,${out.base64}`;
+      }),
+    );
+    setPhotos(prev => [...prev, ...encoded]);
+  };
+
+  const takePhoto = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      setError('Camera access is off. Turn it on in Settings to take pictures.');
+      return;
+    }
+    // The camera hands back one shot at a time, so there is no multi-select here.
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      quality: 1, // Compression happens in attachAssets.
+    });
+    if (result.canceled) return;
+    await attachAssets(result.assets);
+  };
+
+  const pickFromLibrary = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       setError('Photo access is off. Turn it on in Settings to attach pictures.');
@@ -160,19 +191,28 @@ export function HuntForm({ mode, huntId, onSaved, onCancel }: HuntFormProps) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsMultipleSelection: true,
-      quality: 1, // Compression happens below, at the web app's exact settings.
+      quality: 1, // Compression happens in attachAssets.
     });
     if (result.canceled) return;
+    await attachAssets(result.assets);
+  };
 
-    const encoded = await Promise.all(
-      result.assets.map(async asset => {
-        const context = ImageManipulator.manipulate(asset.uri).resize({ width: PHOTO_MAX_WIDTH });
-        const image = await context.renderAsync();
-        const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: PHOTO_QUALITY, base64: true });
-        return `data:image/jpeg;base64,${out.base64}`;
-      }),
-    );
-    setPhotos(prev => [...prev, ...encoded]);
+  const addPhotos = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ['Cancel', 'Take Photo', 'Choose from Library'], cancelButtonIndex: 0 },
+        index => {
+          if (index === 1) takePhoto();
+          if (index === 2) pickFromLibrary();
+        },
+      );
+      return;
+    }
+    Alert.alert('Add a photo', undefined, [
+      { text: 'Take Photo', onPress: takePhoto },
+      { text: 'Choose from Library', onPress: pickFromLibrary },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const addPartyMember = () => {
