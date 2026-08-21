@@ -345,12 +345,12 @@ export default function HuntEdit() {
           </div>
         )}
 
-        {/* Harvest */}
+        {/* Bird Activity */}
         <div className="bg-green/5 border border-green/20 rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-green/15">
             <div>
-              <p className="text-xs font-semibold text-green uppercase tracking-widest">Harvest</p>
-              <p className="text-xs text-muted mt-0.5">What did you bring home?</p>
+              <p className="text-xs font-semibold text-green uppercase tracking-widest">Bird Activity</p>
+              <p className="text-xs text-muted mt-0.5">Everything you saw — not just what you took.</p>
             </div>
             <button
               type="button"
@@ -366,8 +366,8 @@ export default function HuntEdit() {
 
           {harvests.length === 0 ? (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-muted">No harvest entries yet.</p>
-              <p className="text-xs text-muted mt-0.5">Tap "Add Species" to log your bag.</p>
+              <p className="text-sm text-muted">Nothing logged yet.</p>
+              <p className="text-xs text-muted mt-0.5">Even a slow morning is worth recording — birds seen sharpen your timing forecast.</p>
             </div>
           ) : (
             <div className="p-4 space-y-3">
@@ -389,7 +389,7 @@ export default function HuntEdit() {
         {/* Photos */}
         <div>
           <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Photos</label>
-          <input ref={fileInputRef} type="file" accept="image/*" multiple capture="environment" onChange={handlePhotoUpload} className="hidden" />
+          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
