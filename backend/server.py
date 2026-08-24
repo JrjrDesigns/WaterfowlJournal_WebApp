@@ -2146,6 +2146,33 @@ MIGRATION_ANCHORS = [
     # floor rather than being invented -- the river ices and the divers move
     # south, which the shape reflects.
     ("Mississippi Pools 7-9 WI", 43.55, -91.22, "Mississippi", 452406, [3, 5, 12, 76, 100, 63, 29, 13, 6, 3]),
+
+    # --- Green Bay, Wisconsin (44.85N) ---------------------------------------
+    # First anchor at or above 44N anywhere in the Mississippi flyway. Before
+    # this, Green Bay drew 97.3% of its blend from anchors SOUTH of it, and the
+    # band from 44N to the Canadian border held nine anchors across all four
+    # flyways combined.
+    #
+    # Source: Wisconsin DNR "Non-Breeding Waterfowl Survey of Green Bay"
+    # (dnr.wisconsin.gov/topic/WildlifeHabitat/wfsurveys), 8 surveys over 4
+    # seasons. Rebuild: backend/data/parse_greenbay.py from surveys/greenbay.csv.
+    #
+    # DUCK totals only, teal excluded, taken from each report's Figure 2 species
+    # table. The headline number these reports lead with is "water birds" and
+    # includes cormorants, pelicans, geese and swans -- one October total was 22%
+    # cormorant. Do not use it.
+    #
+    # Only the 2021+ seven-transect design is included. 2017 and 2019 used
+    # shoreline transects and are not comparable; the DNR describes the newer
+    # design as deliberately expanded to cover offshore water as well.
+    #
+    # CAVEAT: surveys cluster in Oct-1, Nov-1 and Dec-1, so Oct-2 and Nov-2 are
+    # interpolated between observations rather than measured. The peak is at
+    # least bracketed -- Nov-1 is the observed maximum with lower observed values
+    # either side -- but on a scaup staging bay the true peak could sit in Nov-2,
+    # which would put this curve up to two weeks early. Adding a mid-November or
+    # late-October survey would settle it.
+    ("Green Bay WI", 44.85, -87.75, "Mississippi", 37616, [3, 4, 10, 55, 100, 77, 54, 24, 11, 5]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power

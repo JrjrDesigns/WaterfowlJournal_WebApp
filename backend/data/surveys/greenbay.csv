@@ -1,0 +1,17 @@
+# Wisconsin Non-Breeding Waterfowl Survey of Green Bay.
+# Source: Wisconsin DNR, dnr.wisconsin.gov/topic/WildlifeHabitat/wfsurveys
+# Duck totals only, teal excluded, taken from each report's Figure 2 species table.
+# Geese, swans, cormorants, pelicans and coot are NOT included.
+#
+# ONLY the 2021+ seven-transect design is listed. The 2017 and 2019 reports used
+# shoreline transects (East/West x Near/Off Shore) and are NOT comparable -- the
+# DNR describes the newer design as expanded coverage of nearshore AND offshore.
+survey_date,ducks_teal_excluded
+2021-11-03,42793
+2022-10-04,2766
+2022-11-07,26616
+2022-12-05,22626
+2023-10-05,4531
+2023-11-07,44062
+2024-11-07,36995
+2024-12-09,18127
