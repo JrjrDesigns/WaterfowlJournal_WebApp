@@ -1,0 +1,2122 @@
+{
+ "UPM_1942_NARRATIVEREPORT": [],
+ "UPM_1943_NARRATIVEREPORT": [],
+ "UPM_1944_NARRATIVEREPORT": [],
+ "UPM_1945_NARRATIVEREPORT": [],
+ "UPM_1946_NARRATIVEREPORT": [],
+ "UPM_1947_NARRATIVEREPORT": [],
+ "UPM_1948_NARRATIVEREPORT": [],
+ "UPM_1949_NARRATIVEREPORT": [],
+ "UPM_1950_NARRATIVEREPORT": [],
+ "UPM_1951_NARRATIVEREPORT": [],
+ "UPM_1952_NARRATIVEREPORT": [],
+ "UPM_1953_NARRATIVEREPORT": [],
+ "UPM_1954_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.1385,
+    "days_form": 800233,
+    "days_obs": 689402,
+    "ok": true,
+    "peak_err": 0.0856,
+    "peak_form": 26665,
+    "peak_obs": 24382,
+    "summary_page": 275
+   },
+   "cont_pages": [
+    274
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Joper Mississippl MONTHS OF TO 19 5",
+   "n_species_rows": 15,
+   "page": 273,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 24382,
+    "10": 3391,
+    "11": 3136,
+    "12": 5256,
+    "13": 6036,
+    "14": 5383,
+    "15": 6906,
+    "16": 9478,
+    "17": 11626,
+    "2": 5335,
+    "3": 3500,
+    "4": 2530,
+    "5": 2285,
+    "6": 2480,
+    "7": 926,
+    "8": 2810,
+    "9": 3026
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.8284,
+    "days_form": 6226885,
+    "days_obs": 1068571,
+    "ok": false,
+    "peak_err": 0.5602,
+    "peak_form": 157000,
+    "peak_obs": 69055,
+    "summary_page": 400
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 2,
+   "header": "REFUGE Uppor Xiesdenipp1 MONTHS OF Jonuary TO \u0434\u0440r\u0426l - 1956",
+   "n_species_rows": 7,
+   "page": 398,
+   "species": [
+    "Mallard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Shoveler",
+    "Scaup \u2022$80",
+    "Goldeneye"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "10": 19789,
+    "7": 11976,
+    "8": 51833,
+    "9": 69055
+   }
+  }
+ ],
+ "UPM_1955_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.8331,
+    "days_form": 4279210,
+    "days_obs": 714210,
+    "ok": false,
+    "peak_err": 0.1579,
+    "peak_form": 95000,
+    "peak_obs": 80000,
+    "summary_page": 201
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Keithsburg MONTHS OF September TO December 19 55 | Week8 of reporting period",
+   "n_species_rows": 5,
+   "page": 199,
+   "species": [
+    "Maliard",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 120,
+    "10": 80000,
+    "2": 110,
+    "3": 150,
+    "4": 250,
+    "5": 700,
+    "6": 750,
+    "7": 1600,
+    "8": 2850,
+    "9": 15500
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.1958,
+    "days_form": 2130695,
+    "days_obs": 1713579,
+    "ok": true,
+    "peak_err": 0.0851,
+    "peak_form": 82200,
+    "peak_obs": 75202,
+    "summary_page": 247
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Batahtam MONTHS OF September TO Decenber 19 55",
+   "n_species_rows": 15,
+   "page": 245,
+   "species": [
+    "Maliard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Ruddy",
+    "Staug Mergansers"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 4310,
+    "10": 66300,
+    "2": 7500,
+    "3": 9750,
+    "4": 11475,
+    "5": 13300,
+    "6": 11950,
+    "7": 9308,
+    "8": 35702,
+    "9": 75202
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Uyper Mississippi MONTHS OF TO August 1955",
+   "n_species_rows": 12,
+   "page": 367,
+   "species": [
+    "Maliard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 13807,
+    "10": 2644,
+    "2": 5783,
+    "3": 3475,
+    "4": 2884,
+    "5": 2300,
+    "6": 2525,
+    "7": 2434,
+    "8": 2337,
+    "9": 2484
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Detor MONTHS OF Taanguat 195) | Weeks of reporting period",
+   "n_species_rows": 5,
+   "page": 408,
+   "species": [
+    "Maliard",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 550,
+    "10": 20,
+    "2": 350,
+    "3": 150,
+    "4": 55,
+    "5": 55,
+    "6": 40,
+    "7": 40,
+    "8": 40,
+    "9": 40
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Calhoun MONTHS OF TO August _ 1955 | Weeks of reporting period",
+   "n_species_rows": 5,
+   "page": 410,
+   "species": [
+    "Maliard",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 875,
+    "10": 120,
+    "2": 325,
+    "3": 100,
+    "4": 40,
+    "5": 40,
+    "6": 40,
+    "7": 40,
+    "8": 40,
+    "9": 70
+   }
+  },
+  {
+   "check": {
+    "days_err": 1124.5367,
+    "days_form": 885,
+    "days_obs": 996100,
+    "ok": false,
+    "peak_err": 59.4286,
+    "peak_form": 700,
+    "peak_obs": 42300,
+    "summary_page": 602
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE Calhoun MONTHS OF Januasy TO Apri1 19 55 | weeks of reporting period Estimated : Production",
+   "n_species_rows": 12,
+   "page": 601,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Ring-necked",
+    "Scaup",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 42300,
+    "12": 22400,
+    "13": 35100,
+    "14": 36100,
+    "15": 3500,
+    "16": 1750,
+    "17": 1150
+   }
+  }
+ ],
+ "UPM_1956_NARRATIVEREPORT1": [
+  {
+   "check": {
+    "days_err": 0.6936,
+    "days_form": 2018128,
+    "days_obs": 618429,
+    "ok": false,
+    "peak_err": 0.4105,
+    "peak_form": 25455,
+    "peak_obs": 15005,
+    "summary_page": 88
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE_Doper HissisaipoL MONTHS OF TO Augast _ 1956 | Weeks reporting period Estimated : Production",
+   "n_species_rows": 9,
+   "page": 87,
+   "species": [
+    "Mallard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Wood",
+    "Scaup",
+    "Athezr Merganser"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 8019,
+    "12": 8434,
+    "13": 8775,
+    "14": 9714,
+    "15": 12875,
+    "16": 12970,
+    "17": 12555,
+    "18": 15005
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.7595,
+    "days_form": 53270,
+    "days_obs": 12810,
+    "ok": false,
+    "peak_err": 0.8667,
+    "peak_form": 3750,
+    "peak_obs": 500,
+    "summary_page": 135
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE Calaem MONTHS OF TO Augost \u2192 1956 | Weeks ol reporting period Estimated : Production",
+   "n_species_rows": 4,
+   "page": 134,
+   "species": [
+    "Mailard",
+    "Blue-winged teal",
+    "Wood",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 195,
+    "12": 170,
+    "13": 215,
+    "14": 175,
+    "16": 225,
+    "17": 350,
+    "18": 500
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.765,
+    "days_form": 15641229,
+    "days_obs": 3676071,
+    "ok": false,
+    "peak_err": 0.5977,
+    "peak_form": 604905,
+    "peak_obs": 243326,
+    "summary_page": 256
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE Upper Miasiaginpi MONTHS OF January TO \u21921956 | Weeks o1 reporting period Estimated : Production",
+   "n_species_rows": 17,
+   "page": 255,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood -800",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Qtben Mergansere"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 119084,
+    "12": 1258,
+    "13": 243326,
+    "15": 900,
+    "16": 1240,
+    "17": 159345
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.4515,
+    "days_form": 2158200,
+    "days_obs": 1183700,
+    "ok": false,
+    "peak_err": 0.0065,
+    "peak_form": 45900,
+    "peak_obs": 45600,
+    "summary_page": 317
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Batent am MONTHS OF January TO 4 11 1056 | Weeks of roporting period",
+   "n_species_rows": 13,
+   "page": 315,
+   "species": [
+    "Black Maliard",
+    "Gadwall",
+    "Baldpate \u00b7300",
+    "Pintail",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Athaz Mergansers"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 8800,
+    "10": 19300,
+    "2": 10100,
+    "3": 3500,
+    "4": 1300,
+    "5": 3800,
+    "6": 22500,
+    "7": 26900,
+    "8": 45600,
+    "9": 27300
+   }
+  }
+ ],
+ "UPM_1956_NARRATIVEREPORT2": [
+  {
+   "check": {
+    "days_err": 0.697,
+    "days_form": 11482261,
+    "days_obs": 3479413,
+    "ok": false,
+    "peak_err": 486.1617,
+    "peak_form": 266,
+    "peak_obs": 129585,
+    "summary_page": 141
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper MLeaisaippi MONTHS OF Septerber TO December 19 56 | Week& of reporting period",
+   "n_species_rows": 16,
+   "page": 139,
+   "species": [
+    "Maliard",
+    "Black",
+    "Gadwal1",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 20240,
+    "10": 1055,
+    "2": 6995,
+    "3": 50100,
+    "4": 67240,
+    "5": 77483,
+    "6": 1540,
+    "7": 52586,
+    "8": 90235,
+    "9": 129585
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Louisa MONTHS OF Sopterbar TO Deo ember 19 56",
+   "n_species_rows": 9,
+   "page": 191,
+   "species": [
+    "Maliard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Wood",
+    "Ring-necked",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 240,
+    "10": 105650,
+    "2": 200,
+    "3": 140,
+    "4": 100,
+    "5": 225,
+    "6": 300,
+    "7": 450,
+    "8": 1100,
+    "9": 7650
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Leithsburg MONTHS OF Septenber TO December 1956",
+   "n_species_rows": 3,
+   "page": 196,
+   "species": [
+    "Maliard",
+    "Blue-winged teal",
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 140,
+    "10": 40200,
+    "2": 140,
+    "3": 140,
+    "4": 100,
+    "5": 100,
+    "6": 300,
+    "7": 250,
+    "8": 550,
+    "9": 2500
+   }
+  },
+  {
+   "check": {
+    "days_err": 21.7771,
+    "days_form": 32300,
+    "days_obs": 735700,
+    "ok": false,
+    "peak_err": 0.8711,
+    "peak_form": 158300,
+    "peak_obs": 20400,
+    "summary_page": 247
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Batohtown MONTHS OF Septerber TO Deocaber 19 56",
+   "n_species_rows": 14,
+   "page": 245,
+   "species": [
+    "Maliard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Cinnamon teal Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 2900,
+    "10": 16000,
+    "2": 3800,
+    "3": 7800,
+    "4": 10500,
+    "5": 15100,
+    "6": 8300,
+    "7": 10700,
+    "8": 9600,
+    "9": 20400
+   }
+  }
+ ],
+ "UPM_1957_NARRATIVEREPORT": [
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Bithober MONTHS OF Sepcenbes TO Docasber 19 7 | Weeks of reporting Period",
+   "n_species_rows": 3,
+   "page": 95,
+   "species": [
+    "Mailard",
+    "Pintail",
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "10": 48000,
+    "3": 800,
+    "4": 200,
+    "5": 200,
+    "6": 150,
+    "7": 100,
+    "8": 5050,
+    "9": 93000
+   }
+  },
+  {
+   "check": {
+    "days_err": 760.6841,
+    "days_form": 766,
+    "days_obs": 583450,
+    "ok": false,
+    "peak_err": 87.535,
+    "peak_form": 628,
+    "peak_obs": 55600,
+    "summary_page": 130
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE_Batehtcn MONTHS OF September IO Docarbor, 1951 | weeks of reporting period Estimated : Production",
+   "n_species_rows": 14,
+   "page": 129,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 55600,
+    "12": 8150,
+    "13": 3400,
+    "14": 7000,
+    "15": 4400,
+    "16": 1300,
+    "17": 3500
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.7358,
+    "days_form": 5416600,
+    "days_obs": 1431325,
+    "ok": false,
+    "peak_err": 0.8206,
+    "peak_form": 407500,
+    "peak_obs": 73100,
+    "summary_page": 133
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Calhoun MONTHS OF Septoriber TO Decer ber 19 57 | W e e of reporting period",
+   "n_species_rows": 14,
+   "page": 131,
+   "species": [
+    "Mailard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 2375,
+    "10": 50300,
+    "2": 2600,
+    "3": 4400,
+    "4": 4500,
+    "5": 4400,
+    "6": 100,
+    "7": 21200,
+    "8": 73100,
+    "9": 41500
+   }
+  },
+  {
+   "check": {
+    "days_err": 318.1063,
+    "days_form": 1778,
+    "days_obs": 567371,
+    "ok": false,
+    "peak_err": 3.9909,
+    "peak_form": 6565,
+    "peak_obs": 32765,
+    "summary_page": 201
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Wluntssipp3 MONTHS OF May TO Bugust 19 57",
+   "n_species_rows": 12,
+   "page": 199,
+   "species": [
+    "Maliard",
+    "Black",
+    "Gadwal1",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood Redhead",
+    "Ring-necked",
+    "Scaup",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 32765,
+    "10": 8310,
+    "2": 3755,
+    "3": 8058,
+    "4": 5000,
+    "5": 5755,
+    "6": 180,
+    "7": 6795,
+    "8": 7486,
+    "9": 2949
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.0625,
+    "days_form": 11200,
+    "days_obs": 11900,
+    "ok": false,
+    "peak_err": 0.6667,
+    "peak_form": 150,
+    "peak_obs": 250,
+    "summary_page": 309
+   },
+   "cont_pages": [
+    308
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE MONTHS OF TO 19",
+   "n_species_rows": 1,
+   "page": 307,
+   "species": [
+    "Shoveler"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 50,
+    "10": 50,
+    "11": 50,
+    "12": 250,
+    "13": 150,
+    "14": 150,
+    "15": 150,
+    "16": 250,
+    "17": 150,
+    "18": 150,
+    "2": 50,
+    "3": 50,
+    "4": 50,
+    "6": 50,
+    "7": 50,
+    "9": 50
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.233,
+    "days_form": 37100,
+    "days_obs": 28455,
+    "ok": true,
+    "peak_err": 0.0,
+    "peak_form": 1050,
+    "peak_obs": 1050,
+    "summary_page": 341
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE Sathost MONTHS OF TO \u0414UR\u043deL \u2192 1952 | Weeks reporting period Estimated : Production",
+   "n_species_rows": 3,
+   "page": 340,
+   "species": [
+    "Mallard",
+    "Blue-winged teal",
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 105,
+    "12": 110,
+    "13": 300,
+    "14": 350,
+    "15": 675,
+    "16": 675,
+    "17": 800,
+    "18": 1050
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.6442,
+    "days_form": 3586500,
+    "days_obs": 1276100,
+    "ok": false,
+    "peak_err": 0.0,
+    "peak_form": 85000,
+    "peak_obs": 85000,
+    "summary_page": 443
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 11,
+   "header": "REFUGE Loaica MONTHS OF auasT TO ADril 19 57 | Weeks ol reporting period Estimated : Production",
+   "n_species_rows": 6,
+   "page": 442,
+   "species": [
+    "Mailard",
+    "Baldpate",
+    "Pintail",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "11": 85000,
+    "12": 20600,
+    "13": 50600,
+    "14": 10300,
+    "15": 10100,
+    "16": 5500,
+    "17": 200
+   }
+  },
+  {
+   "check": {
+    "days_err": 2.489,
+    "days_form": 246225,
+    "days_obs": 859075,
+    "ok": false,
+    "peak_err": 0.0058,
+    "peak_form": 17200,
+    "peak_obs": 17100,
+    "summary_page": 472
+   },
+   "cont_pages": [
+    471
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Batohtoa MONTHS OF danuary TO Apr1l 19 57 | weeka oi reporting , period",
+   "n_species_rows": 13,
+   "page": 470,
+   "species": [
+    "Mallard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 6600,
+    "11": 14900,
+    "12": 12300,
+    "13": 10700,
+    "14": 17100,
+    "15": 9400,
+    "16": 3000,
+    "17": 1150,
+    "2": 12700,
+    "3": 3900,
+    "4": 1900,
+    "5": 1000,
+    "6": 3500,
+    "7": 6300,
+    "8": 14400,
+    "9": 3875
+   }
+  }
+ ],
+ "UPM_1958_NARRATIVEREPORT": [
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Loulaa MONTHS OF MAX TO _ Aurust_, 1958",
+   "n_species_rows": 1,
+   "page": 198,
+   "species": [
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 40,
+    "10": 40,
+    "2": 40,
+    "3": 40,
+    "4": 40,
+    "5": 40,
+    "6": 40,
+    "7": 40,
+    "8": 40,
+    "9": 40
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Keltheburg MONTHS OF M TO August 1958 | Weoksof reporting period",
+   "n_species_rows": 1,
+   "page": 201,
+   "species": [
+    "Wood"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 40,
+    "10": 40,
+    "2": 40,
+    "3": 40,
+    "4": 40,
+    "5": 40,
+    "6": 40,
+    "7": 40,
+    "8": 40,
+    "9": 40
+   }
+  },
+  {
+   "check": {
+    "days_err": 20.9707,
+    "days_form": 512,
+    "days_obs": 11249,
+    "ok": false,
+    "peak_err": 0.6583,
+    "peak_form": 1200,
+    "peak_obs": 410,
+    "summary_page": 229
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Batohtom MONTHS OFMSX TO August _ 1958",
+   "n_species_rows": 4,
+   "page": 227,
+   "species": [
+    "Mallard",
+    "Blue-winged teal",
+    "Wood",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 410,
+    "10": 185,
+    "2": 52,
+    "3": 52,
+    "4": 118,
+    "5": 145,
+    "6": 150,
+    "7": 155,
+    "8": 155,
+    "9": 185
+   }
+  },
+  {
+   "check": {
+    "days_err": 27.7056,
+    "days_form": 377,
+    "days_obs": 10822,
+    "ok": false,
+    "peak_err": 1.0,
+    "peak_form": 210,
+    "peak_obs": 420,
+    "summary_page": 232
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Celheua _May _ TO August _ 1958",
+   "n_species_rows": 4,
+   "page": 230,
+   "species": [
+    "Mailard",
+    "Blue-winged teal",
+    "Wood",
+    "Scaup"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 420,
+    "10": 180,
+    "2": 56,
+    "3": 50,
+    "4": 95,
+    "5": 95,
+    "6": 130,
+    "7": 170,
+    "8": 170,
+    "9": 180
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Calhoun MONTHS OF Jamar TO Apr\u0456l .19 %",
+   "n_species_rows": 10,
+   "page": 349,
+   "species": [
+    "Mallard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 2800,
+    "10": 42050,
+    "2": 53200,
+    "3": 145300,
+    "4": 54200,
+    "5": 87200,
+    "6": 65130,
+    "7": 40100,
+    "8": 23800,
+    "9": 47100
+   }
+  }
+ ],
+ "UPM_1959_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.132,
+    "days_form": 8538215,
+    "days_obs": 7410893,
+    "ok": true,
+    "peak_err": 0.0014,
+    "peak_form": 203957,
+    "peak_obs": 203666,
+    "summary_page": 70
+   },
+   "cont_pages": [
+    69
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Mississippi MONTHS OF September TO December 19 59",
+   "n_species_rows": 16,
+   "page": 68,
+   "species": [
+    "Mailard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 36265,
+    "10": 146894,
+    "11": 75975,
+    "12": 12979,
+    "13": 13618,
+    "14": 9965,
+    "15": 7676,
+    "16": 7237,
+    "17": 5596,
+    "18": 1094,
+    "2": 50987,
+    "3": 70790,
+    "4": 77388,
+    "5": 69378,
+    "6": 94809,
+    "7": 174382,
+    "9": 203666
+   }
+  }
+ ],
+ "UPM_1960_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.0112,
+    "days_form": 11215645,
+    "days_obs": 11090527,
+    "ok": true,
+    "peak_err": 0.0,
+    "peak_form": 232916,
+    "peak_obs": 232916,
+    "summary_page": 55
+   },
+   "cont_pages": [
+    54
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "1 81 81 1 MONTHS OF September TO 19 60 | Weeks of reporting period",
+   "n_species_rows": 18,
+   "page": 53,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "OthosMerganser",
+    "Am.Scoter"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 52610,
+    "10": 112439,
+    "11": 71217,
+    "12": 72093,
+    "13": 21809,
+    "14": 44403,
+    "15": 35690,
+    "16": 18860,
+    "17": 18394,
+    "2": 64942,
+    "3": 79550,
+    "4": 103255,
+    "5": 120386,
+    "6": 178650,
+    "7": 178142,
+    "8": 232916,
+    "9": 179005
+   }
+  }
+ ],
+ "UPM_1961_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.5149,
+    "days_form": 8730204,
+    "days_obs": 4235154,
+    "ok": false,
+    "peak_err": 0.6857,
+    "peak_form": 348575,
+    "peak_obs": 109570,
+    "summary_page": 55
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper X! MONTHS OF September TO December 1962 | Weeks o f reporting period",
+   "n_species_rows": 13,
+   "page": 53,
+   "species": [
+    "Black Mailard",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Cinnamon teal Blue-winged teal",
+    "Wood Shoveler",
+    "Redhead",
+    "Canvasback Ring-necked",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 52805,
+    "10": 47770,
+    "2": 73592,
+    "3": 69140,
+    "4": 103980,
+    "5": 102520,
+    "6": 60,
+    "7": 45585,
+    "9": 109570
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.1414,
+    "days_form": 1857723,
+    "days_obs": 1595083,
+    "ok": true,
+    "peak_err": 0.0004,
+    "peak_form": 35500,
+    "peak_obs": 35515,
+    "summary_page": 292
+   },
+   "cont_pages": [
+    291
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Ipper Mianiastrpd MONTHS OF Mag TOAuguat._, 1961",
+   "n_species_rows": 14,
+   "page": 290,
+   "species": [
+    "Black Mallard",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Cinnamon teal Blue-winged teal",
+    "Shoveler",
+    "Wood Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 35515,
+    "10": 9450,
+    "11": 10152,
+    "12": 11168,
+    "13": 12919,
+    "14": 15718,
+    "15": 17240,
+    "16": 21506,
+    "17": 18262,
+    "18": 29272,
+    "2": 156,
+    "3": 8577,
+    "4": 7432,
+    "5": 5997,
+    "6": 4540,
+    "7": 7063,
+    "8": 4237,
+    "9": 8665
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.9659,
+    "days_form": 8695519,
+    "days_obs": 296247,
+    "ok": false,
+    "peak_err": 0.9455,
+    "peak_form": 291107,
+    "peak_obs": 15870,
+    "summary_page": 477
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Tpper Misaissipp! MONTHS OFJemeary TO 0 11 \u2192 1961",
+   "n_species_rows": 8,
+   "page": 475,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Pintail",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 5454,
+    "10": 15870,
+    "2": 1423,
+    "3": 1584,
+    "4": 135,
+    "5": 1128,
+    "6": 731,
+    "7": 2228,
+    "8": 2832,
+    "9": 10936
+   }
+  }
+ ],
+ "UPM_1962_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.5711,
+    "days_form": 1890224,
+    "days_obs": 810656,
+    "ok": false,
+    "peak_err": 0.2597,
+    "peak_form": 36675,
+    "peak_obs": 46200,
+    "summary_page": 279
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Mississipp1 River Wildlifo & Fish Refuge MONTHS OF May1 TO August 30 19 62 | Week& of reporting period",
+   "n_species_rows": 16,
+   "page": 277,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": {
+    "1": 36675,
+    "2": 13981,
+    "3": 7952,
+    "4": 6622,
+    "5": 6539,
+    "6": 7120,
+    "7": 7903,
+    "8": 9298,
+    "9": 10343
+   },
+   "weeks": {
+    "1": 46200,
+    "2": 13781,
+    "3": 7752,
+    "4": 6422,
+    "5": 7319,
+    "6": 6845,
+    "7": 8598,
+    "8": 8973,
+    "9": 9918
+   }
+  }
+ ],
+ "UPM_1963_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.1194,
+    "days_form": 13046096,
+    "days_obs": 11487798,
+    "ok": true,
+    "peak_err": 0.1066,
+    "peak_form": 222600,
+    "peak_obs": 198865,
+    "summary_page": 53
+   },
+   "cont_pages": [
+    52
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Miastaaippi Rofuge MONTHS OFSeptember TO December _ 1963",
+   "n_species_rows": 17,
+   "page": 51,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Other-Merganser"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 54476,
+    "10": 520,
+    "11": 198865,
+    "12": 138810,
+    "13": 123800,
+    "14": 62009,
+    "15": 19500,
+    "16": 3210,
+    "17": 2365,
+    "2": 64370,
+    "3": 78850,
+    "4": 111890,
+    "5": 122335,
+    "6": 124500,
+    "7": 148325,
+    "8": 194570,
+    "9": 192719
+   }
+  }
+ ],
+ "UPM_1963_NARRATIVEREPORT1": [
+  {
+   "check": {
+    "days_err": 0.9846,
+    "days_form": 716266,
+    "days_obs": 1421476,
+    "ok": false,
+    "peak_err": 0.3727,
+    "peak_form": 43247,
+    "peak_obs": 59367,
+    "summary_page": 52
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Hiesiesipei River WildLLfe and Fish Refuge MONTHS OF H\u0430\u0437 TO August 19 63",
+   "n_species_rows": 16,
+   "page": 50,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Merganser"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 29781,
+    "10": 20699,
+    "2": 14970,
+    "3": 11605,
+    "4": 10517,
+    "5": 10782,
+    "6": 11967,
+    "7": 15377,
+    "8": 18003,
+    "9": 59367
+   }
+  }
+ ],
+ "UPM_1964_NARRATIVEREPORT": [],
+ "UPM_1965_NARRATIVEREPORT": [],
+ "UPM_1966_NARRATIVEREPORT": [],
+ "UPM_1967_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.7246,
+    "days_form": 2705223,
+    "days_obs": 745073,
+    "ok": false,
+    "peak_err": 0.553,
+    "peak_form": 59740,
+    "peak_obs": 26705,
+    "summary_page": 50
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Hlaeiseippi River Mildlife and Flab Refuge MONTHS OF TO August 1967 | weeks oi reporting| period",
+   "n_species_rows": 16,
+   "page": 48,
+   "species": [
+    "Mallard l, 000",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 26705,
+    "10": 11950,
+    "2": 8745,
+    "3": 14470,
+    "4": 10775,
+    "5": 9385,
+    "6": 399,
+    "7": 6005,
+    "8": 6365,
+    "9": 11640
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.0453,
+    "days_form": 8219388,
+    "days_obs": 7846755,
+    "ok": true,
+    "peak_err": 0.0582,
+    "peak_form": 160445,
+    "peak_obs": 151110,
+    "summary_page": 53
+   },
+   "cont_pages": [
+    52
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE IpPOR-MI MONTHS OF -Septcabor TO 19 67 | Weeks of reporting period",
+   "n_species_rows": 16,
+   "page": 51,
+   "species": [
+    "Mailard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup S0",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 67854,
+    "10": 120460,
+    "11": 75745,
+    "12": 54115,
+    "13": 19865,
+    "14": 9870,
+    "15": 5799,
+    "16": 4216,
+    "17": 3355,
+    "2": 26996,
+    "3": 91060,
+    "4": 113965,
+    "5": 117685,
+    "6": 90,
+    "7": 149690,
+    "8": 109090,
+    "9": 151110
+   }
+  }
+ ],
+ "UPM_1968_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.9752,
+    "days_form": 4144208,
+    "days_obs": 102683,
+    "ok": false,
+    "peak_err": 0.9335,
+    "peak_form": 132030,
+    "peak_obs": 8775,
+    "summary_page": 45
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Mississippl River Mldl1fo and Tleh Refuge MONTHS OF Jamary TO Aprll 19 68",
+   "n_species_rows": 5,
+   "page": 43,
+   "species": [
+    "Mallard",
+    "Black",
+    "Pintail",
+    "Scaup",
+    "Goldeneye"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 465,
+    "10": 8775,
+    "2": 393,
+    "3": 378,
+    "4": 428,
+    "5": 665,
+    "6": 860,
+    "7": 875,
+    "8": 870,
+    "9": 960
+   }
+  },
+  {
+   "check": {
+    "ok": null,
+    "why": "no summary block found"
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Uppor Illuntosippi Rivor Wuldltfe and Fish Refuge MONTHS OF \u0416ay TO August \u2192 19_ 68",
+   "n_species_rows": 16,
+   "page": 54,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwal1",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 37445,
+    "10": 15035,
+    "2": 18590,
+    "3": 13010,
+    "4": 10825,
+    "5": 10525,
+    "6": 168,
+    "7": 12055,
+    "8": 12410,
+    "9": 14480
+   }
+  },
+  {
+   "check": {
+    "days_err": 5747.4124,
+    "days_form": 902,
+    "days_obs": 5185068,
+    "ok": false,
+    "peak_err": 404.4603,
+    "peak_form": 252,
+    "peak_obs": 102176,
+    "summary_page": 63
+   },
+   "cont_pages": [
+    62
+   ],
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Kandesippl River Wldilfe and Pish Refuge MONTHS OF September TO Doeekra , 1968 | Weeks os reporting period",
+   "n_species_rows": 16,
+   "page": 61,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwal1",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 49580,
+    "10": 60,
+    "11": 90265,
+    "12": 56020,
+    "13": 16712,
+    "14": 16305,
+    "15": 350,
+    "16": 1120,
+    "17": 295,
+    "2": 90,
+    "3": 70165,
+    "4": 88430,
+    "5": 90610,
+    "6": 77385,
+    "7": 81161,
+    "8": 102176
+   }
+  }
+ ],
+ "UPM_1969_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.7521,
+    "days_form": 4575229,
+    "days_obs": 1134000,
+    "ok": false,
+    "peak_err": 0.3224,
+    "peak_form": 216211,
+    "peak_obs": 146507,
+    "summary_page": 87
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "1 1 810 1 Rivor Wildlife and Flah Refuge MONTHS OF January TO 4 1 1969 | Weeks of reporting period",
+   "n_species_rows": 7,
+   "page": 85,
+   "species": [
+    "Mallard",
+    "Black",
+    "Redhead",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Other -Merganser"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 1004,
+    "10": 5685,
+    "2": 918,
+    "3": 859,
+    "4": 1023,
+    "5": 964,
+    "6": 1275,
+    "7": 1158,
+    "8": 146507,
+    "9": 2607
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.6341,
+    "days_form": 2202985,
+    "days_obs": 806169,
+    "ok": false,
+    "peak_err": 0.9407,
+    "peak_form": 281660,
+    "peak_obs": 16700,
+    "summary_page": 96
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper HinBiBEDI Biver Juldlii end lish Refuge MONTHS OF TO August 19 62 | : Weeks of reporting period",
+   "n_species_rows": 14,
+   "page": 94,
+   "species": [
+    "Mallard",
+    "Black",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Bufflehead",
+    "Ruddy",
+    "Other-H.Merganser"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 11980,
+    "10": 16700,
+    "2": 8475,
+    "3": 9962,
+    "4": 9640,
+    "5": 9730,
+    "6": 10445,
+    "7": 10535,
+    "8": 13475,
+    "9": 14225
+   }
+  }
+ ],
+ "UPM_1970_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.188,
+    "days_form": 8568971,
+    "days_obs": 6957804,
+    "ok": true,
+    "peak_err": 0.1294,
+    "peak_form": 185832,
+    "peak_obs": 161778,
+    "summary_page": 84
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Uppor Miaaiaaippi Refuge MONTHS OF September 19 70 | Weeks o f re orting period",
+   "n_species_rows": 17,
+   "page": 82,
+   "species": [
+    "Mallard",
+    "Black Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Other - Merganser",
+    "Old squaw"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 29510,
+    "10": 114584,
+    "2": 53795,
+    "3": 67855,
+    "4": 79350,
+    "5": 104105,
+    "6": 105025,
+    "7": 139395,
+    "8": 161778,
+    "9": 138575
+   }
+  }
+ ],
+ "UPM_1971_NARRATIVEREPORT": [
+  {
+   "check": {
+    "days_err": 0.3398,
+    "days_form": 12122110,
+    "days_obs": 8003065,
+    "ok": false,
+    "peak_err": 0.0,
+    "peak_form": 228585,
+    "peak_obs": 228585,
+    "summary_page": 5
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 1,
+   "header": "REFUGE Upper Mississippi River Wildlife and Eish Refuge MONTHS OF 19 7 | Weeks of r \u0435 orting period",
+   "n_species_rows": 19,
+   "page": 3,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Other - Merganser",
+    "w.w. scoter",
+    "old squaw"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "1": 46120,
+    "10": 186885,
+    "2": 60145,
+    "3": 67785,
+    "4": 75415,
+    "5": 101020,
+    "6": 63495,
+    "7": 163040,
+    "8": 150805,
+    "9": 228585
+   }
+  },
+  {
+   "check": {
+    "days_err": 0.3573,
+    "days_form": 12122110,
+    "days_obs": 7790580,
+    "ok": false,
+    "peak_err": 0.0839,
+    "peak_form": 228585,
+    "peak_obs": 247760,
+    "summary_page": 109
+   },
+   "date_row": null,
+   "district": null,
+   "first_week": 2,
+   "header": "REFUGE Upper Mississippi River Wldlife and Fish Refuge MONTHS OF September IO December, 19 % | Weeks \u00b0 f P rting Period",
+   "n_species_rows": 19,
+   "page": 107,
+   "species": [
+    "Mallard",
+    "Black",
+    "Gadwall",
+    "Baldpate",
+    "Pintail",
+    "Green-winged teal",
+    "Blue-winged teal",
+    "Shoveler",
+    "Wood",
+    "Redhead",
+    "Ring-necked",
+    "Canvasback",
+    "Scaup",
+    "Goldeneye",
+    "Bufflehead",
+    "Ruddy",
+    "Other - Merganser",
+    "y.W.scoter",
+    "old squaw"
+   ],
+   "totals_row": null,
+   "weeks": {
+    "10": 185515,
+    "2": 60145,
+    "3": 60785,
+    "4": 75415,
+    "5": 97980,
+    "6": 124495,
+    "7": 101040,
+    "8": 159805,
+    "9": 247760
+   }
+  }
+ ],
+ "UPM_1972_NARRATIVEREPORT": [],
+ "UPM_1972_NARRATIVEREPORT_V1": [],
+ "UPM_1972_NARRATIVEREPORT_V2": []
+}
