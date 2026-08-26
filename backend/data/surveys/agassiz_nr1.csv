@@ -1,0 +1,58 @@
+# Agassiz NWR (MN) weekly waterfowl counts, USFWS Form NR-1 census sheets.
+# Source: National Archives RG-22, nara-media S3 bucket, AGS_<year>_NARRATIVEREPORT.
+# DUCKS ONLY (the form's Ducks 'Totals' row). Geese, swans and coot are separate
+# rows on the form and are excluded.
+#
+# The embedded text layer in these scans is ~50%% corrupt; values were recovered by
+# re-OCRing the form pages with the macOS Vision framework and rebuilding the table
+# geometrically. See backend/data/parse_agassiz.py.
+#
+# Only seasons whose week-start date was legible are included -- binning to
+# half-months requires knowing when week 1 began.
+season,week_midpoint,bin,ducks
+1962,1962-09-05,Sep1,31130
+1962,1962-09-12,Sep1,32080
+1962,1962-09-19,Sep2,30630
+1962,1962-09-26,Sep2,25570
+1962,1962-10-03,Oct1,28810
+1962,1962-10-10,Oct1,48505
+1962,1962-10-17,Oct2,48510
+1962,1962-10-24,Oct2,15270
+1962,1962-10-31,Oct2,14900
+1963,1963-09-04,Sep1,28660
+1963,1963-09-11,Sep1,37260
+1963,1963-09-18,Sep2,48150
+1963,1963-09-25,Sep2,55510
+1963,1963-10-02,Oct1,52730
+1963,1963-10-09,Oct1,38530
+1963,1963-10-16,Oct2,58570
+1963,1963-10-23,Oct2,51400
+1963,1963-10-30,Oct2,13760
+1965,1965-09-08,Sep1,65912
+1965,1965-09-15,Sep1,62797
+1965,1965-09-22,Sep2,61238
+1965,1965-09-29,Sep2,62340
+1965,1965-10-06,Oct1,72650
+1965,1965-10-20,Oct2,41835
+1965,1965-10-27,Oct2,28060
+1965,1965-11-03,Nov1,18460
+1969,1969-09-17,Sep2,66791
+1969,1969-09-24,Sep2,71098
+1969,1969-10-01,Oct1,89562
+1969,1969-10-08,Oct1,69660
+1969,1969-10-15,Oct1,69660
+1969,1969-10-22,Oct2,43850
+1969,1969-10-29,Oct2,60100
+1969,1969-11-05,Nov1,14320
+1969,1969-11-12,Nov1,5820
+1969,1969-11-19,Nov2,5960
+1970,1970-09-09,Sep1,16810
+1970,1970-09-16,Sep2,22314
+1970,1970-09-23,Sep2,18872
+1970,1970-09-30,Sep2,16706
+1970,1970-10-07,Oct1,14630
+1970,1970-10-14,Oct1,12190
+1970,1970-10-21,Oct2,14210
+1970,1970-10-28,Oct2,8260
+1970,1970-11-04,Nov1,10940
+1970,1970-11-11,Nov1,4940

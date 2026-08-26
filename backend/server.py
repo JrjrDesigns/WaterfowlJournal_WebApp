@@ -2173,6 +2173,30 @@ MIGRATION_ANCHORS = [
     # which would put this curve up to two weeks early. Adding a mid-November or
     # late-October survey would settle it.
     ("Green Bay WI", 44.85, -87.75, "Mississippi", 37616, [3, 4, 10, 55, 100, 77, 54, 24, 11, 5]),
+
+    # --- Agassiz NWR, northwest Minnesota (48.31N) ----------------------------
+    # Northernmost anchor in the Mississippi flyway by 3.5 degrees, and the only
+    # one that peaks in EARLY OCTOBER. Every other anchor in this flyway peaks
+    # Nov-1 or Nov-2; at 48N the birds are through a month sooner and the marsh
+    # is frozen by December. Without this the model extrapolated all of northern
+    # Minnesota upward from Wisconsin and put the peak weeks late.
+    #
+    # 5 seasons (1962, 1963, 1965, 1969, 1970), 46 weekly counts, ducks only.
+    # Source: USFWS Form NR-1 waterfowl census sheets inside the refuge annual
+    # narrative reports, National Archives RG-22 (public S3 bucket nara-media).
+    # Rebuild: backend/data/parse_agassiz.py from surveys/agassiz_nr1.csv; the
+    # OCR pipeline that recovered them is pdfocr.swift + nr1.py in the same dir.
+    #
+    # Dec/Jan decay rather than being measured: the sheets stop once the refuge
+    # ices over, and the observed collapse (Nov-1 22, Nov-2 12) is the birds
+    # leaving, not the survey ending. That is real signal, not missing data.
+    #
+    # CAVEAT: 5 of 10 extractable seasons were rejected -- see parse_agassiz.py
+    # for each reason. Three were mis-reads; three more had legible counts but an
+    # illegible week-start date, and binning to half-months without it risks a
+    # 9-day error that crosses a bin boundary. Agassiz is also a BREEDING refuge,
+    # so September counts include locally produced birds, not only migrants.
+    ("Agassiz NWR MN", 48.31, -95.99, "Mississippi", 58321, [79, 88, 100, 67, 22, 12, 5, 3, 3, 3]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power
