@@ -1,0 +1,566 @@
+# Great Lakes Migrant Waterfowl Survey (ECCC / Canadian Wildlife Service).
+# Source: https://open.canada.ca/data/en/dataset/b188cade-c51a-406a-ac43-8103622cc389
+# Aerial shoreline/nearshore counts, Ontario. Ducks only, TEAL EXCLUDED to match
+# the rest of the anchor cloud; geese, swans, coot, cormorants and the SURV
+# survey-placeholder rows are dropped.
+# Sectors are grouped into clusters by coordinate box; lat/lng is the cluster
+# centroid from the GLMWS_Sectors geodatabase layer (EPSG:4269).
+# 'sectors' = how many sectors were flown that date (survey effort).
+cluster,flyway,latitude,longitude,survey_date,sectors,ducks_teal_excluded
+Long Point ON,Mississippi,42.608,-80.367,1971-09-30,4,23117
+Long Point ON,Mississippi,42.608,-80.367,1971-10-15,4,25334
+Long Point ON,Mississippi,42.608,-80.367,1971-11-19,4,141857
+Long Point ON,Mississippi,42.608,-80.367,1971-12-16,4,11960
+Long Point ON,Mississippi,42.608,-80.367,1972-01-05,4,5244
+Long Point ON,Mississippi,42.608,-80.367,1974-09-17,3,4369
+Long Point ON,Mississippi,42.608,-80.367,1974-09-26,4,16710
+Long Point ON,Mississippi,42.608,-80.367,1974-10-10,4,41155
+Long Point ON,Mississippi,42.608,-80.367,1974-10-23,4,81137
+Long Point ON,Mississippi,42.608,-80.367,1974-11-04,4,120481
+Long Point ON,Mississippi,42.608,-80.367,1974-11-22,4,71118
+Long Point ON,Mississippi,42.608,-80.367,1974-12-04,4,15397
+Long Point ON,Mississippi,42.608,-80.367,1974-12-18,4,6560
+Long Point ON,Mississippi,42.608,-80.367,1975-01-02,4,6877
+Long Point ON,Mississippi,42.608,-80.367,1975-09-26,4,15889
+Long Point ON,Mississippi,42.608,-80.367,1975-10-10,4,40791
+Long Point ON,Mississippi,42.608,-80.367,1975-10-23,4,81193
+Long Point ON,Mississippi,42.608,-80.367,1975-11-04,4,120347
+Long Point ON,Mississippi,42.608,-80.367,1975-11-22,4,70967
+Long Point ON,Mississippi,42.608,-80.367,1975-12-04,4,15413
+Long Point ON,Mississippi,42.608,-80.367,1978-09-01,4,5366
+Long Point ON,Mississippi,42.608,-80.367,1978-09-22,4,23143
+Long Point ON,Mississippi,42.608,-80.367,1978-09-29,4,30951
+Long Point ON,Mississippi,42.608,-80.367,1978-10-13,4,62254
+Long Point ON,Mississippi,42.608,-80.367,1978-10-26,4,167819
+Long Point ON,Mississippi,42.608,-80.367,1978-11-14,4,88515
+Long Point ON,Mississippi,42.608,-80.367,1978-12-05,4,34077
+Long Point ON,Mississippi,42.608,-80.367,1979-09-01,4,3972
+Long Point ON,Mississippi,42.608,-80.367,1979-09-22,4,22381
+Long Point ON,Mississippi,42.608,-80.367,1979-09-29,4,30869
+Long Point ON,Mississippi,42.608,-80.367,1979-10-13,4,62078
+Long Point ON,Mississippi,42.608,-80.367,1979-10-26,4,166993
+Long Point ON,Mississippi,42.608,-80.367,1979-11-14,4,88070
+Long Point ON,Mississippi,42.608,-80.367,1979-12-05,4,33447
+Long Point ON,Mississippi,42.608,-80.367,1984-09-19,4,5109
+Long Point ON,Mississippi,42.608,-80.367,1984-09-27,4,10160
+Long Point ON,Mississippi,42.608,-80.367,1984-10-18,4,25258
+Long Point ON,Mississippi,42.608,-80.367,1984-10-25,4,39226
+Long Point ON,Mississippi,42.608,-80.367,1984-11-08,4,77967
+Long Point ON,Mississippi,42.608,-80.367,1984-12-05,4,29242
+Long Point ON,Mississippi,42.608,-80.367,1985-01-09,3,2746
+Long Point ON,Mississippi,42.608,-80.367,1986-09-24,4,6940
+Long Point ON,Mississippi,42.608,-80.367,1986-10-07,4,7550
+Long Point ON,Mississippi,42.608,-80.367,1986-10-24,4,45105
+Long Point ON,Mississippi,42.608,-80.367,1986-11-05,4,76758
+Long Point ON,Mississippi,42.608,-80.367,1986-11-20,4,42868
+Long Point ON,Mississippi,42.608,-80.367,1987-01-06,4,289
+Long Point ON,Mississippi,42.608,-80.367,1987-09-01,4,3718
+Long Point ON,Mississippi,42.608,-80.367,1987-09-21,4,2321
+Long Point ON,Mississippi,42.608,-80.367,1987-10-13,4,32507
+Long Point ON,Mississippi,42.608,-80.367,1987-10-23,4,31147
+Long Point ON,Mississippi,42.608,-80.367,1987-11-04,4,66886
+Long Point ON,Mississippi,42.608,-80.367,1987-11-23,4,29531
+Long Point ON,Mississippi,42.608,-80.367,1987-12-11,4,7186
+Long Point ON,Mississippi,42.608,-80.367,1987-12-14,4,31387
+Long Point ON,Mississippi,42.608,-80.367,1988-01-07,3,847
+Long Point ON,Mississippi,42.608,-80.367,1991-09-20,4,7802
+Long Point ON,Mississippi,42.608,-80.367,1991-10-13,4,55121
+Long Point ON,Mississippi,42.608,-80.367,1991-11-17,4,42452
+Long Point ON,Mississippi,42.608,-80.367,1991-12-01,4,60126
+Long Point ON,Mississippi,42.608,-80.367,1992-09-11,4,1187
+Long Point ON,Mississippi,42.608,-80.367,1992-09-22,4,4990
+Long Point ON,Mississippi,42.608,-80.367,1992-10-25,4,31467
+Long Point ON,Mississippi,42.608,-80.367,1992-11-19,4,10711
+Long Point ON,Mississippi,42.608,-80.367,1992-12-04,4,26660
+Long Point ON,Mississippi,42.608,-80.367,1992-12-19,4,11836
+Long Point ON,Mississippi,42.608,-80.367,1993-09-16,3,2452
+Long Point ON,Mississippi,42.608,-80.367,1993-10-12,4,89937
+Long Point ON,Mississippi,42.608,-80.367,1993-10-26,4,129146
+Long Point ON,Mississippi,42.608,-80.367,1993-11-11,4,109668
+Long Point ON,Mississippi,42.608,-80.367,1993-12-07,4,23437
+Long Point ON,Mississippi,42.608,-80.367,1994-09-20,4,4825
+Long Point ON,Mississippi,42.608,-80.367,1994-10-11,4,26588
+Long Point ON,Mississippi,42.608,-80.367,1994-11-02,4,106692
+Long Point ON,Mississippi,42.608,-80.367,1994-11-15,4,98321
+Long Point ON,Mississippi,42.608,-80.367,1994-12-06,4,40103
+Long Point ON,Mississippi,42.608,-80.367,1995-10-01,4,8791
+Long Point ON,Mississippi,42.608,-80.367,1995-10-26,4,74482
+Long Point ON,Mississippi,42.608,-80.367,1995-11-09,4,55918
+Long Point ON,Mississippi,42.608,-80.367,1995-11-28,4,40169
+Long Point ON,Mississippi,42.608,-80.367,1995-12-13,4,308
+Long Point ON,Mississippi,42.608,-80.367,1996-10-01,4,11975
+Long Point ON,Mississippi,42.608,-80.367,1996-10-17,4,50577
+Long Point ON,Mississippi,42.608,-80.367,1996-10-31,4,57332
+Long Point ON,Mississippi,42.608,-80.367,1996-11-28,4,40169
+Long Point ON,Mississippi,42.608,-80.367,1996-12-13,4,308
+Long Point ON,Mississippi,42.608,-80.367,1998-09-24,4,7449
+Long Point ON,Mississippi,42.608,-80.367,1998-10-08,4,47844
+Long Point ON,Mississippi,42.608,-80.367,1998-10-22,4,97875
+Long Point ON,Mississippi,42.608,-80.367,1998-10-25,4,184178
+Long Point ON,Mississippi,42.608,-80.367,1998-10-27,4,171711
+Long Point ON,Mississippi,42.608,-80.367,1998-11-03,4,152451
+Long Point ON,Mississippi,42.608,-80.367,1998-11-12,4,98290
+Long Point ON,Mississippi,42.608,-80.367,1998-11-19,4,109838
+Long Point ON,Mississippi,42.608,-80.367,1998-11-27,4,124856
+Long Point ON,Mississippi,42.608,-80.367,1998-12-10,4,36618
+Long Point ON,Mississippi,42.608,-80.367,1998-12-17,4,38571
+Long Point ON,Mississippi,42.608,-80.367,1999-09-10,4,2817
+Long Point ON,Mississippi,42.608,-80.367,1999-10-10,4,90713
+Long Point ON,Mississippi,42.608,-80.367,1999-10-31,4,105745
+Long Point ON,Mississippi,42.608,-80.367,1999-11-14,4,134716
+Long Point ON,Mississippi,42.608,-80.367,1999-11-28,4,75725
+Long Point ON,Mississippi,42.608,-80.367,1999-12-17,4,18739
+Long Point ON,Mississippi,42.608,-80.367,2000-09-15,4,9033
+Long Point ON,Mississippi,42.608,-80.367,2000-10-08,4,31308
+Long Point ON,Mississippi,42.608,-80.367,2000-10-22,4,112253
+Long Point ON,Mississippi,42.608,-80.367,2000-11-05,4,135224
+Long Point ON,Mississippi,42.608,-80.367,2000-11-29,4,79141
+Long Point ON,Mississippi,42.608,-80.367,2001-09-17,4,7627
+Long Point ON,Mississippi,42.608,-80.367,2001-09-27,4,11877
+Long Point ON,Mississippi,42.608,-80.367,2001-10-17,4,47181
+Long Point ON,Mississippi,42.608,-80.367,2001-10-28,4,81946
+Long Point ON,Mississippi,42.608,-80.367,2001-11-11,4,50338
+Long Point ON,Mississippi,42.608,-80.367,2001-11-25,4,80819
+Long Point ON,Mississippi,42.608,-80.367,2001-12-18,4,35471
+Long Point ON,Mississippi,42.608,-80.367,2002-09-18,4,3042
+Long Point ON,Mississippi,42.608,-80.367,2002-10-10,4,25270
+Long Point ON,Mississippi,42.608,-80.367,2002-10-30,4,44636
+Long Point ON,Mississippi,42.608,-80.367,2002-11-18,4,48067
+Long Point ON,Mississippi,42.608,-80.367,2002-12-04,4,2201
+Long Point ON,Mississippi,42.608,-80.367,2003-09-18,4,7111
+Long Point ON,Mississippi,42.608,-80.367,2003-10-14,4,42300
+Long Point ON,Mississippi,42.608,-80.367,2003-10-23,4,62683
+Long Point ON,Mississippi,42.608,-80.367,2003-11-10,4,65290
+Long Point ON,Mississippi,42.608,-80.367,2003-11-19,4,51060
+Long Point ON,Mississippi,42.608,-80.367,2003-12-19,4,11039
+Long Point ON,Mississippi,42.608,-80.367,2010-09-09,4,2784
+Long Point ON,Mississippi,42.608,-80.367,2010-09-21,4,9235
+Long Point ON,Mississippi,42.608,-80.367,2010-10-05,4,13319
+Long Point ON,Mississippi,42.608,-80.367,2010-10-19,4,30842
+Long Point ON,Mississippi,42.608,-80.367,2010-11-02,4,61842
+Long Point ON,Mississippi,42.608,-80.367,2010-11-19,4,46405
+Long Point ON,Mississippi,42.608,-80.367,2010-12-03,4,71961
+Long Point ON,Mississippi,42.608,-80.367,2010-12-15,4,67
+Long Point ON,Mississippi,42.608,-80.367,2010-12-28,4,2
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-09-04,3,12250
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-09-09,3,19025
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-09-17,3,20255
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-09-25,3,20119
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-10-01,3,23526
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-10-06,3,38807
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-10-13,3,53990
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-10-20,3,63734
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-10-27,3,95387
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-11-03,3,72033
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-11-10,3,65304
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-11-24,3,41532
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-12-01,3,34008
+Lake St. Clair ON,Mississippi,42.428,-82.459,1968-12-16,3,6705
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-09-03,3,9049
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-09-21,3,12915
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-10-26,3,128881
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-11-02,3,85128
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-11-25,3,53990
+Lake St. Clair ON,Mississippi,42.428,-82.459,1976-12-22,3,13399
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-09-20,3,26210
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-10-05,3,34465
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-10-26,3,75964
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-11-04,3,102513
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-11-25,3,69628
+Lake St. Clair ON,Mississippi,42.428,-82.459,1982-12-21,3,39105
+Lake St. Clair ON,Mississippi,42.428,-82.459,1989-09-19,3,20165
+Lake St. Clair ON,Mississippi,42.428,-82.459,1989-10-04,3,27331
+Lake St. Clair ON,Mississippi,42.428,-82.459,1990-10-23,3,35665
+Lake St. Clair ON,Mississippi,42.428,-82.459,1990-11-09,3,52742
+Lake St. Clair ON,Mississippi,42.428,-82.459,1990-11-23,3,48940
+Lake St. Clair ON,Mississippi,42.428,-82.459,1990-12-17,3,35197
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-09-20,3,31140
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-10-06,3,46158
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-10-24,3,97441
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-11-12,3,127484
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-11-27,3,70569
+Lake St. Clair ON,Mississippi,42.428,-82.459,2002-12-16,3,27237
+Lake St. Clair ON,Mississippi,42.428,-82.459,2004-01-08,3,102405
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-09-07,3,10233
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-09-22,3,7407
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-10-05,3,26630
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-10-20,3,30214
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-11-02,3,43368
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-11-16,3,43029
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-12-01,2,39100
+Lake St. Clair ON,Mississippi,42.428,-82.459,2011-12-16,2,24583
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-09-15,1,0
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-09-23,11,6735
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-10-01,12,8754
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-10-15,12,20202
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-10-27,12,30010
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-11-04,12,82740
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-11-09,12,67210
+Bay of Quinte ON,Atlantic,43.999,-77.25,1970-12-21,12,4416
+Bay of Quinte ON,Atlantic,43.999,-77.25,1971-10-22,12,52223
+Bay of Quinte ON,Atlantic,43.999,-77.25,1971-12-01,12,5851
+Bay of Quinte ON,Atlantic,43.999,-77.25,1971-12-22,12,5321
+Bay of Quinte ON,Atlantic,43.999,-77.25,1976-09-29,12,18208
+Bay of Quinte ON,Atlantic,43.999,-77.25,1976-11-06,7,29482
+Bay of Quinte ON,Atlantic,43.999,-77.25,1976-12-03,8,2856
+Bay of Quinte ON,Atlantic,43.999,-77.25,1977-01-20,12,3192
+Bay of Quinte ON,Atlantic,43.999,-77.25,1977-09-22,4,6301
+Bay of Quinte ON,Atlantic,43.999,-77.25,1977-10-19,4,32367
+Bay of Quinte ON,Atlantic,43.999,-77.25,1977-11-15,5,11630
+Bay of Quinte ON,Atlantic,43.999,-77.25,1977-12-08,5,3604
+Bay of Quinte ON,Atlantic,43.999,-77.25,1978-11-07,6,15430
+Bay of Quinte ON,Atlantic,43.999,-77.25,1979-11-06,4,49368
+Bay of Quinte ON,Atlantic,43.999,-77.25,1980-11-07,9,51300
+Bay of Quinte ON,Atlantic,43.999,-77.25,1981-11-06,4,21967
+Bay of Quinte ON,Atlantic,43.999,-77.25,1982-11-05,4,25969
+Bay of Quinte ON,Atlantic,43.999,-77.25,1983-11-05,7,33820
+Bay of Quinte ON,Atlantic,43.999,-77.25,1984-11-06,6,35312
+Bay of Quinte ON,Atlantic,43.999,-77.25,1985-11-06,13,65421
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-01-02,11,2925
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-09-15,12,1671
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-09-24,10,10302
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-10-10,9,46544
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-10-17,4,137
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-10-23,9,60090
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-11-05,11,57955
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-11-14,4,3785
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-11-20,10,7458
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-12-08,8,3263
+Bay of Quinte ON,Atlantic,43.999,-77.25,1986-12-17,4,713
+Bay of Quinte ON,Atlantic,43.999,-77.25,1987-01-13,13,4345
+Bay of Quinte ON,Atlantic,43.999,-77.25,1987-11-05,12,22580
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-01-07,8,2156
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-10-19,10,42429
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-11-03,4,9547
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-11-04,10,29975
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-11-18,13,20589
+Bay of Quinte ON,Atlantic,43.999,-77.25,1988-12-14,6,8098
+Bay of Quinte ON,Atlantic,43.999,-77.25,1989-01-03,10,3663
+Bay of Quinte ON,Atlantic,43.999,-77.25,1989-10-24,13,48892
+Bay of Quinte ON,Atlantic,43.999,-77.25,1989-11-08,11,38936
+Bay of Quinte ON,Atlantic,43.999,-77.25,1989-11-17,4,6805
+Bay of Quinte ON,Atlantic,43.999,-77.25,1989-12-15,8,3202
+Bay of Quinte ON,Atlantic,43.999,-77.25,1990-01-03,9,4937
+Bay of Quinte ON,Atlantic,43.999,-77.25,1990-11-08,15,28667
+Bay of Quinte ON,Atlantic,43.999,-77.25,1990-11-15,11,6928
+Bay of Quinte ON,Atlantic,43.999,-77.25,1990-12-13,4,150
+Bay of Quinte ON,Atlantic,43.999,-77.25,1991-01-02,11,3887
+Bay of Quinte ON,Atlantic,43.999,-77.25,1991-11-05,13,31848
+Bay of Quinte ON,Atlantic,43.999,-77.25,1991-11-14,1,20
+Bay of Quinte ON,Atlantic,43.999,-77.25,1991-11-18,12,4260
+Bay of Quinte ON,Atlantic,43.999,-77.25,1991-12-12,11,3495
+Bay of Quinte ON,Atlantic,43.999,-77.25,1992-01-09,10,1893
+Bay of Quinte ON,Atlantic,43.999,-77.25,1992-11-05,14,30086
+Bay of Quinte ON,Atlantic,43.999,-77.25,1992-11-24,8,5394
+Bay of Quinte ON,Atlantic,43.999,-77.25,1993-01-05,11,3022
+Bay of Quinte ON,Atlantic,43.999,-77.25,1993-11-04,13,20164
+Bay of Quinte ON,Atlantic,43.999,-77.25,1993-11-17,14,28158
+Bay of Quinte ON,Atlantic,43.999,-77.25,1993-12-16,13,7438
+Bay of Quinte ON,Atlantic,43.999,-77.25,1994-01-05,12,2169
+Bay of Quinte ON,Atlantic,43.999,-77.25,1994-11-04,12,57430
+Bay of Quinte ON,Atlantic,43.999,-77.25,1994-11-16,15,40223
+Bay of Quinte ON,Atlantic,43.999,-77.25,1994-12-15,14,22838
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-01-09,1,447
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-01-10,11,24966
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-10-25,15,58898
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-11-09,15,40351
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-11-22,15,21520
+Bay of Quinte ON,Atlantic,43.999,-77.25,1995-12-12,15,15487
+Bay of Quinte ON,Atlantic,43.999,-77.25,1996-01-05,8,7254
+Bay of Quinte ON,Atlantic,43.999,-77.25,1996-11-04,13,14437
+Bay of Quinte ON,Atlantic,43.999,-77.25,1996-11-05,15,36634
+Bay of Quinte ON,Atlantic,43.999,-77.25,1996-12-10,7,10377
+Bay of Quinte ON,Atlantic,43.999,-77.25,1996-12-16,8,5085
+Bay of Quinte ON,Atlantic,43.999,-77.25,1997-01-08,11,10533
+Bay of Quinte ON,Atlantic,43.999,-77.25,1997-11-05,14,47705
+Bay of Quinte ON,Atlantic,43.999,-77.25,1997-11-06,2,4240
+Bay of Quinte ON,Atlantic,43.999,-77.25,1997-12-08,7,6155
+Bay of Quinte ON,Atlantic,43.999,-77.25,1997-12-11,7,2634
+Bay of Quinte ON,Atlantic,43.999,-77.25,1998-01-21,9,11523
+Bay of Quinte ON,Atlantic,43.999,-77.25,1998-11-04,15,33980
+Bay of Quinte ON,Atlantic,43.999,-77.25,1998-12-16,15,47242
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-01-07,2,3016
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-01-11,10,22224
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-09-13,10,775
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-09-23,15,8975
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-10-07,15,14899
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-10-18,12,5803
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-10-19,15,19739
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-11-08,15,120803
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-11-18,15,93775
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-12-01,4,11767
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-12-02,15,30645
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-12-17,11,7848
+Bay of Quinte ON,Atlantic,43.999,-77.25,1999-12-22,4,7783
+Bay of Quinte ON,Atlantic,43.999,-77.25,2000-01-05,15,47327
+Bay of Quinte ON,Atlantic,43.999,-77.25,2000-11-07,13,55607
+Bay of Quinte ON,Atlantic,43.999,-77.25,2000-11-08,2,16405
+Bay of Quinte ON,Atlantic,43.999,-77.25,2001-01-09,5,2812
+Bay of Quinte ON,Atlantic,43.999,-77.25,2001-01-10,5,6807
+Bay of Quinte ON,Atlantic,43.999,-77.25,2001-11-05,2,789
+Bay of Quinte ON,Atlantic,43.999,-77.25,2001-11-06,11,43493
+Bay of Quinte ON,Atlantic,43.999,-77.25,2002-01-07,4,8555
+Bay of Quinte ON,Atlantic,43.999,-77.25,2002-01-08,7,7586
+Bay of Quinte ON,Atlantic,43.999,-77.25,2002-10-29,15,58845
+Bay of Quinte ON,Atlantic,43.999,-77.25,2003-01-07,9,12044
+Bay of Quinte ON,Atlantic,43.999,-77.25,2003-11-06,15,66632
+Bay of Quinte ON,Atlantic,43.999,-77.25,2004-01-07,15,13987
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-09-08,4,396
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-09-09,11,616
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-09-24,4,790
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-09-25,12,1580
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-10-06,4,1617
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-10-08,11,1702
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-10-19,4,8096
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-10-26,11,12246
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-11-03,3,11869
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-11-04,12,54363
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-11-17,4,10010
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-11-18,12,64326
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-12-02,4,18015
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-12-04,11,28884
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-12-16,4,5647
+Bay of Quinte ON,Atlantic,43.999,-77.25,2009-12-17,11,21401
+Kingston Basin ON,Atlantic,44.194,-76.506,1976-09-28,7,4298
+Kingston Basin ON,Atlantic,44.194,-76.506,1976-09-29,4,1063
+Kingston Basin ON,Atlantic,44.194,-76.506,1976-11-05,7,25878
+Kingston Basin ON,Atlantic,44.194,-76.506,1976-11-06,4,1047
+Kingston Basin ON,Atlantic,44.194,-76.506,1976-12-03,11,7877
+Kingston Basin ON,Atlantic,44.194,-76.506,1977-01-20,11,695
+Kingston Basin ON,Atlantic,44.194,-76.506,1977-09-22,7,2426
+Kingston Basin ON,Atlantic,44.194,-76.506,1977-10-19,8,42108
+Kingston Basin ON,Atlantic,44.194,-76.506,1977-11-15,7,26965
+Kingston Basin ON,Atlantic,44.194,-76.506,1977-12-08,7,5957
+Kingston Basin ON,Atlantic,44.194,-76.506,1978-11-07,10,23417
+Kingston Basin ON,Atlantic,44.194,-76.506,1979-11-06,8,31660
+Kingston Basin ON,Atlantic,44.194,-76.506,1980-11-06,5,14502
+Kingston Basin ON,Atlantic,44.194,-76.506,1980-11-07,3,10715
+Kingston Basin ON,Atlantic,44.194,-76.506,1981-11-06,7,15761
+Kingston Basin ON,Atlantic,44.194,-76.506,1982-11-05,6,16213
+Kingston Basin ON,Atlantic,44.194,-76.506,1983-11-05,8,27624
+Kingston Basin ON,Atlantic,44.194,-76.506,1984-11-06,8,15127
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-09-11,8,3766
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-09-26,8,2198
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-10-10,5,11330
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-10-23,8,21909
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-11-06,10,42665
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-11-07,2,68
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-11-18,7,36150
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-12-05,8,15142
+Kingston Basin ON,Atlantic,44.194,-76.506,1985-12-19,5,4171
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-01-02,10,7256
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-09-15,4,622
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-09-24,4,499
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-03,2,930
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-08,3,3950
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-10,4,1282
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-17,5,8025
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-23,9,21878
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-10-30,6,15917
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-11-05,9,28864
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-11-06,3,3317
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-11-14,5,23758
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-11-20,12,19229
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-11-28,5,10543
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-12-08,4,1833
+Kingston Basin ON,Atlantic,44.194,-76.506,1986-12-17,7,6341
+Kingston Basin ON,Atlantic,44.194,-76.506,1987-01-13,12,9171
+Kingston Basin ON,Atlantic,44.194,-76.506,1987-11-04,3,497
+Kingston Basin ON,Atlantic,44.194,-76.506,1987-11-05,9,21182
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-01-07,12,4733
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-10-19,2,891
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-11-03,10,28194
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-11-04,2,87
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-11-18,8,5953
+Kingston Basin ON,Atlantic,44.194,-76.506,1988-12-14,6,3811
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-01-03,9,3146
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-10-24,8,38782
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-11-07,10,24522
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-11-08,2,337
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-11-17,7,21847
+Kingston Basin ON,Atlantic,44.194,-76.506,1989-12-15,7,2395
+Kingston Basin ON,Atlantic,44.194,-76.506,1990-01-03,4,460
+Kingston Basin ON,Atlantic,44.194,-76.506,1990-11-07,11,47049
+Kingston Basin ON,Atlantic,44.194,-76.506,1990-11-08,1,77
+Kingston Basin ON,Atlantic,44.194,-76.506,1990-11-15,8,17542
+Kingston Basin ON,Atlantic,44.194,-76.506,1990-12-13,6,2251
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-01-02,4,728
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-01-03,7,3277
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-11-04,11,23723
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-11-05,1,821
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-11-14,11,25659
+Kingston Basin ON,Atlantic,44.194,-76.506,1991-12-11,10,2028
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-01-08,10,4017
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-01-09,1,17
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-11-04,8,18231
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-11-05,4,1207
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-11-24,10,7360
+Kingston Basin ON,Atlantic,44.194,-76.506,1992-12-15,8,1272
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-01-05,4,595
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-01-06,8,3823
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-11-04,12,22573
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-11-16,12,21590
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-11-17,1,4
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-12-15,10,1219
+Kingston Basin ON,Atlantic,44.194,-76.506,1993-12-16,1,31
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-01-05,6,1672
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-01-06,1,70
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-11-03,12,20342
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-11-04,1,0
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-11-15,12,15651
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-11-16,1,22
+Kingston Basin ON,Atlantic,44.194,-76.506,1994-12-14,12,2849
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-01-09,10,3761
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-01-10,1,127
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-10-25,13,19672
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-11-06,2,822
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-11-09,12,29093
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-11-22,11,26216
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-12-12,4,1248
+Kingston Basin ON,Atlantic,44.194,-76.506,1995-12-13,9,5780
+Kingston Basin ON,Atlantic,44.194,-76.506,1996-01-05,4,445
+Kingston Basin ON,Atlantic,44.194,-76.506,1996-11-04,9,1978
+Kingston Basin ON,Atlantic,44.194,-76.506,1996-11-05,11,30002
+Kingston Basin ON,Atlantic,44.194,-76.506,1996-12-09,12,9150
+Kingston Basin ON,Atlantic,44.194,-76.506,1996-12-10,1,38
+Kingston Basin ON,Atlantic,44.194,-76.506,1997-01-07,7,7236
+Kingston Basin ON,Atlantic,44.194,-76.506,1997-01-08,5,1175
+Kingston Basin ON,Atlantic,44.194,-76.506,1997-11-05,13,29634
+Kingston Basin ON,Atlantic,44.194,-76.506,1997-12-08,13,4662
+Kingston Basin ON,Atlantic,44.194,-76.506,1998-01-21,8,4896
+Kingston Basin ON,Atlantic,44.194,-76.506,1998-11-04,3,981
+Kingston Basin ON,Atlantic,44.194,-76.506,1998-11-05,10,16183
+Kingston Basin ON,Atlantic,44.194,-76.506,1998-12-15,10,17255
+Kingston Basin ON,Atlantic,44.194,-76.506,1998-12-16,5,3241
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-01-07,11,10392
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-09-13,13,4361
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-09-22,5,1428
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-09-23,9,5962
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-10-07,9,16589
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-10-08,5,2899
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-10-18,13,36116
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-10-19,1,39
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-11-03,1,293
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-11-04,8,4184
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-11-08,6,35184
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-11-17,13,23149
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-11-18,1,184
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-12-01,13,26752
+Kingston Basin ON,Atlantic,44.194,-76.506,1999-12-17,13,14036
+Kingston Basin ON,Atlantic,44.194,-76.506,2000-01-05,13,18020
+Kingston Basin ON,Atlantic,44.194,-76.506,2000-11-07,9,28326
+Kingston Basin ON,Atlantic,44.194,-76.506,2000-11-08,5,2780
+Kingston Basin ON,Atlantic,44.194,-76.506,2001-01-09,11,3504
+Kingston Basin ON,Atlantic,44.194,-76.506,2001-11-05,11,2933
+Kingston Basin ON,Atlantic,44.194,-76.506,2001-11-06,3,16606
+Kingston Basin ON,Atlantic,44.194,-76.506,2002-01-07,11,19542
+Kingston Basin ON,Atlantic,44.194,-76.506,2002-10-29,12,33410
+Kingston Basin ON,Atlantic,44.194,-76.506,2002-10-30,2,883
+Kingston Basin ON,Atlantic,44.194,-76.506,2003-01-07,11,14446
+Kingston Basin ON,Atlantic,44.194,-76.506,2003-11-06,12,38011
+Kingston Basin ON,Atlantic,44.194,-76.506,2004-01-06,3,3249
+Kingston Basin ON,Atlantic,44.194,-76.506,2004-01-07,9,12675
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-09-08,4,155
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-09-09,8,1054
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-09-24,8,448
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-09-25,5,3861
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-10-06,4,1339
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-10-08,8,26393
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-10-19,8,4927
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-10-26,5,28123
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-11-03,8,14431
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-11-04,5,29290
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-11-17,8,4224
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-11-18,5,23123
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-12-02,11,24319
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-12-04,2,406
+Kingston Basin ON,Atlantic,44.194,-76.506,2009-12-16,13,13334
+Lake St. Francis ON,Atlantic,45.056,-74.662,1976-09-28,4,285
+Lake St. Francis ON,Atlantic,45.056,-74.662,1976-11-05,4,6852
+Lake St. Francis ON,Atlantic,45.056,-74.662,1976-12-01,4,4132
+Lake St. Francis ON,Atlantic,45.056,-74.662,1977-01-20,4,1214
+Lake St. Francis ON,Atlantic,45.056,-74.662,1977-09-22,3,1149
+Lake St. Francis ON,Atlantic,45.056,-74.662,1977-10-19,4,954
+Lake St. Francis ON,Atlantic,45.056,-74.662,1977-11-15,4,3480
+Lake St. Francis ON,Atlantic,45.056,-74.662,1977-12-08,4,7288
+Lake St. Francis ON,Atlantic,45.056,-74.662,1978-11-07,4,15545
+Lake St. Francis ON,Atlantic,45.056,-74.662,1979-11-06,4,11435
+Lake St. Francis ON,Atlantic,45.056,-74.662,1981-11-05,2,2784
+Lake St. Francis ON,Atlantic,45.056,-74.662,1982-11-06,1,171
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-09-11,4,693
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-09-26,4,372
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-10-23,4,4912
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-11-06,1,4
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-11-07,4,13158
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-11-18,4,16866
+Lake St. Francis ON,Atlantic,45.056,-74.662,1985-12-05,4,5835
+Lake St. Francis ON,Atlantic,45.056,-74.662,1986-01-02,4,354
+Lake St. Francis ON,Atlantic,45.056,-74.662,1986-11-05,1,98
+Lake St. Francis ON,Atlantic,45.056,-74.662,1986-11-06,4,23947
+Lake St. Francis ON,Atlantic,45.056,-74.662,1987-01-13,4,705
+Lake St. Francis ON,Atlantic,45.056,-74.662,1987-11-04,3,11155
+Lake St. Francis ON,Atlantic,45.056,-74.662,1988-01-07,3,910
+Lake St. Francis ON,Atlantic,45.056,-74.662,1988-11-03,3,14573
+Lake St. Francis ON,Atlantic,45.056,-74.662,1988-12-14,1,5791
+Lake St. Francis ON,Atlantic,45.056,-74.662,1989-01-03,1,61
+Lake St. Francis ON,Atlantic,45.056,-74.662,1989-11-07,4,13475
+Lake St. Francis ON,Atlantic,45.056,-74.662,1989-11-17,1,0
+Lake St. Francis ON,Atlantic,45.056,-74.662,1989-12-15,1,3
+Lake St. Francis ON,Atlantic,45.056,-74.662,1990-01-03,1,39
+Lake St. Francis ON,Atlantic,45.056,-74.662,1990-11-07,4,12567
+Lake St. Francis ON,Atlantic,45.056,-74.662,1990-11-15,1,2110
+Lake St. Francis ON,Atlantic,45.056,-74.662,1990-12-13,1,191
+Lake St. Francis ON,Atlantic,45.056,-74.662,1991-01-03,3,2369
+Lake St. Francis ON,Atlantic,45.056,-74.662,1991-11-04,4,4885
+Lake St. Francis ON,Atlantic,45.056,-74.662,1991-11-14,1,999
+Lake St. Francis ON,Atlantic,45.056,-74.662,1991-12-11,1,248
+Lake St. Francis ON,Atlantic,45.056,-74.662,1992-01-08,4,3372
+Lake St. Francis ON,Atlantic,45.056,-74.662,1992-11-04,4,1113
+Lake St. Francis ON,Atlantic,45.056,-74.662,1992-11-27,1,944
+Lake St. Francis ON,Atlantic,45.056,-74.662,1992-12-16,1,259
+Lake St. Francis ON,Atlantic,45.056,-74.662,1993-01-06,4,1458
+Lake St. Francis ON,Atlantic,45.056,-74.662,1993-11-04,4,1512
+Lake St. Francis ON,Atlantic,45.056,-74.662,1993-11-16,4,2688
+Lake St. Francis ON,Atlantic,45.056,-74.662,1993-12-15,1,219
+Lake St. Francis ON,Atlantic,45.056,-74.662,1994-01-06,2,143
+Lake St. Francis ON,Atlantic,45.056,-74.662,1994-11-03,4,744
+Lake St. Francis ON,Atlantic,45.056,-74.662,1994-11-15,4,249
+Lake St. Francis ON,Atlantic,45.056,-74.662,1994-12-14,1,365
+Lake St. Francis ON,Atlantic,45.056,-74.662,1995-01-05,4,203
+Lake St. Francis ON,Atlantic,45.056,-74.662,1995-11-06,4,1471
+Lake St. Francis ON,Atlantic,45.056,-74.662,1995-12-13,1,367
+Lake St. Francis ON,Atlantic,45.056,-74.662,1996-01-05,3,500
+Lake St. Francis ON,Atlantic,45.056,-74.662,1996-11-04,4,4380
+Lake St. Francis ON,Atlantic,45.056,-74.662,1996-11-05,1,2
+Lake St. Francis ON,Atlantic,45.056,-74.662,1996-12-09,1,1606
+Lake St. Francis ON,Atlantic,45.056,-74.662,1997-01-07,4,1219
+Lake St. Francis ON,Atlantic,45.056,-74.662,1997-11-05,4,750
+Lake St. Francis ON,Atlantic,45.056,-74.662,1997-12-08,1,536
+Lake St. Francis ON,Atlantic,45.056,-74.662,1998-01-22,3,487
+Lake St. Francis ON,Atlantic,45.056,-74.662,1998-11-05,4,2219
+Lake St. Francis ON,Atlantic,45.056,-74.662,1998-12-15,4,1931
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-01-07,4,2391
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-09-10,4,288
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-09-22,4,199
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-10-08,4,625
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-10-18,4,597
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-11-03,4,1484
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-11-17,4,611
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-12-01,4,2804
+Lake St. Francis ON,Atlantic,45.056,-74.662,1999-12-21,4,2342
+Lake St. Francis ON,Atlantic,45.056,-74.662,2000-01-05,4,3048
+Lake St. Francis ON,Atlantic,45.056,-74.662,2000-11-08,4,1179
+Lake St. Francis ON,Atlantic,45.056,-74.662,2001-01-09,4,2299
+Lake St. Francis ON,Atlantic,45.056,-74.662,2001-11-05,4,325
+Lake St. Francis ON,Atlantic,45.056,-74.662,2002-01-07,4,1439
+Lake St. Francis ON,Atlantic,45.056,-74.662,2002-10-30,4,3564
+Lake St. Francis ON,Atlantic,45.056,-74.662,2003-01-07,4,2284
+Lake St. Francis ON,Atlantic,45.056,-74.662,2004-01-06,4,1308
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-09-08,4,376
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-09-24,4,602
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-10-06,4,1163
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-10-19,4,1410
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-11-03,4,3588
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-11-17,4,2009
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-12-04,4,1483
+Lake St. Francis ON,Atlantic,45.056,-74.662,2009-12-16,4,1893

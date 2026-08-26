@@ -1997,6 +1997,29 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # allowed. Built + cross-validated offline (LOO peak within-1: 73%% overall;
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
+#
+# ABUNDANCE is the peak duck count at the site, used only as an IDW voting
+# weight (abundance ** _MIG_ABUND_EXP). It is NOT perfectly consistent across
+# the cloud; audited 2026-08-26, and left as-is deliberately:
+#
+#   * Two peak definitions are in use. Most anchors (Michigan, Green Bay, the
+#     Ontario Great Lakes) use the max half-month BIN MEAN. Pools 7-9 WI and
+#     Agassiz MN use the mean of each season's single PEAK count, which runs
+#     1.17-1.27x higher. Harmonising them shifts blended curves by at most
+#     2 points anywhere tested, because the 0.38 exponent compresses hard --
+#     not worth re-opening the multiplier calibration for.
+#   * Geographic scale varies ~1000x, from single survey zones (DE zone 10,
+#     2,331) to whole ecoregions (Louisiana coast, 2,500,000). That 1073x
+#     spread becomes only a 14x weight difference. It is arguably correct --
+#     a region-scale anchor should carry farther -- but it means abundance
+#     conflates "how many birds" with "how large an area".
+#   * The original 104 anchors were built offline and their abundance cannot
+#     be reproduced from this repo (build_migration_curves.py is deprecated and
+#     emits no abundance). Only the 15 added since are reproducible from
+#     backend/data/parse_*.py.
+#
+# If you add an anchor: use the max half-month bin mean, and correct for survey
+# effort first if the source's coverage varies (see parse_greatlakes.py).
 MIGRATION_ANCHORS = [
     ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1200000, [15, 19, 29, 39, 63, 65, 81, 90, 100, 93]),
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
@@ -2197,6 +2220,41 @@ MIGRATION_ANCHORS = [
     # 9-day error that crosses a bin boundary. Agassiz is also a BREEDING refuge,
     # so September counts include locally produced birds, not only migrants.
     ("Agassiz NWR MN", 48.31, -95.99, "Mississippi", 58321, [79, 88, 100, 67, 22, 12, 5, 3, 3, 3]),
+
+    # --- Ontario Great Lakes / St. Lawrence (42.4-45.1N) ----------------------
+    # The deepest-backed anchors in the set: 21-31 fall seasons each, from the
+    # ECCC/Canadian Wildlife Service "Great Lakes Migrant Waterfowl Survey"
+    # (open.canada.ca dataset b188cade-c51a-406a-ac43-8103622cc389). Aerial
+    # counts of Ontario shoreline and nearshore waters, 1968-2011, per species
+    # per sector. Ducks only, teal excluded to match the rest of the cloud.
+    # Rebuild: backend/data/parse_greatlakes.py from surveys/greatlakes_on.csv.
+    #
+    # These fill two real holes. The Atlantic flyway had NOTHING between 43.0N
+    # and 45.1N; Bay of Quinte, Kingston Basin and Lake St. Francis sit in it.
+    # Long Point is 250 km east of the Ohio Lake Erie marshes, which was the
+    # only anchor on that lake.
+    #
+    # The survey files 360 sectors in five broad regions, and the regions are
+    # far too large to be points -- "Western L. Ontario - L. Erie" alone runs
+    # 350 km from Windsor to Toronto. Sectors are therefore clustered into
+    # coordinate boxes spanning at most ~0.55 lat x ~1.05 lon, each anchor at
+    # its own sector centroid (from the GLMWS_Sectors geodatabase layer). This
+    # is the mistake that disqualified the Upper Mississippi refuge-wide sheets;
+    # see backend/data/UPM_NR1_FINDINGS.md.
+    #
+    # Three candidate clusters were dropped rather than smoothed over: E. Lake
+    # Erie and W. Lake Ontario were too spatially smeared and their curves
+    # zigzagged, and Thousand Islands holds only 6-22% of its birds in Sep-Nov
+    # -- a wintering site peaking in January, 0.3 deg from Kingston Basin which
+    # peaks in October.
+    #
+    # A half-month needs 3+ surveys before it is trusted; without that rule
+    # Lake St. Clair peaks in January on the strength of one flight.
+    ("Lake St. Francis ON", 45.056, -74.662, "Atlantic", 5925, [8, 10, 24, 39, 100, 73, 68, 30, 24, 11]),
+    ("Kingston Basin ON", 44.194, -76.506, "Atlantic", 31367, [9, 16, 54, 100, 88, 73, 30, 31, 24, 11]),
+    ("Bay of Quinte ON", 43.999, -77.25, "Atlantic", 57593, [3, 21, 40, 85, 100, 60, 33, 30, 26, 12]),
+    ("Long Point ON", 42.608, -80.367, "Mississippi", 94876, [4, 12, 42, 88, 100, 69, 27, 18, 4, 3]),
+    ("Lake St. Clair ON", 42.428, -82.459, "Mississippi", 78367, [16, 25, 46, 96, 100, 70, 52, 34, 15, 7]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power
