@@ -2281,6 +2281,33 @@ MIGRATION_ANCHORS = [
     # (fourth 9/22-28, eighteenth 12/29-31). Refuges did not follow one
     # convention; re-derive it per refuge rather than carrying one over.
     ("Parker River NWR MA", 42.75, -70.8, "Atlantic", 11633, [16, 35, 58, 78, 100, 83, 70, 57, 35, 16]),
+
+    # --- Brigantine NWR, coastal New Jersey (39.47N) --------------------------
+    # Now the Brigantine Division of Edwin B. Forsythe NWR. The only anchor on
+    # the New Jersey Atlantic coast: the nearest is DE zone 4, 87 km away on
+    # Delaware Bay, which is a different water body with different timing. The
+    # model had Atlantic City peaking in December, extrapolated from Delaware and
+    # Chesapeake; Brigantine's own counts peak Nov-1. Nothing outside coastal NJ
+    # moves more than 6 points, and the distant controls move 0.
+    #
+    # THE BEST-SUPPORTED NARA ANCHOR IN THE CLOUD: 11 seasons (1955-1971), above
+    # the 8 ANCHOR_RULES.md prefers, where Parker River managed 5, Agassiz 5 and
+    # Green Bay 4. Nine of ten half-months observed with n=11.
+    # Rebuild: backend/data/parse_brigantine.py from surveys/brigantine.csv.
+    #
+    # Week 1 begins SEP 1 here, verified on both sheets of 1965 (primary prints
+    # 9/1-9/7 first; continuation prints 11/10-11/16 for week 11 and 12/29-31 for
+    # week 18). Matches Parker River but NOT Agassiz, where week 1 is the Sunday
+    # on or before Sep 1 -- re-derive per refuge, never carry the rule over.
+    #
+    # Validation is the sheet's own per-species days-use column against
+    # sum(weekly)*7; it rejected 1956 (58.8%), 1962 (47.9%) and 1964, whose parse
+    # gave a peak of 5,003,540 across an impossible 21 weeks.
+    #
+    # KNOWN LIMIT: the form stops at Dec 31, so Jan-1 rests on a single week per
+    # season (n=9) and Jan-2 is DECAYED, not measured. This anchor is weakest in
+    # deep winter -- precisely where a coastal wintering site matters most.
+    ("Brigantine NWR NJ", 39.47, -74.45, "Atlantic", 77811, [13, 26, 47, 93, 100, 92, 96, 67, 62, 28]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power
