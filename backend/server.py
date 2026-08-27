@@ -2255,6 +2255,32 @@ MIGRATION_ANCHORS = [
     ("Bay of Quinte ON", 43.999, -77.25, "Atlantic", 57593, [3, 21, 40, 85, 100, 60, 33, 30, 26, 12]),
     ("Long Point ON", 42.608, -80.367, "Mississippi", 94876, [4, 12, 42, 88, 100, 69, 27, 18, 4, 3]),
     ("Lake St. Clair ON", 42.428, -82.459, "Mississippi", 78367, [16, 25, 46, 96, 100, 70, 52, 34, 15, 7]),
+
+    # --- Parker River NWR, coastal Massachusetts (42.75N) --------------------
+    # Fills the largest hole left in the cloud. Between Montezuma NY (43.0N) and
+    # DE zone 1 (39.75N) the Atlantic flyway had NO anchor at all, so the whole
+    # southern New England coast took its timing from Lake Champlain (an inland
+    # lake that freezes) or Delaware Bay, 286-391 km away. Cape Ann/Boston was
+    # scoring late January at 57% of peak, extrapolated from Delaware's December
+    # peak; Parker River's own counts say 16%. Also the first anchor anywhere in
+    # the cloud built on a salt-water site where brant, scoter and eider are the
+    # birds present -- the sheets carry them, though only ducks are counted here.
+    #
+    # 5 seasons (1966, 1968-1971), USFWS Form NR-1 weekly census sheets from the
+    # National Archives. 9 of 10 half-months observed with n=5; only Jan-2 is
+    # decayed. Rebuild: backend/data/parse_parker.py from surveys/parker_river.csv.
+    #
+    # Below the 8 seasons ANCHOR_RULES.md prefers, though above its floor of 4 and
+    # in line with Green Bay (4) and Agassiz (5). 1943-1952 are not missing data:
+    # the pre-1953 form recorded only First Seen / Peak Concentration / Last Seen
+    # and has no weekly grid. Later years were rejected on scan quality -- 1960's
+    # page is clipped at the right edge and loses weeks 8-10 entirely.
+    #
+    # WEEK 1 BEGINS SEP 1 HERE, not the Sunday on or before Sep 1 as at Agassiz.
+    # Read off the 1960 sheet (first column prints 9/1-7) and confirmed on 1968
+    # (fourth 9/22-28, eighteenth 12/29-31). Refuges did not follow one
+    # convention; re-derive it per refuge rather than carrying one over.
+    ("Parker River NWR MA", 42.75, -70.8, "Atlantic", 11633, [16, 35, 58, 78, 100, 83, 70, 57, 35, 16]),
 ]
 # Blend params (fit offline against leave-one-out accuracy).
 _MIG_P = 1.5        # IDW power
