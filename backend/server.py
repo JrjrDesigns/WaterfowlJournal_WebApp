@@ -1998,7 +1998,7 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 68 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
+# SOURCE DATA: 69 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
 # (backend/data/parse_*.py + surveys/). The remaining 53 were built offline and
 # their curves exist only as literals here -- they cannot be audited or fixed
 # without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
@@ -2111,7 +2111,7 @@ MIGRATION_ANCHORS = [
     ("Dardenne MR", 38.85, -90.42, "Mississippi", 86877, [3, 3, 3, 26, 72, 89, 100, 67, 60, 27]),
     ("Long Lake MR", 38.9, -90.5, "Mississippi", 31066, [3, 3, 3, 16, 73, 100, 98, 54, 43, 20]),
     ("Sacramento Valley", 39.4, -122.2, "Pacific", 901000, [20, 25, 65, 74, 94, 100, 85, 75, 78, 64]),
-    ("Summer Lake OR", 42.85, -120.78, "Pacific", 35000, [58, 72, 100, 89, 72, 45, 23, 16, 12, 12]),
+    ("Summer Lake OR", 42.85, -120.78, "Pacific", 51879, [50, 78, 100, 86, 63, 39, 21, 16, 11, 12]),
     ("Klamath Basin", 41.9, -121.8, "Pacific", 1200000, [30, 50, 78, 100, 82, 58, 38, 25, 18, 14]),
     ("Bear River UT", 41.45, -112.25, "Pacific", 220000, [30, 50, 75, 95, 100, 65, 35, 18, 8, 4]),
     ("San Joaquin CA", 37.2, -120.9, "Pacific", 260619, [12, 18, 42, 62, 82, 95, 100, 92, 82, 68]),
