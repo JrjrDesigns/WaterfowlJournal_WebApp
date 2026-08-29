@@ -1998,8 +1998,8 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 41 of the 121 anchors can now be rebuilt from data in this repo
-# (backend/data/parse_*.py + surveys/). The remaining 80 were built offline and
+# SOURCE DATA: 59 of the 121 anchors can now be rebuilt from data in this repo
+# (backend/data/parse_*.py + surveys/). The remaining 62 were built offline and
 # their curves exist only as literals here -- they cannot be audited or fixed
 # without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
 # its raw data and a rebuild script.
@@ -2068,17 +2068,17 @@ MIGRATION_ANCHORS = [
     ("Laguna Atascosa", 26.3, -97.35, "Central", 408783, [2, 7, 24, 63, 89, 100, 96, 91, 80, 66]),
     ("Arrowwood ND", 47.2, -98.8, "Central", 80000, [25, 55, 85, 100, 88, 45, 20, 10, 5, 3]),
     ("Upper Souris ND", 48.6, -101.5, "Central", 120000, [30, 60, 88, 100, 70, 32, 15, 7, 3, 1]),
-    ("DE zone 1", 39.75, -75.52, "Atlantic", 6407, [0, 8, 24, 32, 32, 53, 94, 100, 72, 58]),
-    ("DE zone 2", 39.6, -75.55, "Atlantic", 5626, [6, 16, 34, 53, 73, 89, 100, 93, 67, 54]),
-    ("DE zone 3", 39.45, -75.5, "Atlantic", 15508, [4, 28, 76, 100, 99, 99, 97, 88, 69, 60]),
-    ("DE zone 4", 39.35, -75.45, "Atlantic", 3508, [34, 48, 74, 83, 73, 78, 97, 100, 88, 82]),
-    ("DE zone 5", 39.27, -75.47, "Atlantic", 39506, [21, 33, 55, 71, 80, 89, 99, 100, 93, 90]),
-    ("DE zone 6", 39.15, -75.43, "Atlantic", 17325, [34, 42, 56, 70, 82, 92, 99, 100, 94, 91]),
-    ("DE zone 7", 39.02, -75.4, "Atlantic", 45794, [14, 34, 72, 94, 100, 95, 78, 66, 59, 55]),
-    ("DE zone 8", 38.88, -75.33, "Atlantic", 6172, [44, 51, 64, 78, 92, 99, 100, 94, 82, 75]),
-    ("DE zone 9", 38.75, -75.28, "Atlantic", 2415, [10, 13, 18, 28, 44, 65, 90, 100, 95, 93]),
-    ("DE zone 10", 38.6, -75.13, "Atlantic", 2331, [3, 7, 15, 22, 26, 40, 63, 81, 94, 100]),
-    ("DE zone 11", 38.5, -75.07, "Atlantic", 5103, [23, 28, 39, 53, 71, 87, 100, 99, 82, 74]),
+    ("DE zone 1", 39.75, -75.52, "Atlantic", 2518, [3, 13, 26, 33, 41, 71, 100, 86, 71, 32]),
+    ("DE zone 2", 39.6, -75.55, "Atlantic", 910, [8, 23, 39, 52, 66, 83, 100, 87, 73, 33]),
+    ("DE zone 3", 39.45, -75.5, "Atlantic", 2812, [5, 38, 72, 86, 100, 98, 95, 83, 71, 32]),
+    ("DE zone 4", 39.35, -75.45, "Atlantic", 1792, [24, 53, 82, 78, 73, 87, 100, 82, 64, 29]),
+    ("DE zone 5", 39.27, -75.47, "Atlantic", 16491, [25, 45, 65, 75, 85, 93, 100, 95, 91, 41]),
+    ("DE zone 6", 39.15, -75.43, "Atlantic", 11263, [34, 50, 66, 81, 96, 98, 100, 88, 77, 35]),
+    ("DE zone 7", 39.02, -75.4, "Atlantic", 13035, [27, 55, 83, 92, 100, 95, 90, 81, 72, 33]),
+    ("DE zone 8", 38.88, -75.33, "Atlantic", 2265, [40, 53, 67, 81, 94, 97, 100, 94, 88, 40]),
+    ("DE zone 9", 38.75, -75.28, "Atlantic", 1980, [4, 8, 12, 33, 54, 77, 100, 99, 99, 44]),
+    ("DE zone 10", 38.6, -75.13, "Atlantic", 2262, [3, 6, 9, 25, 41, 68, 96, 98, 100, 45]),
+    ("DE zone 11", 38.5, -75.07, "Atlantic", 2403, [14, 25, 36, 55, 74, 87, 100, 88, 76, 34]),
     ("Blackwater MD", 38.4, -76.06, "Atlantic", 7900, [1, 3, 6, 12, 30, 51, 57, 100, 47, 42]),
     ("Mattamuskeet NC", 35.45, -76.18, "Atlantic", 120000, [5, 12, 28, 40, 46, 70, 100, 93, 68, 59]),
     ("South Carolina coast", 33.2, -80.35, "Atlantic", 100000, [8, 12, 16, 24, 34, 48, 66, 84, 100, 96]),
