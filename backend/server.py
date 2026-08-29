@@ -1998,8 +1998,8 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 59 of the 121 anchors can now be rebuilt from data in this repo
-# (backend/data/parse_*.py + surveys/). The remaining 62 were built offline and
+# SOURCE DATA: 68 of the 121 anchors can now be rebuilt from data in this repo
+# (backend/data/parse_*.py + surveys/). The remaining 53 were built offline and
 # their curves exist only as literals here -- they cannot be audited or fixed
 # without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
 # its raw data and a rebuild script.
@@ -2050,7 +2050,7 @@ MIGRATION_ANCHORS = [
     ("Kirwin", 39.68, -99.2, "Central", 216960, [1, 4, 13, 35, 64, 92, 100, 95, 87, 85]),
     ("Flint Hills", 38.4, -95.75, "Central", 89075, [5, 6, 14, 42, 75, 97, 100, 86, 70, 56]),
     ("Quivira", 38.1, -98.5, "Central", 475710, [14, 21, 36, 57, 79, 96, 100, 91, 80, 73]),
-    ("Salt Plains", 36.78, -98.2, "Central", 119156, [13, 20, 46, 75, 97, 97, 100, 95, 95, 84]),
+    ("Salt Plains", 36.78, -98.2, "Central", 15950, [4, 15, 21, 46, 60, 70, 100, 96, 80, 36]),
     ("Washita", 35.75, -99.3, "Central", 131135, [1, 1, 8, 20, 35, 64, 87, 100, 95, 89]),
     ("Deep Fork", 35.55, -96.1, "Central", 4335, [17, 17, 17, 37, 61, 81, 94, 98, 100, 93]),
     ("Tishomingo", 34.2, -96.62, "Central", 46410, [4, 4, 8, 58, 83, 100, 74, 70, 51, 38]),
@@ -2118,7 +2118,7 @@ MIGRATION_ANCHORS = [
     ("Salton Sea CA", 33.18, -115.62, "Pacific", 60000, [8, 12, 28, 48, 72, 90, 100, 98, 90, 85]),
     ("Columbia Basin WA", 46.9, -119.3, "Pacific", 268000, [18, 28, 48, 68, 85, 95, 100, 92, 78, 58]),
     ("Stillwater NV", 39.5, -118.55, "Pacific", 100000, [30, 55, 85, 100, 78, 42, 20, 9, 4, 2]),
-    ("Ruby Lake NV", 40.15, -115.5, "Pacific", 150000, [28, 52, 82, 100, 82, 50, 26, 12, 6, 3]),
+    ("Ruby Lake NV", 40.15, -115.5, "Pacific", 21300, [77, 88, 100, 96, 77, 46, 22, 13, 12, 5]),
     ("Malheur OR", 43.25, -118.85, "Pacific", 150000, [42, 68, 92, 100, 72, 42, 22, 10, 5, 3]),
     ("Cibola AZ", 33.3, -114.68, "Pacific", 20000, [3, 5, 12, 25, 45, 68, 90, 100, 95, 88]),
     ("Kern NWR CA", 35.73, -119.6, "Pacific", 44058, [10, 15, 35, 55, 78, 92, 100, 95, 85, 72]),
