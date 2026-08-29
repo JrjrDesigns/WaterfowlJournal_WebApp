@@ -1,0 +1,57 @@
+# TWRA bi-weekly waterfowl refuge surveys, Tennessee Wildlife Resources Agency.
+# Source: Tennessee State Library & Archives, Digital Tennessee,
+#   digitaltennessee.tnsos.gov/wildlife_resources_waterfowl_counts (item 6).
+# ONE SEASON ONLY (2020-21). Not enough to build an anchor -- the repo floor is 4
+# seasons -- so no Tennessee curve is changed from this. Committed because the
+# extraction works and 5 more seasons (items 1-5 of that collection) would make
+# these 8 anchors rebuildable.
+# TWRA counts on the 1st and 15th of each month; the 1st is binned to the first
+# half-month and the 15th to the second. Surveys start Nov 15 -- there is NO
+# Sep/Oct coverage at all in this source.
+# ducks only (the GEESE column is dropped); DNS = did not survey -> blank.
+anchor,survey_label,bin,ducks
+Black Bayou TN,Nov 15,Nov2,5300
+Black Bayou TN,Dec 1,Dec1,2300
+Black Bayou TN,Dec 15,Dec2,1500
+Black Bayou TN,Jan 1,Jan1,11090
+Black Bayou TN,Jan 15,Jan2,9072
+Black Bayou TN,Feb 1,,30530
+Hop-In TN,Nov 15,Nov2,1300
+Hop-In TN,Dec 1,Dec1,5400
+Hop-In TN,Dec 15,Dec2,7900
+Hop-In TN,Jan 1,Jan1,14715
+Hop-In TN,Jan 15,Jan2,11404
+Hop-In TN,Feb 1,,7200
+Maness Swamp TN,Nov 15,Nov2,2
+Maness Swamp TN,Dec 1,Dec1,0
+Maness Swamp TN,Dec 15,Dec2,2325
+Maness Swamp TN,Jan 1,Jan1,8655
+Maness Swamp TN,Jan 15,Jan2,7400
+Maness Swamp TN,Feb 1,,11602
+White Lake TN,Nov 15,Nov2,23550
+White Lake TN,Dec 1,Dec1,62755
+White Lake TN,Dec 15,Dec2,82025
+White Lake TN,Jan 1,Jan1,109982
+White Lake TN,Jan 15,Jan2,95255
+Lake Lauderdale TN,Nov 15,Nov2,0
+Lake Lauderdale TN,Dec 1,Dec1,7072
+Lake Lauderdale TN,Dec 15,Dec2,15800
+Lake Lauderdale TN,Jan 1,Jan1,48950
+Lake Lauderdale TN,Jan 15,Jan2,21000
+Lake Lauderdale TN,Feb 1,,20400
+Horns Bluff TN,Nov 15,Nov2,1555
+Horns Bluff TN,Dec 1,Dec1,3860
+Horns Bluff TN,Dec 15,Dec2,4850
+Horns Bluff TN,Jan 1,Jan1,9560
+Horns Bluff TN,Jan 15,Jan2,18105
+Horns Bluff TN,Feb 1,,38525
+Old Hickory L5 TN,Nov 15,Nov2,1314
+Old Hickory L5 TN,Dec 1,Dec1,4241
+Old Hickory L5 TN,Dec 15,Dec2,6679
+Old Hickory L5 TN,Jan 1,Jan1,9778
+Old Hickory L5 TN,Jan 15,Jan2,6780
+Old Hickory L5 TN,Feb 1,,4564
+Cheatham Lake TN,Nov 15,Nov2,1470
+Cheatham Lake TN,Dec 1,Dec1,2495
+Cheatham Lake TN,Dec 15,Dec2,3015
+Cheatham Lake TN,Jan 1,Jan1,3395

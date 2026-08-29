@@ -1998,7 +1998,7 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 68 of the 121 anchors can now be rebuilt from data in this repo
+# SOURCE DATA: 68 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
 # (backend/data/parse_*.py + surveys/). The remaining 53 were built offline and
 # their curves exist only as literals here -- they cannot be audited or fixed
 # without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
@@ -2050,7 +2050,7 @@ MIGRATION_ANCHORS = [
     ("Kirwin", 39.68, -99.2, "Central", 216960, [1, 4, 13, 35, 64, 92, 100, 95, 87, 85]),
     ("Flint Hills", 38.4, -95.75, "Central", 89075, [5, 6, 14, 42, 75, 97, 100, 86, 70, 56]),
     ("Quivira", 38.1, -98.5, "Central", 475710, [14, 21, 36, 57, 79, 96, 100, 91, 80, 73]),
-    ("Salt Plains", 36.78, -98.2, "Central", 15950, [4, 15, 21, 46, 60, 70, 100, 96, 80, 36]),
+    ("Salt Plains", 36.78, -98.2, "Central", 17280, [5, 15, 31, 47, 59, 75, 100, 100, 44, 20]),
     ("Washita", 35.75, -99.3, "Central", 131135, [1, 1, 8, 20, 35, 64, 87, 100, 95, 89]),
     ("Deep Fork", 35.55, -96.1, "Central", 4335, [17, 17, 17, 37, 61, 81, 94, 98, 100, 93]),
     ("Tishomingo", 34.2, -96.62, "Central", 46410, [4, 4, 8, 58, 83, 100, 74, 70, 51, 38]),
@@ -2065,7 +2065,7 @@ MIGRATION_ANCHORS = [
     ("Big Boggy", 28.85, -95.83, "Central", 27650, [5, 20, 32, 67, 83, 100, 82, 65, 58, 57]),
     ("Aransas", 28.3, -96.8, "Central", 253124, [2, 9, 15, 51, 76, 93, 100, 69, 63, 28]),
     ("Matagorda Island", 28.2, -96.45, "Central", 801024, [1, 3, 7, 28, 48, 81, 93, 86, 100, 100]),
-    ("Laguna Atascosa", 26.3, -97.35, "Central", 408783, [2, 7, 24, 63, 89, 100, 96, 91, 80, 66]),
+    ("Laguna Atascosa", 26.3, -97.35, "Central", 257271, [4, 5, 12, 49, 100, 99, 89, 53, 24, 11]),
     ("Arrowwood ND", 47.2, -98.8, "Central", 80000, [25, 55, 85, 100, 88, 45, 20, 10, 5, 3]),
     ("Upper Souris ND", 48.6, -101.5, "Central", 120000, [30, 60, 88, 100, 70, 32, 15, 7, 3, 1]),
     ("DE zone 1", 39.75, -75.52, "Atlantic", 2518, [3, 13, 26, 33, 41, 71, 100, 86, 71, 32]),
@@ -2079,7 +2079,7 @@ MIGRATION_ANCHORS = [
     ("DE zone 9", 38.75, -75.28, "Atlantic", 1980, [4, 8, 12, 33, 54, 77, 100, 99, 99, 44]),
     ("DE zone 10", 38.6, -75.13, "Atlantic", 2262, [3, 6, 9, 25, 41, 68, 96, 98, 100, 45]),
     ("DE zone 11", 38.5, -75.07, "Atlantic", 2403, [14, 25, 36, 55, 74, 87, 100, 88, 76, 34]),
-    ("Blackwater MD", 38.4, -76.06, "Atlantic", 7900, [1, 3, 6, 12, 30, 51, 57, 100, 47, 42]),
+    ("Blackwater MD", 38.4, -76.06, "Atlantic", 100050, [3, 11, 26, 71, 97, 100, 86, 68, 31, 14]),
     ("Mattamuskeet NC", 35.45, -76.18, "Atlantic", 120000, [5, 12, 28, 40, 46, 70, 100, 93, 68, 59]),
     ("South Carolina coast", 33.2, -80.35, "Atlantic", 100000, [8, 12, 16, 24, 34, 48, 66, 84, 100, 96]),
     ("Georgia coast", 31.3, -81.4, "Atlantic", 86706, [7, 11, 20, 34, 50, 68, 86, 100, 96, 84]),
@@ -2118,13 +2118,13 @@ MIGRATION_ANCHORS = [
     ("Salton Sea CA", 33.18, -115.62, "Pacific", 60000, [8, 12, 28, 48, 72, 90, 100, 98, 90, 85]),
     ("Columbia Basin WA", 46.9, -119.3, "Pacific", 268000, [18, 28, 48, 68, 85, 95, 100, 92, 78, 58]),
     ("Stillwater NV", 39.5, -118.55, "Pacific", 100000, [30, 55, 85, 100, 78, 42, 20, 9, 4, 2]),
-    ("Ruby Lake NV", 40.15, -115.5, "Pacific", 21300, [77, 88, 100, 96, 77, 46, 22, 13, 12, 5]),
+    ("Ruby Lake NV", 40.15, -115.5, "Pacific", 21300, [80, 89, 100, 89, 72, 39, 19, 10, 5, 4]),
     ("Malheur OR", 43.25, -118.85, "Pacific", 150000, [42, 68, 92, 100, 72, 42, 22, 10, 5, 3]),
     ("Cibola AZ", 33.3, -114.68, "Pacific", 20000, [3, 5, 12, 25, 45, 68, 90, 100, 95, 88]),
     ("Kern NWR CA", 35.73, -119.6, "Pacific", 44058, [10, 15, 35, 55, 78, 92, 100, 95, 85, 72]),
     ("Pahranagat NV", 37.27, -115.12, "Pacific", 12000, [5, 8, 20, 40, 65, 88, 100, 95, 85, 75]),
     ("Cheyenne Bottoms KS", 38.48, -98.65, "Central", 50000, [15, 32, 62, 92, 100, 72, 42, 24, 14, 9]),
-    ("Lacreek SD", 43.1, -101.7, "Central", 29000, [30, 55, 85, 100, 78, 48, 24, 11, 5, 3]),
+    ("Lacreek SD", 43.1, -101.7, "Central", 63800, [42, 79, 99, 100, 56, 32, 19, 17, 7, 4]),
     ("Sand Lake SD", 45.7, -98.3, "Central", 100000, [35, 62, 90, 100, 70, 38, 18, 9, 4, 2]),
     ("Monte Vista CO", 37.5, -106.1, "Central", 30000, [20, 40, 70, 95, 100, 72, 44, 25, 15, 10]),
     ("Skagit WA", 48.35, -122.35, "Pacific", 50000, [12, 22, 45, 68, 88, 100, 90, 78, 68, 58]),

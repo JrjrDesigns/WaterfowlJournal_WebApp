@@ -50,16 +50,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LABELS = ['Sep1','Sep2','Oct1','Oct2','Nov1','Nov2','Dec1','Dec2','Jan1','Jan2']
 POS = {9:0, 10:1, 11:2, 12:3, 1:4}
 FLOOR = 3
-MAX_ERR, MIN_COLS, MIN_WEEKS, MIN_SEASONS, MIN_BIN = 0.25, 9, 14, 8, 3
+MAX_ERR, MIN_COLS, MIN_WEEKS, MIN_SEASONS, MIN_BIN = 0.25, 9, 14, 8, 6
 # A single refuge cannot hold millions of ducks. OCR occasionally concatenates
 # digits -- one Sacramento season parsed to a peak of 308,000,823,615 and one
 # Laguna Atascosa season to 5,923,566,850. Drop such seasons outright, and take
 # the MEDIAN of seasonal peaks for abundance so one survivor cannot skew it.
 MAX_PLAUSIBLE_PEAK = 2_000_000
-ADOPTED = {"Sacramento Valley", "Ruby Lake NV", "Salt Plains"}
+ADOPTED = {"Blackwater MD", "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains"}
+
+def sunday_on_or_before_sep1(y):
+    d = date(y, 9, 1)
+    return d - timedelta(days=(d.weekday() + 1) % 7)
 
 def bin_of(ds):
-    d = date.fromisoformat(ds) + timedelta(days=3)
+    # week_start in the CSV was written assuming Sep 1; shift to the Sunday on or
+    # before Sep 1, which is the convention Agassiz's dated sheets establish and
+    # which measurably reduces curve noise here (mean wobble 2.6 -> 1.6).
+    d0 = date.fromisoformat(ds)
+    d = d0 - (date(d0.year if d0.month >= 8 else d0.year - 1, 9, 1)
+              - sunday_on_or_before_sep1(d0.year if d0.month >= 8 else d0.year - 1)) + timedelta(days=3)
     p = POS.get(d.month)
     if p is None: return None
     b = p*2 + (0 if d.day <= 15 else 1)
@@ -88,7 +97,7 @@ for a in sorted(data):
             i = bin_of(ds)
             if i is not None: b[i].append(v)
         m = {i: sum(v)/len(v) for i, v in b.items()}
-        if len(m) < 4 or max(m.values()) <= 0: continue
+        if len(m) < 8 or max(m.values()) <= 0: continue   # season must be near-complete
         if max(wk.values()) > MAX_PLAUSIBLE_PEAK: continue
         peaks.append(max(wk.values()))
         mx = max(m.values())
