@@ -2027,7 +2027,7 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # If you add an anchor: use the max half-month bin mean, and correct for survey
 # effort first if the source's coverage varies (see parse_greatlakes.py).
 MIGRATION_ANCHORS = [
-    ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1200000, [15, 19, 29, 39, 63, 65, 81, 90, 100, 93]),
+    ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1160465, [3, 5, 12, 26, 57, 59, 73, 86, 100, 85]),
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
     ("Louisiana coast", 29.9, -92.2, "Mississippi", 2500000, [5, 8, 20, 42, 68, 88, 100, 96, 88, 78]),
     ("SE Louisiana", 29.6, -89.8, "Mississippi", 315000, [3, 6, 16, 36, 58, 80, 95, 100, 96, 86]),
@@ -2039,12 +2039,12 @@ MIGRATION_ANCHORS = [
     ("Hop-In TN", 36.35, -89.42, "Mississippi", 44000, [1, 2, 3, 6, 10, 16, 50, 64, 100, 55]),
     ("Cheatham Lake TN", 36.28, -87.15, "Mississippi", 5800, [1, 1, 2, 5, 8, 12, 22, 100, 91, 91]),
     ("Old Hickory L5 TN", 36.28, -86.65, "Mississippi", 6600, [1, 3, 5, 11, 18, 27, 42, 45, 79, 100]),
-    ("Ballard area KY", 37.05, -89.02, "Mississippi", 130000, [2, 4, 9, 20, 39, 48, 61, 74, 90, 100]),
-    ("Sloughs KY", 37.72, -87.62, "Mississippi", 15000, [2, 4, 8, 18, 45, 60, 90, 100, 93, 86]),
-    ("Southern Ohio", 39.0, -82.9, "Mississippi", 15261, [1, 1, 2, 7, 10, 38, 50, 45, 60, 100]),
-    ("North-central Ohio", 40.6, -82.9, "Mississippi", 416678, [6, 11, 23, 48, 71, 100, 59, 45, 38, 34]),
-    ("Lake Erie marshes", 41.6, -83.2, "Mississippi", 190013, [5, 6, 20, 64, 92, 100, 92, 68, 15, 0]),
-    ("Ohio River Zone", 38.7, -83.5, "Mississippi", 5642, [6, 11, 13, 43, 56, 57, 70, 59, 51, 100]),
+    ("Ballard area KY", 37.05, -89.02, "Mississippi", 85138, [3, 3, 3, 5, 11, 20, 55, 57, 78, 100]),
+    ("Sloughs KY", 37.72, -87.62, "Mississippi", 20820, [4, 4, 5, 11, 24, 53, 100, 69, 70, 95]),
+    ("Southern Ohio", 39.0, -82.9, "Mississippi", 3861, [3, 3, 9, 25, 16, 64, 100, 49, 69, 45]),
+    ("North-central Ohio", 40.6, -82.9, "Mississippi", 176802, [4, 9, 28, 61, 86, 100, 90, 57, 35, 26]),
+    ("Lake Erie marshes", 41.6, -83.2, "Mississippi", 116702, [4, 5, 22, 78, 99, 98, 100, 52, 23, 11]),
+    ("Ohio River Zone", 38.7, -83.5, "Mississippi", 3135, [5, 15, 14, 47, 78, 67, 100, 71, 62, 73]),
     ("Crescent Lake", 41.75, -102.45, "Central", 33866, [71, 92, 100, 80, 45, 18, 10, 1, 1, 0]),
     ("North Platte", 41.75, -103.65, "Central", 163855, [1, 3, 7, 29, 63, 93, 100, 85, 65, 54]),
     ("Kirwin", 39.68, -99.2, "Central", 216960, [1, 4, 13, 35, 64, 92, 100, 95, 87, 85]),
