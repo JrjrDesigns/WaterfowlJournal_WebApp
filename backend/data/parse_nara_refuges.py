@@ -28,8 +28,13 @@ rebuild is demonstrably not worse:
     Ruby Lake NV        reversals 1 -> 1, better latitude fit   replaced
     Salt Plains         reversals 1 -> 1, 15 seasons   replaced
 
-Retained (data committed, curve unchanged): Bitter Lake, Blackwater MD,
-Bosque del Apache, Lacreek SD, Laguna Atascosa, Quivira.
+Retained (data committed, curve unchanged): Bitter Lake, Bosque del Apache, Quivira.
+
+REFUGES WITH NO EXTRACTABLE FALL SHEETS, and why -- do not re-run these: Brazoria (narratives
+start 1972), Kern (1972), Attwater (1977), McFaddin (1980), Big Boggy (1983). The weekly NR-1
+form was discontinued around 1971, so their narratives contain no weekly grid at all. Aransas,
+San Bernard, Upper Souris, Flint Hills, Malheur and Sand Lake yielded 0-3 validated seasons,
+below the 8-season floor.
 
 WHY THE REBUILD IS NOISIER, and what would fix it:
   - 8-15 seasons here against 38-49 for Delaware and ~100 flights for Illinois.
@@ -56,7 +61,7 @@ MAX_ERR, MIN_COLS, MIN_WEEKS, MIN_SEASONS, MIN_BIN = 0.25, 9, 14, 8, 6
 # Laguna Atascosa season to 5,923,566,850. Drop such seasons outright, and take
 # the MEDIAN of seasonal peaks for abundance so one survivor cannot skew it.
 MAX_PLAUSIBLE_PEAK = 2_000_000
-ADOPTED = {"Blackwater MD", "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains"}
+ADOPTED = {"Blackwater MD", "Kirwin", "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains"}
 
 def sunday_on_or_before_sep1(y):
     d = date(y, 9, 1)

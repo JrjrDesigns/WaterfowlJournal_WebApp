@@ -1998,7 +1998,7 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 69 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
+# SOURCE DATA: 70 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
 # (backend/data/parse_*.py + surveys/). The remaining 53 were built offline and
 # their curves exist only as literals here -- they cannot be audited or fixed
 # without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
@@ -2047,7 +2047,7 @@ MIGRATION_ANCHORS = [
     ("Ohio River Zone", 38.7, -83.5, "Mississippi", 3135, [5, 15, 14, 47, 78, 67, 100, 71, 62, 73]),
     ("Crescent Lake", 41.75, -102.45, "Central", 33866, [71, 92, 100, 80, 45, 18, 10, 1, 1, 0]),
     ("North Platte", 41.75, -103.65, "Central", 163855, [1, 3, 7, 29, 63, 93, 100, 85, 65, 54]),
-    ("Kirwin", 39.68, -99.2, "Central", 216960, [1, 4, 13, 35, 64, 92, 100, 95, 87, 85]),
+    ("Kirwin", 39.68, -99.2, "Central", 38451, [3, 3, 18, 37, 79, 100, 82, 70, 31, 14]),
     ("Flint Hills", 38.4, -95.75, "Central", 89075, [5, 6, 14, 42, 75, 97, 100, 86, 70, 56]),
     ("Quivira", 38.1, -98.5, "Central", 475710, [14, 21, 36, 57, 79, 96, 100, 91, 80, 73]),
     ("Salt Plains", 36.78, -98.2, "Central", 17280, [5, 15, 31, 47, 59, 75, 100, 100, 44, 20]),
