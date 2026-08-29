@@ -1,0 +1,2475 @@
+# Illinois Natural History Survey / Illinois DNR waterfowl aerial inventory.
+# Source: huntillinois.org/survey-data (2021-2026) and
+#   dnr.illinois.gov/hunting/waterfowlhunting/oldwaterfowlsurveys.html (2018-2020).
+# Weekly-to-biweekly aerial counts, Illinois River (IR) Spring Valley-Grafton and
+# central Mississippi River (MR) Alton-Moline. Started by Frank Bellrose in 1938;
+# the longest continuous waterfowl inventory known.
+# ducks_teal_excluded = printed TOTAL DUCKS minus the BWTE and AGWT columns, so
+# teal exclusion is exact rather than approximated.
+region,site,survey_date,ducks_teal_excluded
+MR,Batchtown Refuge,2018-10-18,90
+MR,Batchtown Refuge,2018-10-24,305
+MR,Batchtown Refuge,2018-11-02,2500
+MR,Batchtown Refuge,2018-11-09,8910
+MR,Batchtown Refuge,2018-11-20,9700
+MR,Batchtown Refuge,2018-11-29,30000
+MR,Batchtown Refuge,2018-12-07,40500
+MR,Batchtown Refuge,2018-12-11,0
+MR,Batchtown Refuge,2018-12-17,2300
+MR,Batchtown Refuge,2019-01-03,17500
+MR,Batchtown Refuge,2019-01-10,8200
+MR,Batchtown Refuge,2019-10-24,3730
+MR,Batchtown Refuge,2019-10-28,2330
+MR,Batchtown Refuge,2019-11-05,1470
+MR,Batchtown Refuge,2019-11-14,12525
+MR,Batchtown Refuge,2019-11-25,1220
+MR,Batchtown Refuge,2019-12-02,1200
+MR,Batchtown Refuge,2019-12-18,25100
+MR,Batchtown Refuge,2019-12-23,10000
+MR,Batchtown Refuge,2020-01-02,1730
+MR,Batchtown Refuge,2020-01-08,650
+MR,Batchtown Refuge,2020-10-21,0
+MR,Batchtown Refuge,2020-10-28,4460
+MR,Batchtown Refuge,2020-11-03,3500
+MR,Batchtown Refuge,2020-11-09,15700
+MR,Batchtown Refuge,2020-11-17,29250
+MR,Batchtown Refuge,2020-11-23,34500
+MR,Batchtown Refuge,2020-12-02,-4500
+MR,Batchtown Refuge,2020-12-10,11000
+MR,Batchtown Refuge,2020-12-15,35000
+MR,Batchtown Refuge,2020-12-22,6010
+MR,Batchtown Refuge,2020-12-31,8000
+MR,Batchtown Refuge,2021-01-05,17600
+MR,Batchtown Refuge,2021-09-17,1130
+MR,Batchtown Refuge,2021-10-19,6785
+MR,Batchtown Refuge,2021-10-26,2180
+MR,Batchtown Refuge,2021-11-01,10880
+MR,Batchtown Refuge,2021-11-09,4730
+MR,Batchtown Refuge,2021-11-15,4900
+MR,Batchtown Refuge,2021-11-22,11100
+MR,Batchtown Refuge,2021-11-30,15990
+MR,Batchtown Refuge,2021-12-07,23100
+MR,Batchtown Refuge,2021-12-14,15300
+MR,Batchtown Refuge,2021-12-22,24900
+MR,Batchtown Refuge,2022-01-07,10075
+MR,Batchtown Refuge,2022-03-08,995
+MR,Batchtown Refuge,2022-03-15,670
+MR,Batchtown Refuge,2022-08-31,0
+MR,Batchtown Refuge,2022-09-08,0
+MR,Batchtown Refuge,2022-09-13,0
+MR,Batchtown Refuge,2022-09-22,0
+MR,Batchtown Refuge,2022-10-10,70
+MR,Batchtown Refuge,2022-10-19,4480
+MR,Batchtown Refuge,2022-10-27,2465
+MR,Batchtown Refuge,2022-11-07,7260
+MR,Batchtown Refuge,2022-11-14,10000
+MR,Batchtown Refuge,2022-11-22,23000
+MR,Batchtown Refuge,2022-12-01,29000
+MR,Batchtown Refuge,2022-12-19,19070
+MR,Batchtown Refuge,2022-12-27,0
+MR,Batchtown Refuge,2023-01-09,8955
+MR,Batchtown Refuge,2023-08-31,10
+MR,Batchtown Refuge,2023-09-08,30
+MR,Batchtown Refuge,2023-09-15,20
+MR,Batchtown Refuge,2023-09-19,60
+MR,Batchtown Refuge,2023-10-09,450
+MR,Batchtown Refuge,2023-10-20,3410
+MR,Batchtown Refuge,2023-10-30,14490
+MR,Batchtown Refuge,2023-11-10,14000
+MR,Batchtown Refuge,2023-11-15,13150
+MR,Batchtown Refuge,2023-11-22,16530
+MR,Batchtown Refuge,2023-11-28,33365
+MR,Batchtown Refuge,2023-12-06,19090
+MR,Batchtown Refuge,2023-12-13,21795
+MR,Batchtown Refuge,2023-12-21,18050
+MR,Batchtown Refuge,2024-01-03,25250
+MR,Batchtown Refuge,2024-09-04,35
+MR,Batchtown Refuge,2024-09-09,160
+MR,Batchtown Refuge,2024-09-16,70
+MR,Batchtown Refuge,2024-10-15,1810
+MR,Batchtown Refuge,2024-10-24,5270
+MR,Batchtown Refuge,2024-11-01,1890
+MR,Batchtown Refuge,2024-11-06,895
+MR,Batchtown Refuge,2024-11-15,1650
+MR,Batchtown Refuge,2024-11-26,4180
+MR,Batchtown Refuge,2024-12-03,20315
+MR,Batchtown Refuge,2024-12-09,10570
+MR,Batchtown Refuge,2024-12-23,8655
+MR,Batchtown Refuge,2025-01-03,6625
+MR,Batchtown Refuge,2025-01-07,7510
+MR,Batchtown Refuge,2025-08-27,0
+MR,Batchtown Refuge,2025-09-11,0
+MR,Batchtown Refuge,2025-09-19,0
+MR,Batchtown Refuge,2025-10-14,105
+MR,Batchtown Refuge,2025-10-31,4155
+MR,Batchtown Refuge,2025-11-13,9800
+MR,Batchtown Refuge,2025-11-28,22630
+MR,Batchtown Refuge,2025-12-09,30000
+MR,Batchtown Refuge,2025-12-16,26070
+MR,Batchtown Refuge,2025-12-22,29120
+MR,Batchtown Refuge,2026-01-02,27640
+MR,Batchtown Refuge,2026-01-12,23950
+IR,Big Lake,2018-10-12,790
+IR,Big Lake,2018-10-18,1635
+IR,Big Lake,2018-10-24,2880
+IR,Big Lake,2018-11-02,725
+IR,Big Lake,2018-11-09,2900
+IR,Big Lake,2018-11-14,8035
+IR,Big Lake,2018-11-20,1000
+IR,Big Lake,2018-11-29,10050
+IR,Big Lake,2018-12-07,5000
+IR,Big Lake,2018-12-11,1000
+IR,Big Lake,2018-12-17,2600
+IR,Big Lake,2019-01-03,605
+IR,Big Lake,2019-01-10,250
+IR,Big Lake,2019-10-17,1505
+IR,Big Lake,2019-10-28,5805
+IR,Big Lake,2019-11-05,1900
+IR,Big Lake,2019-11-14,3505
+IR,Big Lake,2019-11-25,150
+IR,Big Lake,2019-12-02,4260
+IR,Big Lake,2019-12-18,0
+IR,Big Lake,2019-12-23,55
+IR,Big Lake,2020-01-02,105
+IR,Big Lake,2020-01-08,40
+IR,Big Lake,2020-10-16,4070
+IR,Big Lake,2020-10-21,5635
+IR,Big Lake,2020-10-28,4565
+IR,Big Lake,2020-11-03,4400
+IR,Big Lake,2020-11-08,10000
+IR,Big Lake,2020-11-17,4710
+IR,Big Lake,2020-12-02,325
+IR,Big Lake,2020-12-10,120
+IR,Big Lake,2020-12-15,100
+IR,Big Lake,2020-12-22,95
+IR,Big Lake,2020-12-31,0
+IR,Big Lake,2021-01-05,140
+IR,Big Lake,2021-09-23,100
+IR,Big Lake,2021-10-19,530
+IR,Big Lake,2021-10-26,5250
+IR,Big Lake,2021-11-01,6580
+IR,Big Lake,2021-11-09,11140
+IR,Big Lake,2021-11-15,17150
+IR,Big Lake,2021-11-22,11195
+IR,Big Lake,2021-11-30,12360
+IR,Big Lake,2021-12-07,9940
+IR,Big Lake,2021-12-14,5450
+IR,Big Lake,2021-12-22,6740
+IR,Big Lake,2022-01-07,625
+IR,Big Lake,2022-03-08,16330
+IR,Big Lake,2022-03-15,7830
+IR,Big Lake,2022-08-31,50
+IR,Big Lake,2022-09-08,40
+IR,Big Lake,2022-09-13,65
+IR,Big Lake,2022-09-22,140
+IR,Big Lake,2022-10-10,485
+IR,Big Lake,2022-10-19,780
+IR,Big Lake,2022-10-27,3300
+IR,Big Lake,2022-11-07,11420
+IR,Big Lake,2022-11-22,28670
+IR,Big Lake,2022-12-01,5620
+IR,Big Lake,2022-12-12,555
+IR,Big Lake,2022-12-19,2085
+IR,Big Lake,2022-12-27,1810
+IR,Big Lake,2023-01-09,1815
+IR,Big Lake,2023-08-31,95
+IR,Big Lake,2023-09-08,120
+IR,Big Lake,2023-09-15,160
+IR,Big Lake,2023-09-19,230
+IR,Big Lake,2023-10-30,5730
+IR,Big Lake,2023-11-10,10300
+IR,Big Lake,2023-11-15,12150
+IR,Big Lake,2023-11-22,13750
+IR,Big Lake,2023-11-28,2500
+IR,Big Lake,2023-12-06,5900
+IR,Big Lake,2023-12-13,4000
+IR,Big Lake,2023-12-21,2350
+IR,Big Lake,2024-01-03,3035
+IR,Big Lake,2024-09-04,50
+IR,Big Lake,2024-09-09,65
+IR,Big Lake,2024-09-16,35
+IR,Big Lake,2024-10-15,790
+IR,Big Lake,2024-10-24,8195
+IR,Big Lake,2024-11-01,5095
+IR,Big Lake,2024-11-06,7190
+IR,Big Lake,2024-11-15,5790
+IR,Big Lake,2024-11-26,8075
+IR,Big Lake,2024-12-03,920
+IR,Big Lake,2024-12-09,8175
+IR,Big Lake,2024-12-23,2715
+IR,Big Lake,2025-01-03,780
+IR,Big Lake,2025-01-07,5
+IR,Big Lake,2025-08-27,25
+IR,Big Lake,2025-09-11,60
+IR,Big Lake,2025-09-19,65
+IR,Big Lake,2025-10-14,380
+IR,Big Lake,2025-10-31,2910
+IR,Big Lake,2025-11-13,4265
+IR,Big Lake,2025-11-28,0
+IR,Big Lake,2025-12-09,0
+IR,Big Lake,2025-12-16,50
+IR,Big Lake,2025-12-22,0
+IR,Big Lake,2026-01-02,0
+IR,Big Lake,2026-01-07,180
+IR,Big Lake,2026-01-12,90
+MR,Cannon Refuge,2018-10-18,1300
+MR,Cannon Refuge,2018-10-24,4120
+MR,Cannon Refuge,2018-11-02,24815
+MR,Cannon Refuge,2018-11-09,33375
+MR,Cannon Refuge,2018-11-14,86000
+MR,Cannon Refuge,2018-11-20,55620
+MR,Cannon Refuge,2018-11-29,63025
+MR,Cannon Refuge,2018-12-07,94000
+MR,Cannon Refuge,2018-12-11,65000
+MR,Cannon Refuge,2018-12-17,21800
+MR,Cannon Refuge,2019-01-03,53105
+MR,Cannon Refuge,2019-01-10,41850
+MR,Cannon Refuge,2019-10-17,0
+MR,Cannon Refuge,2019-10-24,11600
+MR,Cannon Refuge,2019-10-28,23620
+MR,Cannon Refuge,2019-11-05,71000
+MR,Cannon Refuge,2019-11-14,105050
+MR,Cannon Refuge,2019-11-25,50500
+MR,Cannon Refuge,2019-12-02,55520
+MR,Cannon Refuge,2019-12-18,2010
+MR,Cannon Refuge,2019-12-23,700
+MR,Cannon Refuge,2020-01-02,6355
+MR,Cannon Refuge,2020-01-08,5470
+MR,Cannon Refuge,2020-10-21,0
+MR,Cannon Refuge,2020-10-28,21310
+MR,Cannon Refuge,2020-11-03,35245
+MR,Cannon Refuge,2020-11-09,68000
+MR,Cannon Refuge,2020-11-17,62550
+MR,Cannon Refuge,2020-11-23,100000
+MR,Cannon Refuge,2020-12-02,-11885
+MR,Cannon Refuge,2020-12-10,62000
+MR,Cannon Refuge,2020-12-15,85400
+MR,Cannon Refuge,2020-12-22,55120
+MR,Cannon Refuge,2020-12-31,25000
+MR,Cannon Refuge,2021-01-05,50000
+MR,Cannon Refuge,2021-09-17,0
+MR,Cannon Refuge,2021-10-19,19295
+MR,Cannon Refuge,2021-10-26,15950
+MR,Cannon Refuge,2021-11-01,40100
+MR,Cannon Refuge,2021-11-09,48300
+MR,Cannon Refuge,2021-11-15,22100
+MR,Cannon Refuge,2021-11-22,62190
+MR,Cannon Refuge,2021-11-30,41780
+MR,Cannon Refuge,2021-12-07,56675
+MR,Cannon Refuge,2021-12-14,32925
+MR,Cannon Refuge,2021-12-22,23620
+MR,Cannon Refuge,2022-01-07,0
+MR,Cannon Refuge,2022-03-08,2160
+MR,Cannon Refuge,2022-03-15,4740
+MR,Cannon Refuge,2022-08-31,0
+MR,Cannon Refuge,2022-09-08,0
+MR,Cannon Refuge,2022-09-13,0
+MR,Cannon Refuge,2022-09-22,0
+MR,Cannon Refuge,2022-10-10,5150
+MR,Cannon Refuge,2022-10-19,3700
+MR,Cannon Refuge,2022-10-27,9930
+MR,Cannon Refuge,2022-11-07,36075
+MR,Cannon Refuge,2022-11-14,48545
+MR,Cannon Refuge,2022-11-22,51095
+MR,Cannon Refuge,2022-12-01,67060
+MR,Cannon Refuge,2022-12-19,47695
+MR,Cannon Refuge,2022-12-27,0
+MR,Cannon Refuge,2023-01-09,2855
+MR,Cannon Refuge,2023-08-31,0
+MR,Cannon Refuge,2023-09-08,0
+MR,Cannon Refuge,2023-09-15,0
+MR,Cannon Refuge,2023-09-19,10
+MR,Cannon Refuge,2023-10-09,7080
+MR,Cannon Refuge,2023-10-20,11305
+MR,Cannon Refuge,2023-10-30,25805
+MR,Cannon Refuge,2023-11-10,30600
+MR,Cannon Refuge,2023-11-15,29400
+MR,Cannon Refuge,2023-11-22,43760
+MR,Cannon Refuge,2023-11-28,42500
+MR,Cannon Refuge,2023-12-06,32680
+MR,Cannon Refuge,2023-12-13,23350
+MR,Cannon Refuge,2023-12-21,26700
+MR,Cannon Refuge,2024-01-03,28000
+MR,Cannon Refuge,2024-09-04,0
+MR,Cannon Refuge,2024-09-09,0
+MR,Cannon Refuge,2024-09-16,0
+MR,Cannon Refuge,2024-10-15,2580
+MR,Cannon Refuge,2024-10-24,13025
+MR,Cannon Refuge,2024-11-01,15850
+MR,Cannon Refuge,2024-11-06,31990
+MR,Cannon Refuge,2024-11-15,24280
+MR,Cannon Refuge,2024-11-26,30015
+MR,Cannon Refuge,2024-12-03,45480
+MR,Cannon Refuge,2024-12-09,41640
+MR,Cannon Refuge,2024-12-23,10440
+MR,Cannon Refuge,2025-01-03,13600
+MR,Cannon Refuge,2025-01-07,16775
+MR,Cannon Refuge,2025-08-27,0
+MR,Cannon Refuge,2025-09-11,0
+MR,Cannon Refuge,2025-09-19,0
+MR,Cannon Refuge,2025-10-14,80
+MR,Cannon Refuge,2025-10-31,10630
+MR,Cannon Refuge,2025-11-13,25850
+MR,Cannon Refuge,2025-11-28,35300
+MR,Cannon Refuge,2025-12-09,23620
+MR,Cannon Refuge,2025-12-16,7130
+MR,Cannon Refuge,2025-12-22,20590
+MR,Cannon Refuge,2026-01-02,10580
+MR,Cannon Refuge,2026-01-12,14410
+IR,Chautauqua,2018-10-12,12000
+IR,Chautauqua,2018-10-18,21600
+IR,Chautauqua,2018-10-24,40570
+IR,Chautauqua,2018-11-02,67985
+IR,Chautauqua,2018-11-09,74260
+IR,Chautauqua,2018-11-14,64900
+IR,Chautauqua,2018-11-20,73010
+IR,Chautauqua,2018-11-29,800
+IR,Chautauqua,2018-12-07,16300
+IR,Chautauqua,2018-12-11,2995
+IR,Chautauqua,2018-12-17,22350
+IR,Chautauqua,2019-01-03,5320
+IR,Chautauqua,2019-01-10,5765
+IR,Chautauqua,2019-10-17,6320
+IR,Chautauqua,2019-10-28,11070
+IR,Chautauqua,2019-11-05,25050
+IR,Chautauqua,2019-11-14,23900
+IR,Chautauqua,2019-11-25,30420
+IR,Chautauqua,2019-12-02,30200
+IR,Chautauqua,2019-12-18,3680
+IR,Chautauqua,2019-12-23,5375
+IR,Chautauqua,2020-01-02,21805
+IR,Chautauqua,2020-01-08,8675
+IR,Chautauqua,2020-10-16,34200
+IR,Chautauqua,2020-10-21,37280
+IR,Chautauqua,2020-10-28,45400
+IR,Chautauqua,2020-11-03,47400
+IR,Chautauqua,2020-11-08,53760
+IR,Chautauqua,2020-11-17,104200
+IR,Chautauqua,2020-12-02,70210
+IR,Chautauqua,2020-12-10,67150
+IR,Chautauqua,2020-12-15,32665
+IR,Chautauqua,2020-12-22,41510
+IR,Chautauqua,2020-12-31,1540
+IR,Chautauqua,2021-01-05,4030
+IR,Chautauqua,2021-09-23,12500
+IR,Chautauqua,2021-10-19,27720
+IR,Chautauqua,2021-10-26,24250
+IR,Chautauqua,2021-11-01,43405
+IR,Chautauqua,2021-11-09,34060
+IR,Chautauqua,2021-11-15,27795
+IR,Chautauqua,2021-11-22,15765
+IR,Chautauqua,2021-11-30,18930
+IR,Chautauqua,2021-12-07,6775
+IR,Chautauqua,2021-12-14,3175
+IR,Chautauqua,2021-12-22,1780
+IR,Chautauqua,2022-01-07,0
+IR,Chautauqua,2022-03-08,18590
+IR,Chautauqua,2022-03-15,11335
+IR,Chautauqua,2022-08-31,2190
+IR,Chautauqua,2022-09-08,1945
+IR,Chautauqua,2022-09-13,2595
+IR,Chautauqua,2022-09-22,14220
+IR,Chautauqua,2022-10-10,21160
+IR,Chautauqua,2022-10-19,45770
+IR,Chautauqua,2022-10-27,78600
+IR,Chautauqua,2022-11-07,97490
+IR,Chautauqua,2022-11-22,77050
+IR,Chautauqua,2022-12-01,46485
+IR,Chautauqua,2022-12-12,15035
+IR,Chautauqua,2022-12-19,8045
+IR,Chautauqua,2022-12-27,15
+IR,Chautauqua,2023-01-09,3905
+IR,Chautauqua,2023-08-31,2325
+IR,Chautauqua,2023-09-08,3455
+IR,Chautauqua,2023-09-15,5015
+IR,Chautauqua,2023-09-19,8090
+IR,Chautauqua,2023-10-30,73290
+IR,Chautauqua,2023-11-10,137500
+IR,Chautauqua,2023-11-15,143020
+IR,Chautauqua,2023-11-22,107410
+IR,Chautauqua,2023-11-28,38905
+IR,Chautauqua,2023-12-06,25535
+IR,Chautauqua,2023-12-13,30525
+IR,Chautauqua,2023-12-21,38245
+IR,Chautauqua,2024-01-03,44990
+IR,Chautauqua,2024-09-04,3145
+IR,Chautauqua,2024-09-09,4050
+IR,Chautauqua,2024-09-16,5060
+IR,Chautauqua,2024-10-15,19370
+IR,Chautauqua,2024-10-24,63880
+IR,Chautauqua,2024-11-01,83365
+IR,Chautauqua,2024-11-06,74825
+IR,Chautauqua,2024-11-15,52340
+IR,Chautauqua,2024-11-26,56165
+IR,Chautauqua,2024-12-03,13985
+IR,Chautauqua,2024-12-09,5845
+IR,Chautauqua,2024-12-23,4275
+IR,Chautauqua,2025-01-03,3870
+IR,Chautauqua,2025-01-07,5
+IR,Chautauqua,2025-08-27,875
+IR,Chautauqua,2025-09-11,1675
+IR,Chautauqua,2025-09-19,6270
+IR,Chautauqua,2025-10-14,37025
+IR,Chautauqua,2025-10-31,71060
+IR,Chautauqua,2025-11-13,72870
+IR,Chautauqua,2025-11-28,75430
+IR,Chautauqua,2025-12-09,900
+IR,Chautauqua,2025-12-16,3940
+IR,Chautauqua,2025-12-22,4915
+IR,Chautauqua,2026-01-02,365
+IR,Chautauqua,2026-01-07,5245
+IR,Chautauqua,2026-01-12,11730
+IR,Clear Lake,2018-10-12,2605
+IR,Clear Lake,2018-10-18,4560
+IR,Clear Lake,2018-10-24,14450
+IR,Clear Lake,2018-11-02,10000
+IR,Clear Lake,2018-11-09,10620
+IR,Clear Lake,2018-11-14,6635
+IR,Clear Lake,2018-11-20,14550
+IR,Clear Lake,2018-11-29,1010
+IR,Clear Lake,2018-12-07,6260
+IR,Clear Lake,2018-12-11,205
+IR,Clear Lake,2018-12-17,640
+IR,Clear Lake,2019-01-03,1250
+IR,Clear Lake,2019-01-10,620
+IR,Clear Lake,2019-10-17,1010
+IR,Clear Lake,2019-10-28,1160
+IR,Clear Lake,2019-11-05,2410
+IR,Clear Lake,2019-11-14,1035
+IR,Clear Lake,2019-11-25,2880
+IR,Clear Lake,2019-12-02,2305
+IR,Clear Lake,2019-12-18,0
+IR,Clear Lake,2019-12-23,1620
+IR,Clear Lake,2020-01-02,8100
+IR,Clear Lake,2020-01-08,10330
+IR,Clear Lake,2020-10-16,4020
+IR,Clear Lake,2020-10-21,7965
+IR,Clear Lake,2020-10-28,12925
+IR,Clear Lake,2020-11-03,21000
+IR,Clear Lake,2020-11-08,11205
+IR,Clear Lake,2020-11-17,18010
+IR,Clear Lake,2020-12-02,6570
+IR,Clear Lake,2020-12-10,8805
+IR,Clear Lake,2020-12-15,19985
+IR,Clear Lake,2020-12-22,14260
+IR,Clear Lake,2020-12-31,55
+IR,Clear Lake,2021-01-05,2300
+IR,Clear Lake,2021-09-23,8080
+IR,Clear Lake,2021-10-19,3790
+IR,Clear Lake,2021-10-26,1765
+IR,Clear Lake,2021-11-01,3525
+IR,Clear Lake,2021-11-09,4300
+IR,Clear Lake,2021-11-15,15185
+IR,Clear Lake,2021-11-22,11200
+IR,Clear Lake,2021-11-30,3815
+IR,Clear Lake,2021-12-07,2105
+IR,Clear Lake,2021-12-14,2420
+IR,Clear Lake,2021-12-22,475
+IR,Clear Lake,2022-01-07,0
+IR,Clear Lake,2022-03-08,7550
+IR,Clear Lake,2022-03-15,5775
+IR,Clear Lake,2022-08-31,245
+IR,Clear Lake,2022-09-08,555
+IR,Clear Lake,2022-09-13,1235
+IR,Clear Lake,2022-09-22,5620
+IR,Clear Lake,2022-10-10,8200
+IR,Clear Lake,2022-10-19,10080
+IR,Clear Lake,2022-10-27,8850
+IR,Clear Lake,2022-11-07,28050
+IR,Clear Lake,2022-11-22,13800
+IR,Clear Lake,2022-12-01,3370
+IR,Clear Lake,2022-12-12,15930
+IR,Clear Lake,2022-12-19,0
+IR,Clear Lake,2022-12-27,0
+IR,Clear Lake,2023-01-09,1260
+IR,Clear Lake,2023-08-31,970
+IR,Clear Lake,2023-09-08,4860
+IR,Clear Lake,2023-09-15,3700
+IR,Clear Lake,2023-09-19,4100
+IR,Clear Lake,2023-10-30,21845
+IR,Clear Lake,2023-11-10,31700
+IR,Clear Lake,2023-11-15,29650
+IR,Clear Lake,2023-11-22,23155
+IR,Clear Lake,2023-11-28,10310
+IR,Clear Lake,2023-12-06,18510
+IR,Clear Lake,2023-12-13,23900
+IR,Clear Lake,2023-12-21,17690
+IR,Clear Lake,2024-01-03,31350
+IR,Clear Lake,2024-09-04,155
+IR,Clear Lake,2024-09-09,125
+IR,Clear Lake,2024-09-16,330
+IR,Clear Lake,2024-10-15,2475
+IR,Clear Lake,2024-10-24,8860
+IR,Clear Lake,2024-11-01,13930
+IR,Clear Lake,2024-11-06,23525
+IR,Clear Lake,2024-11-15,19465
+IR,Clear Lake,2024-11-26,15410
+IR,Clear Lake,2024-12-03,1270
+IR,Clear Lake,2024-12-09,8280
+IR,Clear Lake,2024-12-23,9610
+IR,Clear Lake,2025-01-03,1520
+IR,Clear Lake,2025-01-07,25
+IR,Clear Lake,2025-08-27,0
+IR,Clear Lake,2025-09-11,100
+IR,Clear Lake,2025-09-19,1170
+IR,Clear Lake,2025-10-14,5690
+IR,Clear Lake,2025-10-31,24010
+IR,Clear Lake,2025-11-13,37085
+IR,Clear Lake,2025-11-28,27580
+IR,Clear Lake,2025-12-09,75
+IR,Clear Lake,2025-12-16,0
+IR,Clear Lake,2025-12-22,800
+IR,Clear Lake,2026-01-02,9300
+IR,Clear Lake,2026-01-07,23080
+IR,Clear Lake,2026-01-12,23700
+MR,Cuivre Club,2018-10-18,750
+MR,Cuivre Club,2018-10-24,5500
+MR,Cuivre Club,2018-11-02,45000
+MR,Cuivre Club,2018-11-09,73000
+MR,Cuivre Club,2018-11-14,87000
+MR,Cuivre Club,2018-11-20,67000
+MR,Cuivre Club,2018-11-29,71050
+MR,Cuivre Club,2018-12-07,64000
+MR,Cuivre Club,2018-12-11,75000
+MR,Cuivre Club,2018-12-17,20050
+MR,Cuivre Club,2019-01-03,60000
+MR,Cuivre Club,2019-01-10,37600
+MR,Cuivre Club,2019-10-17,12720
+MR,Cuivre Club,2019-10-24,10900
+MR,Cuivre Club,2019-10-28,11800
+MR,Cuivre Club,2019-11-05,10610
+MR,Cuivre Club,2019-11-14,127000
+MR,Cuivre Club,2019-11-25,11000
+MR,Cuivre Club,2019-12-02,63500
+MR,Cuivre Club,2019-12-18,70000
+MR,Cuivre Club,2019-12-23,82000
+MR,Cuivre Club,2020-01-02,20600
+MR,Cuivre Club,2020-01-08,9700
+MR,Cuivre Club,2020-10-21,0
+MR,Cuivre Club,2020-10-28,12340
+MR,Cuivre Club,2020-11-03,10000
+MR,Cuivre Club,2020-11-09,15000
+MR,Cuivre Club,2020-11-17,60000
+MR,Cuivre Club,2020-11-23,69850
+MR,Cuivre Club,2020-12-02,-23400
+MR,Cuivre Club,2020-12-10,45000
+MR,Cuivre Club,2020-12-15,77000
+MR,Cuivre Club,2020-12-22,16100
+MR,Cuivre Club,2020-12-31,75000
+MR,Cuivre Club,2021-01-05,17100
+MR,Cuivre Club,2021-09-17,0
+MR,Cuivre Club,2021-10-19,1940
+MR,Cuivre Club,2021-10-26,3820
+MR,Cuivre Club,2021-11-01,13950
+MR,Cuivre Club,2021-11-09,18300
+MR,Cuivre Club,2021-11-15,18000
+MR,Cuivre Club,2021-11-22,32510
+MR,Cuivre Club,2021-11-30,40065
+MR,Cuivre Club,2021-12-07,62255
+MR,Cuivre Club,2021-12-14,46365
+MR,Cuivre Club,2021-12-22,33050
+MR,Cuivre Club,2022-01-07,1100
+MR,Cuivre Club,2022-03-08,2955
+MR,Cuivre Club,2022-03-15,2250
+MR,Cuivre Club,2022-08-31,0
+MR,Cuivre Club,2022-09-08,0
+MR,Cuivre Club,2022-09-13,0
+MR,Cuivre Club,2022-09-22,0
+MR,Cuivre Club,2022-10-10,0
+MR,Cuivre Club,2022-10-19,1150
+MR,Cuivre Club,2022-10-27,1175
+MR,Cuivre Club,2022-11-07,10150
+MR,Cuivre Club,2022-11-14,25350
+MR,Cuivre Club,2022-11-22,33000
+MR,Cuivre Club,2022-12-01,35000
+MR,Cuivre Club,2022-12-19,30530
+MR,Cuivre Club,2022-12-27,0
+MR,Cuivre Club,2023-01-09,7300
+MR,Cuivre Club,2023-08-31,0
+MR,Cuivre Club,2023-09-08,0
+MR,Cuivre Club,2023-09-15,0
+MR,Cuivre Club,2023-09-19,0
+MR,Cuivre Club,2023-10-09,0
+MR,Cuivre Club,2023-10-20,3600
+MR,Cuivre Club,2023-10-30,8910
+MR,Cuivre Club,2023-11-10,13000
+MR,Cuivre Club,2023-11-15,16000
+MR,Cuivre Club,2023-11-22,13000
+MR,Cuivre Club,2023-11-28,35000
+MR,Cuivre Club,2023-12-06,22200
+MR,Cuivre Club,2023-12-13,32300
+MR,Cuivre Club,2023-12-21,19400
+MR,Cuivre Club,2024-01-03,40900
+MR,Cuivre Club,2024-09-04,0
+MR,Cuivre Club,2024-09-09,0
+MR,Cuivre Club,2024-09-16,0
+MR,Cuivre Club,2024-10-15,445
+MR,Cuivre Club,2024-10-24,920
+MR,Cuivre Club,2024-11-01,19950
+MR,Cuivre Club,2024-11-06,15800
+MR,Cuivre Club,2024-11-15,16000
+MR,Cuivre Club,2024-11-26,18795
+MR,Cuivre Club,2024-12-03,30880
+MR,Cuivre Club,2024-12-09,22470
+MR,Cuivre Club,2024-12-23,11035
+MR,Cuivre Club,2025-01-03,7710
+MR,Cuivre Club,2025-01-07,8710
+MR,Cuivre Club,2025-08-27,0
+MR,Cuivre Club,2025-09-11,0
+MR,Cuivre Club,2025-09-19,0
+MR,Cuivre Club,2025-10-14,225
+MR,Cuivre Club,2025-10-31,8175
+MR,Cuivre Club,2025-11-13,26250
+MR,Cuivre Club,2025-11-28,30200
+MR,Cuivre Club,2025-12-09,22000
+MR,Cuivre Club,2025-12-16,12140
+MR,Cuivre Club,2025-12-22,24860
+MR,Cuivre Club,2026-01-02,21250
+MR,Cuivre Club,2026-01-12,40760
+MR,Dardenne Club,2018-10-18,2200
+MR,Dardenne Club,2018-10-24,9610
+MR,Dardenne Club,2018-11-02,57000
+MR,Dardenne Club,2018-11-09,92000
+MR,Dardenne Club,2018-11-14,127010
+MR,Dardenne Club,2018-11-20,78200
+MR,Dardenne Club,2018-11-29,110050
+MR,Dardenne Club,2018-12-07,120000
+MR,Dardenne Club,2018-12-11,135000
+MR,Dardenne Club,2018-12-17,35000
+MR,Dardenne Club,2019-01-03,85000
+MR,Dardenne Club,2019-01-10,90000
+MR,Dardenne Club,2019-10-17,10000
+MR,Dardenne Club,2019-10-24,19215
+MR,Dardenne Club,2019-10-28,24730
+MR,Dardenne Club,2019-11-05,25610
+MR,Dardenne Club,2019-11-14,65550
+MR,Dardenne Club,2019-11-25,75300
+MR,Dardenne Club,2019-12-02,90200
+MR,Dardenne Club,2019-12-18,10000
+MR,Dardenne Club,2019-12-23,15000
+MR,Dardenne Club,2020-01-02,13220
+MR,Dardenne Club,2020-01-08,10000
+MR,Dardenne Club,2020-10-21,0
+MR,Dardenne Club,2020-10-28,28275
+MR,Dardenne Club,2020-11-03,65500
+MR,Dardenne Club,2020-11-09,33000
+MR,Dardenne Club,2020-11-17,47000
+MR,Dardenne Club,2020-11-23,50010
+MR,Dardenne Club,2020-12-02,-11700
+MR,Dardenne Club,2020-12-10,65000
+MR,Dardenne Club,2020-12-15,106250
+MR,Dardenne Club,2020-12-22,60000
+MR,Dardenne Club,2020-12-31,120000
+MR,Dardenne Club,2021-01-05,31000
+MR,Dardenne Club,2021-09-17,210
+MR,Dardenne Club,2021-10-19,22120
+MR,Dardenne Club,2021-10-26,25980
+MR,Dardenne Club,2021-11-01,52000
+MR,Dardenne Club,2021-11-09,78825
+MR,Dardenne Club,2021-11-15,68550
+MR,Dardenne Club,2021-11-22,74230
+MR,Dardenne Club,2021-11-30,54220
+MR,Dardenne Club,2021-12-07,72200
+MR,Dardenne Club,2021-12-14,66700
+MR,Dardenne Club,2021-12-22,50100
+MR,Dardenne Club,2022-01-07,8930
+MR,Dardenne Club,2022-03-08,2930
+MR,Dardenne Club,2022-03-15,420
+MR,Dardenne Club,2022-08-31,25
+MR,Dardenne Club,2022-09-08,195
+MR,Dardenne Club,2022-09-13,55
+MR,Dardenne Club,2022-09-22,80
+MR,Dardenne Club,2022-10-10,1400
+MR,Dardenne Club,2022-10-19,18750
+MR,Dardenne Club,2022-10-27,23900
+MR,Dardenne Club,2022-11-07,40300
+MR,Dardenne Club,2022-11-14,38700
+MR,Dardenne Club,2022-11-22,57600
+MR,Dardenne Club,2022-12-01,61450
+MR,Dardenne Club,2022-12-19,67955
+MR,Dardenne Club,2022-12-27,34885
+MR,Dardenne Club,2023-01-09,42055
+MR,Dardenne Club,2023-08-31,15
+MR,Dardenne Club,2023-09-08,10
+MR,Dardenne Club,2023-09-15,0
+MR,Dardenne Club,2023-09-19,0
+MR,Dardenne Club,2023-10-09,480
+MR,Dardenne Club,2023-10-20,17930
+MR,Dardenne Club,2023-10-30,19050
+MR,Dardenne Club,2023-11-10,66900
+MR,Dardenne Club,2023-11-15,33730
+MR,Dardenne Club,2023-11-22,37960
+MR,Dardenne Club,2023-11-28,57550
+MR,Dardenne Club,2023-12-06,37270
+MR,Dardenne Club,2023-12-13,30860
+MR,Dardenne Club,2023-12-21,42350
+MR,Dardenne Club,2024-01-03,61205
+MR,Dardenne Club,2024-09-04,15
+MR,Dardenne Club,2024-09-09,0
+MR,Dardenne Club,2024-09-16,0
+MR,Dardenne Club,2024-10-15,2105
+MR,Dardenne Club,2024-10-24,3230
+MR,Dardenne Club,2024-11-01,33005
+MR,Dardenne Club,2024-11-06,27805
+MR,Dardenne Club,2024-11-15,27410
+MR,Dardenne Club,2024-11-26,47840
+MR,Dardenne Club,2024-12-03,90375
+MR,Dardenne Club,2024-12-09,70150
+MR,Dardenne Club,2024-12-23,24350
+MR,Dardenne Club,2025-01-03,17635
+MR,Dardenne Club,2025-01-07,33850
+MR,Dardenne Club,2025-08-27,0
+MR,Dardenne Club,2025-09-11,0
+MR,Dardenne Club,2025-09-19,195
+MR,Dardenne Club,2025-10-14,6090
+MR,Dardenne Club,2025-10-31,46230
+MR,Dardenne Club,2025-11-13,64150
+MR,Dardenne Club,2025-11-28,114950
+MR,Dardenne Club,2025-12-09,109000
+MR,Dardenne Club,2025-12-16,104800
+MR,Dardenne Club,2025-12-22,90090
+MR,Dardenne Club,2026-01-02,104440
+MR,Dardenne Club,2026-01-12,105100
+MR,Delair Refuge,2018-10-18,4200
+MR,Delair Refuge,2018-10-24,2400
+MR,Delair Refuge,2018-11-02,18100
+MR,Delair Refuge,2018-11-09,12010
+MR,Delair Refuge,2018-11-14,56010
+MR,Delair Refuge,2018-11-20,25530
+MR,Delair Refuge,2018-11-29,50000
+MR,Delair Refuge,2018-12-07,51000
+MR,Delair Refuge,2018-12-11,30000
+MR,Delair Refuge,2018-12-17,7100
+MR,Delair Refuge,2019-01-03,13500
+MR,Delair Refuge,2019-01-10,5700
+MR,Delair Refuge,2019-10-17,6250
+MR,Delair Refuge,2019-10-24,10200
+MR,Delair Refuge,2019-10-28,12900
+MR,Delair Refuge,2019-11-05,10700
+MR,Delair Refuge,2019-11-14,24700
+MR,Delair Refuge,2019-11-25,8500
+MR,Delair Refuge,2019-12-02,19600
+MR,Delair Refuge,2019-12-18,68000
+MR,Delair Refuge,2019-12-23,32000
+MR,Delair Refuge,2020-01-02,5510
+MR,Delair Refuge,2020-01-08,610
+MR,Delair Refuge,2020-10-21,7110
+MR,Delair Refuge,2020-10-28,28665
+MR,Delair Refuge,2020-11-03,30400
+MR,Delair Refuge,2020-11-09,37000
+MR,Delair Refuge,2020-11-17,40300
+MR,Delair Refuge,2020-11-23,40000
+MR,Delair Refuge,2020-12-02,-6200
+MR,Delair Refuge,2020-12-10,11200
+MR,Delair Refuge,2020-12-15,21800
+MR,Delair Refuge,2020-12-22,4000
+MR,Delair Refuge,2020-12-31,2000
+MR,Delair Refuge,2021-01-05,1500
+MR,Delair Refuge,2021-09-17,50
+MR,Delair Refuge,2021-10-19,23450
+MR,Delair Refuge,2021-10-26,11070
+MR,Delair Refuge,2021-11-01,37765
+MR,Delair Refuge,2021-11-09,21865
+MR,Delair Refuge,2021-11-15,13100
+MR,Delair Refuge,2021-11-22,33670
+MR,Delair Refuge,2021-11-30,25255
+MR,Delair Refuge,2021-12-07,33510
+MR,Delair Refuge,2021-12-14,16615
+MR,Delair Refuge,2021-12-22,14515
+MR,Delair Refuge,2022-01-07,580
+MR,Delair Refuge,2022-03-08,1915
+MR,Delair Refuge,2022-03-15,1650
+MR,Delair Refuge,2022-08-31,0
+MR,Delair Refuge,2022-09-08,0
+MR,Delair Refuge,2022-09-13,30
+MR,Delair Refuge,2022-09-22,60
+MR,Delair Refuge,2022-10-10,970
+MR,Delair Refuge,2022-10-19,1950
+MR,Delair Refuge,2022-10-27,5630
+MR,Delair Refuge,2022-11-07,27200
+MR,Delair Refuge,2022-11-14,35525
+MR,Delair Refuge,2022-11-22,53825
+MR,Delair Refuge,2022-12-01,32230
+MR,Delair Refuge,2022-12-19,47720
+MR,Delair Refuge,2022-12-27,0
+MR,Delair Refuge,2023-01-09,660
+MR,Delair Refuge,2023-08-31,0
+MR,Delair Refuge,2023-09-08,0
+MR,Delair Refuge,2023-09-15,0
+MR,Delair Refuge,2023-09-19,0
+MR,Delair Refuge,2023-10-09,80
+MR,Delair Refuge,2023-10-20,1115
+MR,Delair Refuge,2023-10-30,12150
+MR,Delair Refuge,2023-11-10,25000
+MR,Delair Refuge,2023-11-15,18950
+MR,Delair Refuge,2023-11-22,25400
+MR,Delair Refuge,2023-11-28,45485
+MR,Delair Refuge,2023-12-06,37770
+MR,Delair Refuge,2023-12-13,30680
+MR,Delair Refuge,2023-12-21,23200
+MR,Delair Refuge,2024-01-03,8150
+MR,Delair Refuge,2024-09-04,0
+MR,Delair Refuge,2024-09-09,0
+MR,Delair Refuge,2024-09-16,0
+MR,Delair Refuge,2024-10-15,4870
+MR,Delair Refuge,2024-10-24,4030
+MR,Delair Refuge,2024-11-01,10375
+MR,Delair Refuge,2024-11-06,26800
+MR,Delair Refuge,2024-11-15,22000
+MR,Delair Refuge,2024-11-26,34550
+MR,Delair Refuge,2024-12-03,36360
+MR,Delair Refuge,2024-12-09,31280
+MR,Delair Refuge,2024-12-23,6660
+MR,Delair Refuge,2025-01-03,6100
+MR,Delair Refuge,2025-01-07,1445
+MR,Delair Refuge,2025-08-27,0
+MR,Delair Refuge,2025-09-11,0
+MR,Delair Refuge,2025-09-19,40
+MR,Delair Refuge,2025-10-14,10360
+MR,Delair Refuge,2025-10-31,8880
+MR,Delair Refuge,2025-11-13,20500
+MR,Delair Refuge,2025-11-28,37400
+MR,Delair Refuge,2025-12-09,17300
+MR,Delair Refuge,2025-12-16,14220
+MR,Delair Refuge,2025-12-22,32355
+MR,Delair Refuge,2026-01-02,5340
+MR,Delair Refuge,2026-01-12,2075
+IR,Douglas Lake,2018-10-12,13825
+IR,Douglas Lake,2018-10-18,13470
+IR,Douglas Lake,2018-10-24,29650
+IR,Douglas Lake,2018-11-02,36910
+IR,Douglas Lake,2018-11-14,28600
+IR,Douglas Lake,2018-11-20,22500
+IR,Douglas Lake,2018-11-29,8500
+IR,Douglas Lake,2018-12-07,31000
+IR,Douglas Lake,2018-12-11,655
+IR,Douglas Lake,2018-12-17,4200
+IR,Douglas Lake,2019-01-03,17600
+IR,Douglas Lake,2019-01-10,17650
+IR,Douglas Lake,2019-10-17,335
+IR,Douglas Lake,2019-10-28,12205
+IR,Douglas Lake,2019-11-05,10410
+IR,Douglas Lake,2019-11-14,9170
+IR,Douglas Lake,2019-11-25,18195
+IR,Douglas Lake,2019-12-02,9480
+IR,Douglas Lake,2019-12-18,2140
+IR,Douglas Lake,2019-12-23,705
+IR,Douglas Lake,2020-01-02,5810
+IR,Douglas Lake,2020-01-08,3910
+IR,Douglas Lake,2020-10-16,11100
+IR,Douglas Lake,2020-10-21,23790
+IR,Douglas Lake,2020-10-28,25770
+IR,Douglas Lake,2020-11-03,37200
+IR,Douglas Lake,2020-11-08,37900
+IR,Douglas Lake,2020-11-17,70200
+IR,Douglas Lake,2020-12-02,70000
+IR,Douglas Lake,2020-12-10,22810
+IR,Douglas Lake,2020-12-15,32000
+IR,Douglas Lake,2020-12-22,60300
+IR,Douglas Lake,2020-12-31,3300
+IR,Douglas Lake,2021-01-05,7010
+IR,Douglas Lake,2021-09-23,40
+IR,Douglas Lake,2021-10-19,14440
+IR,Douglas Lake,2021-10-26,15085
+IR,Douglas Lake,2021-11-01,11205
+IR,Douglas Lake,2021-11-09,25760
+IR,Douglas Lake,2021-11-15,34060
+IR,Douglas Lake,2021-11-22,65865
+IR,Douglas Lake,2021-11-30,30040
+IR,Douglas Lake,2021-12-07,26050
+IR,Douglas Lake,2021-12-14,23850
+IR,Douglas Lake,2021-12-22,22260
+IR,Douglas Lake,2022-01-07,3485
+IR,Douglas Lake,2022-03-08,6045
+IR,Douglas Lake,2022-03-15,13285
+IR,Douglas Lake,2022-08-31,60
+IR,Douglas Lake,2022-09-08,0
+IR,Douglas Lake,2022-09-13,205
+IR,Douglas Lake,2022-09-22,150
+IR,Douglas Lake,2022-10-10,6180
+IR,Douglas Lake,2022-10-19,13000
+IR,Douglas Lake,2022-10-27,12310
+IR,Douglas Lake,2022-11-07,24020
+IR,Douglas Lake,2022-11-22,4170
+IR,Douglas Lake,2022-12-01,8650
+IR,Douglas Lake,2022-12-12,28900
+IR,Douglas Lake,2022-12-19,250
+IR,Douglas Lake,2022-12-27,350
+IR,Douglas Lake,2023-01-09,150
+IR,Douglas Lake,2023-08-31,65
+IR,Douglas Lake,2023-09-08,0
+IR,Douglas Lake,2023-09-15,0
+IR,Douglas Lake,2023-09-19,35
+IR,Douglas Lake,2023-10-30,23710
+IR,Douglas Lake,2023-11-10,45000
+IR,Douglas Lake,2023-11-15,45935
+IR,Douglas Lake,2023-11-22,40000
+IR,Douglas Lake,2023-11-28,9940
+IR,Douglas Lake,2023-12-06,23050
+IR,Douglas Lake,2023-12-13,25550
+IR,Douglas Lake,2023-12-21,9770
+IR,Douglas Lake,2024-01-03,30505
+IR,Douglas Lake,2024-09-04,290
+IR,Douglas Lake,2024-09-09,305
+IR,Douglas Lake,2024-09-16,320
+IR,Douglas Lake,2024-10-15,18810
+IR,Douglas Lake,2024-10-24,15100
+IR,Douglas Lake,2024-11-01,23000
+IR,Douglas Lake,2024-11-06,27660
+IR,Douglas Lake,2024-11-15,46300
+IR,Douglas Lake,2024-11-26,50635
+IR,Douglas Lake,2024-12-03,2720
+IR,Douglas Lake,2024-12-09,12910
+IR,Douglas Lake,2024-12-23,48230
+IR,Douglas Lake,2025-01-03,29310
+IR,Douglas Lake,2025-01-07,37080
+IR,Douglas Lake,2025-08-27,0
+IR,Douglas Lake,2025-09-11,0
+IR,Douglas Lake,2025-09-19,0
+IR,Douglas Lake,2025-10-14,3355
+IR,Douglas Lake,2025-10-31,29305
+IR,Douglas Lake,2025-11-13,64930
+IR,Douglas Lake,2025-11-28,107770
+IR,Douglas Lake,2025-12-09,11700
+IR,Douglas Lake,2025-12-16,4490
+IR,Douglas Lake,2025-12-22,305
+IR,Douglas Lake,2026-01-02,24525
+IR,Douglas Lake,2026-01-07,18050
+IR,Douglas Lake,2026-01-12,22030
+IR,Duck Creek,2018-10-12,60
+IR,Duck Creek,2018-10-18,170
+IR,Duck Creek,2018-10-24,2110
+IR,Duck Creek,2018-11-02,2520
+IR,Duck Creek,2018-11-09,1800
+IR,Duck Creek,2018-11-14,42720
+IR,Duck Creek,2018-11-20,13630
+IR,Duck Creek,2018-11-29,53535
+IR,Duck Creek,2018-12-07,22415
+IR,Duck Creek,2018-12-11,35410
+IR,Duck Creek,2018-12-17,8815
+IR,Duck Creek,2019-01-03,10550
+IR,Duck Creek,2019-01-10,1870
+IR,Duck Creek,2019-10-17,0
+IR,Duck Creek,2019-10-28,870
+IR,Duck Creek,2019-11-05,4380
+IR,Duck Creek,2019-11-14,8710
+IR,Duck Creek,2019-11-25,3565
+IR,Duck Creek,2019-12-02,5670
+IR,Duck Creek,2019-12-18,23600
+IR,Duck Creek,2019-12-23,25140
+IR,Duck Creek,2020-01-02,350
+IR,Duck Creek,2020-01-08,3510
+IR,Duck Creek,2020-10-16,800
+IR,Duck Creek,2020-10-21,445
+IR,Duck Creek,2020-10-28,12590
+IR,Duck Creek,2020-11-03,7620
+IR,Duck Creek,2020-11-08,10315
+IR,Duck Creek,2020-11-17,11000
+IR,Duck Creek,2020-12-02,22960
+IR,Duck Creek,2020-12-10,16450
+IR,Duck Creek,2020-12-15,17375
+IR,Duck Creek,2020-12-22,10280
+IR,Duck Creek,2020-12-31,10415
+IR,Duck Creek,2021-01-05,11260
+IR,Duck Creek,2021-09-23,10
+IR,Duck Creek,2021-10-19,180
+IR,Duck Creek,2021-10-26,185
+IR,Duck Creek,2021-11-01,525
+IR,Duck Creek,2021-11-09,2500
+IR,Duck Creek,2021-11-15,2705
+IR,Duck Creek,2021-11-22,2065
+IR,Duck Creek,2021-11-30,7190
+IR,Duck Creek,2021-12-07,13120
+IR,Duck Creek,2021-12-14,5420
+IR,Duck Creek,2021-12-22,11095
+IR,Duck Creek,2022-01-07,3280
+IR,Duck Creek,2022-03-08,420
+IR,Duck Creek,2022-03-15,920
+IR,Duck Creek,2022-08-31,5
+IR,Duck Creek,2022-09-08,5
+IR,Duck Creek,2022-09-13,0
+IR,Duck Creek,2022-09-22,0
+IR,Duck Creek,2022-10-10,25
+IR,Duck Creek,2022-10-19,110
+IR,Duck Creek,2022-10-27,80
+IR,Duck Creek,2022-11-07,640
+IR,Duck Creek,2022-11-22,14545
+IR,Duck Creek,2022-12-01,17960
+IR,Duck Creek,2022-12-12,2130
+IR,Duck Creek,2022-12-19,32260
+IR,Duck Creek,2022-12-27,28910
+IR,Duck Creek,2023-01-09,7155
+IR,Duck Creek,2023-08-31,25
+IR,Duck Creek,2023-09-08,5
+IR,Duck Creek,2023-09-15,15
+IR,Duck Creek,2023-09-19,0
+IR,Duck Creek,2023-10-30,760
+IR,Duck Creek,2023-11-10,4360
+IR,Duck Creek,2023-11-15,1800
+IR,Duck Creek,2023-11-22,3280
+IR,Duck Creek,2023-11-28,18350
+IR,Duck Creek,2023-12-06,1260
+IR,Duck Creek,2023-12-13,4480
+IR,Duck Creek,2023-12-21,7585
+IR,Duck Creek,2024-01-03,920
+IR,Duck Creek,2024-09-04,25
+IR,Duck Creek,2024-09-09,20
+IR,Duck Creek,2024-09-16,0
+IR,Duck Creek,2024-10-15,30
+IR,Duck Creek,2024-10-24,215
+IR,Duck Creek,2024-11-01,255
+IR,Duck Creek,2024-11-06,490
+IR,Duck Creek,2024-11-15,825
+IR,Duck Creek,2024-11-26,2130
+IR,Duck Creek,2024-12-03,33520
+IR,Duck Creek,2024-12-09,13690
+IR,Duck Creek,2024-12-23,10205
+IR,Duck Creek,2025-01-03,1720
+IR,Duck Creek,2025-01-07,18305
+IR,Duck Creek,2025-08-27,0
+IR,Duck Creek,2025-09-11,0
+IR,Duck Creek,2025-09-19,0
+IR,Duck Creek,2025-10-14,45
+IR,Duck Creek,2025-10-31,675
+IR,Duck Creek,2025-11-13,1825
+IR,Duck Creek,2025-11-28,5790
+IR,Duck Creek,2025-12-09,42410
+IR,Duck Creek,2025-12-16,57425
+IR,Duck Creek,2025-12-22,47730
+IR,Duck Creek,2026-01-02,25370
+IR,Duck Creek,2026-01-07,1735
+IR,Duck Creek,2026-01-12,470
+IR,Emiquon/Spoon Btm,2018-10-12,11990
+IR,Emiquon/Spoon Btm,2018-10-18,33245
+IR,Emiquon/Spoon Btm,2018-10-24,51870
+IR,Emiquon/Spoon Btm,2018-11-02,28735
+IR,Emiquon/Spoon Btm,2018-11-09,29860
+IR,Emiquon/Spoon Btm,2018-11-14,24485
+IR,Emiquon/Spoon Btm,2018-11-20,14875
+IR,Emiquon/Spoon Btm,2018-11-29,14850
+IR,Emiquon/Spoon Btm,2018-12-07,15530
+IR,Emiquon/Spoon Btm,2018-12-11,5745
+IR,Emiquon/Spoon Btm,2018-12-17,16010
+IR,Emiquon/Spoon Btm,2019-01-03,23990
+IR,Emiquon/Spoon Btm,2019-01-10,17895
+IR,Emiquon/Spoon Btm,2019-10-17,69170
+IR,Emiquon/Spoon Btm,2019-10-28,124675
+IR,Emiquon/Spoon Btm,2019-11-05,98655
+IR,Emiquon/Spoon Btm,2019-11-14,20955
+IR,Emiquon/Spoon Btm,2019-11-25,13190
+IR,Emiquon/Spoon Btm,2019-12-02,12900
+IR,Emiquon/Spoon Btm,2019-12-18,6925
+IR,Emiquon/Spoon Btm,2019-12-23,3465
+IR,Emiquon/Spoon Btm,2020-01-02,9990
+IR,Emiquon/Spoon Btm,2020-01-08,8255
+IR,Emiquon/Spoon Btm,2020-10-16,35270
+IR,Emiquon/Spoon Btm,2020-10-21,39000
+IR,Emiquon/Spoon Btm,2020-10-28,17255
+IR,Emiquon/Spoon Btm,2020-11-03,5155
+IR,Emiquon/Spoon Btm,2020-11-08,3455
+IR,Emiquon/Spoon Btm,2020-11-17,1360
+IR,Emiquon/Spoon Btm,2020-12-02,4980
+IR,Emiquon/Spoon Btm,2020-12-10,3700
+IR,Emiquon/Spoon Btm,2020-12-15,7050
+IR,Emiquon/Spoon Btm,2020-12-22,19060
+IR,Emiquon/Spoon Btm,2020-12-31,85
+IR,Emiquon/Spoon Btm,2021-01-05,0
+IR,Emiquon/Spoon Btm,2021-09-23,2610
+IR,Emiquon/Spoon Btm,2021-10-19,36370
+IR,Emiquon/Spoon Btm,2021-10-26,39560
+IR,Emiquon/Spoon Btm,2021-11-01,53315
+IR,Emiquon/Spoon Btm,2021-11-09,91225
+IR,Emiquon/Spoon Btm,2021-11-15,122200
+IR,Emiquon/Spoon Btm,2021-11-22,87175
+IR,Emiquon/Spoon Btm,2021-11-30,44310
+IR,Emiquon/Spoon Btm,2021-12-07,14840
+IR,Emiquon/Spoon Btm,2021-12-14,19605
+IR,Emiquon/Spoon Btm,2021-12-22,6580
+IR,Emiquon/Spoon Btm,2022-01-07,0
+IR,Emiquon/Spoon Btm,2022-08-31,515
+IR,Emiquon/Spoon Btm,2022-09-08,380
+IR,Emiquon/Spoon Btm,2022-09-13,410
+IR,Emiquon/Spoon Btm,2022-09-22,1705
+IR,Emiquon/Spoon Btm,2022-10-10,4710
+IR,Emiquon/Spoon Btm,2022-10-19,5400
+IR,Emiquon/Spoon Btm,2022-10-27,3470
+IR,Emiquon/Spoon Btm,2022-11-07,21935
+IR,Emiquon/Spoon Btm,2022-11-22,17880
+IR,Emiquon/Spoon Btm,2022-12-01,5415
+IR,Emiquon/Spoon Btm,2022-12-12,2535
+IR,Emiquon/Spoon Btm,2022-12-19,530
+IR,Emiquon/Spoon Btm,2022-12-27,100
+IR,Emiquon/Spoon Btm,2023-01-09,3900
+IR,Emiquon/Spoon Btm,2023-08-31,1005
+IR,Emiquon/Spoon Btm,2023-09-08,1550
+IR,Emiquon/Spoon Btm,2023-09-15,4555
+IR,Emiquon/Spoon Btm,2023-09-19,5355
+IR,Emiquon/Spoon Btm,2023-10-30,8895
+IR,Emiquon/Spoon Btm,2023-11-10,7285
+IR,Emiquon/Spoon Btm,2023-11-15,10730
+IR,Emiquon/Spoon Btm,2023-11-22,10915
+IR,Emiquon/Spoon Btm,2023-11-28,5925
+IR,Emiquon/Spoon Btm,2023-12-06,6165
+IR,Emiquon/Spoon Btm,2023-12-13,5255
+IR,Emiquon/Spoon Btm,2023-12-21,9115
+IR,Emiquon/Spoon Btm,2024-01-03,10860
+IR,Emiquon/Spoon Btm,2024-09-04,455
+IR,Emiquon/Spoon Btm,2024-09-09,480
+IR,Emiquon/Spoon Btm,2024-09-16,650
+IR,Emiquon/Spoon Btm,2024-10-15,4830
+IR,Emiquon/Spoon Btm,2024-10-24,19985
+IR,Emiquon/Spoon Btm,2024-11-01,21285
+IR,Emiquon/Spoon Btm,2024-11-06,15060
+IR,Emiquon/Spoon Btm,2024-11-15,6715
+IR,Emiquon/Spoon Btm,2024-11-26,4235
+IR,Emiquon/Spoon Btm,2024-12-03,6940
+IR,Emiquon/Spoon Btm,2024-12-09,4925
+IR,Emiquon/Spoon Btm,2024-12-23,1835
+IR,Emiquon/Spoon Btm,2025-01-03,2035
+IR,Emiquon/Spoon Btm,2025-01-07,500
+IR,Emiquon/Spoon Btm,2025-08-27,300
+IR,Emiquon/Spoon Btm,2025-09-11,730
+IR,Emiquon/Spoon Btm,2025-09-19,1505
+IR,Emiquon/Spoon Btm,2025-10-14,6140
+IR,Emiquon/Spoon Btm,2025-10-31,9110
+IR,Emiquon/Spoon Btm,2025-11-13,5915
+IR,Emiquon/Spoon Btm,2025-11-28,4945
+IR,Emiquon/Spoon Btm,2025-12-09,230
+IR,Emiquon/Spoon Btm,2025-12-16,125
+IR,Emiquon/Spoon Btm,2025-12-22,1095
+IR,Emiquon/Spoon Btm,2026-01-02,1025
+IR,Emiquon/Spoon Btm,2026-01-07,1150
+IR,Emiquon/Spoon Btm,2026-01-12,3935
+MR,Henderson Creek,2018-10-18,320
+MR,Henderson Creek,2018-10-24,4420
+MR,Henderson Creek,2018-11-02,9610
+MR,Henderson Creek,2018-11-14,20000
+MR,Henderson Creek,2018-11-20,14210
+MR,Henderson Creek,2018-11-29,5205
+MR,Henderson Creek,2018-12-07,5500
+MR,Henderson Creek,2018-12-11,2200
+MR,Henderson Creek,2018-12-17,3300
+MR,Henderson Creek,2019-01-03,3900
+MR,Henderson Creek,2019-01-10,1500
+MR,Henderson Creek,2019-10-17,270
+MR,Henderson Creek,2019-10-24,6000
+MR,Henderson Creek,2019-10-28,11800
+MR,Henderson Creek,2019-11-05,19050
+MR,Henderson Creek,2019-11-14,16965
+MR,Henderson Creek,2019-11-25,11820
+MR,Henderson Creek,2019-12-02,13605
+MR,Henderson Creek,2019-12-18,1205
+MR,Henderson Creek,2019-12-23,9000
+MR,Henderson Creek,2020-01-02,1900
+MR,Henderson Creek,2020-01-08,6800
+MR,Henderson Creek,2020-10-21,2285
+MR,Henderson Creek,2020-10-28,13430
+MR,Henderson Creek,2020-11-03,22650
+MR,Henderson Creek,2020-11-09,26500
+MR,Henderson Creek,2020-11-17,25010
+MR,Henderson Creek,2020-11-23,22330
+MR,Henderson Creek,2020-12-02,20005
+MR,Henderson Creek,2020-12-10,7910
+MR,Henderson Creek,2020-12-15,9220
+MR,Henderson Creek,2020-12-22,3400
+MR,Henderson Creek,2020-12-31,50
+MR,Henderson Creek,2021-01-05,200
+MR,Henderson Creek,2021-09-17,655
+MR,Henderson Creek,2021-10-19,745
+MR,Henderson Creek,2021-10-26,1745
+MR,Henderson Creek,2021-11-01,5760
+MR,Henderson Creek,2021-11-09,6960
+MR,Henderson Creek,2021-11-15,10810
+MR,Henderson Creek,2021-11-22,12000
+MR,Henderson Creek,2021-11-30,13150
+MR,Henderson Creek,2021-12-07,9300
+MR,Henderson Creek,2021-12-14,10680
+MR,Henderson Creek,2021-12-22,6125
+MR,Henderson Creek,2022-01-07,10
+MR,Henderson Creek,2022-03-08,0
+MR,Henderson Creek,2022-03-15,9935
+MR,Henderson Creek,2022-08-31,110
+MR,Henderson Creek,2022-09-08,35
+MR,Henderson Creek,2022-09-13,0
+MR,Henderson Creek,2022-09-22,895
+MR,Henderson Creek,2022-10-10,1225
+MR,Henderson Creek,2022-10-19,300
+MR,Henderson Creek,2022-10-27,4500
+MR,Henderson Creek,2022-11-07,24860
+MR,Henderson Creek,2022-11-14,25250
+MR,Henderson Creek,2022-11-22,24105
+MR,Henderson Creek,2022-12-01,13650
+MR,Henderson Creek,2022-12-19,8050
+MR,Henderson Creek,2022-12-27,0
+MR,Henderson Creek,2023-01-09,685
+MR,Henderson Creek,2023-08-31,25
+MR,Henderson Creek,2023-09-08,320
+MR,Henderson Creek,2023-09-15,455
+MR,Henderson Creek,2023-09-19,355
+MR,Henderson Creek,2023-10-09,715
+MR,Henderson Creek,2023-10-20,5860
+MR,Henderson Creek,2023-10-30,8485
+MR,Henderson Creek,2023-11-10,11600
+MR,Henderson Creek,2023-11-15,9700
+MR,Henderson Creek,2023-11-22,6350
+MR,Henderson Creek,2023-11-28,5800
+MR,Henderson Creek,2023-12-06,8755
+MR,Henderson Creek,2023-12-13,15725
+MR,Henderson Creek,2023-12-21,14030
+MR,Henderson Creek,2024-01-03,10360
+MR,Henderson Creek,2024-09-04,360
+MR,Henderson Creek,2024-09-09,155
+MR,Henderson Creek,2024-09-16,285
+MR,Henderson Creek,2024-10-15,1195
+MR,Henderson Creek,2024-10-24,2745
+MR,Henderson Creek,2024-11-01,7410
+MR,Henderson Creek,2024-11-06,13740
+MR,Henderson Creek,2024-11-15,11080
+MR,Henderson Creek,2024-11-26,25955
+MR,Henderson Creek,2024-12-03,25145
+MR,Henderson Creek,2024-12-09,22070
+MR,Henderson Creek,2024-12-23,7615
+MR,Henderson Creek,2025-01-03,11070
+MR,Henderson Creek,2025-01-07,1280
+MR,Henderson Creek,2025-08-27,0
+MR,Henderson Creek,2025-09-11,275
+MR,Henderson Creek,2025-09-19,200
+MR,Henderson Creek,2025-10-14,1960
+MR,Henderson Creek,2025-10-31,3550
+MR,Henderson Creek,2025-11-13,10675
+MR,Henderson Creek,2025-11-28,23775
+MR,Henderson Creek,2025-12-09,17120
+MR,Henderson Creek,2025-12-16,14490
+MR,Henderson Creek,2025-12-22,12440
+MR,Henderson Creek,2026-01-02,12210
+MR,Henderson Creek,2026-01-12,20580
+IR,Hennepin/Hopper,2018-10-12,7130
+IR,Hennepin/Hopper,2018-10-18,11550
+IR,Hennepin/Hopper,2018-10-24,23160
+IR,Hennepin/Hopper,2018-11-02,36660
+IR,Hennepin/Hopper,2018-11-14,9300
+IR,Hennepin/Hopper,2018-11-20,4910
+IR,Hennepin/Hopper,2018-11-29,3900
+IR,Hennepin/Hopper,2018-12-07,300
+IR,Hennepin/Hopper,2018-12-11,10
+IR,Hennepin/Hopper,2018-12-17,7010
+IR,Hennepin/Hopper,2019-01-03,1650
+IR,Hennepin/Hopper,2019-01-10,10
+IR,Hennepin/Hopper,2019-10-17,13600
+IR,Hennepin/Hopper,2019-10-28,14120
+IR,Hennepin/Hopper,2019-11-05,12230
+IR,Hennepin/Hopper,2019-11-14,300
+IR,Hennepin/Hopper,2019-11-25,2705
+IR,Hennepin/Hopper,2019-12-02,625
+IR,Hennepin/Hopper,2019-12-18,0
+IR,Hennepin/Hopper,2019-12-23,0
+IR,Hennepin/Hopper,2020-01-02,410
+IR,Hennepin/Hopper,2020-01-08,565
+IR,Hennepin/Hopper,2020-10-16,12400
+IR,Hennepin/Hopper,2020-10-21,18340
+IR,Hennepin/Hopper,2020-10-28,29570
+IR,Hennepin/Hopper,2020-11-03,33300
+IR,Hennepin/Hopper,2020-11-08,40400
+IR,Hennepin/Hopper,2020-11-17,26000
+IR,Hennepin/Hopper,2020-12-02,63000
+IR,Hennepin/Hopper,2020-12-10,12200
+IR,Hennepin/Hopper,2020-12-15,26430
+IR,Hennepin/Hopper,2020-12-22,2070
+IR,Hennepin/Hopper,2020-12-31,10
+IR,Hennepin/Hopper,2021-01-05,5
+IR,Hennepin/Hopper,2021-09-23,935
+IR,Hennepin/Hopper,2021-10-19,11010
+IR,Hennepin/Hopper,2021-10-26,21270
+IR,Hennepin/Hopper,2021-11-01,22105
+IR,Hennepin/Hopper,2021-11-09,26690
+IR,Hennepin/Hopper,2021-11-15,14120
+IR,Hennepin/Hopper,2021-11-22,17105
+IR,Hennepin/Hopper,2021-11-30,16375
+IR,Hennepin/Hopper,2021-12-07,21050
+IR,Hennepin/Hopper,2021-12-14,2725
+IR,Hennepin/Hopper,2021-12-22,9060
+IR,Hennepin/Hopper,2022-01-07,0
+IR,Hennepin/Hopper,2022-03-08,1410
+IR,Hennepin/Hopper,2022-03-15,3230
+IR,Hennepin/Hopper,2022-08-31,0
+IR,Hennepin/Hopper,2022-09-08,0
+IR,Hennepin/Hopper,2022-09-13,215
+IR,Hennepin/Hopper,2022-09-22,120
+IR,Hennepin/Hopper,2022-10-10,600
+IR,Hennepin/Hopper,2022-10-19,4380
+IR,Hennepin/Hopper,2022-10-27,8015
+IR,Hennepin/Hopper,2022-11-07,21800
+IR,Hennepin/Hopper,2022-11-22,24180
+IR,Hennepin/Hopper,2022-12-01,29915
+IR,Hennepin/Hopper,2022-12-12,16050
+IR,Hennepin/Hopper,2022-12-19,7250
+IR,Hennepin/Hopper,2022-12-27,10
+IR,Hennepin/Hopper,2023-01-09,535
+IR,Hennepin/Hopper,2023-08-31,0
+IR,Hennepin/Hopper,2023-09-08,115
+IR,Hennepin/Hopper,2023-09-15,120
+IR,Hennepin/Hopper,2023-09-19,275
+IR,Hennepin/Hopper,2023-10-30,9350
+IR,Hennepin/Hopper,2023-11-10,8610
+IR,Hennepin/Hopper,2023-11-15,12100
+IR,Hennepin/Hopper,2023-11-22,15515
+IR,Hennepin/Hopper,2023-11-28,40340
+IR,Hennepin/Hopper,2023-12-06,9375
+IR,Hennepin/Hopper,2023-12-13,19620
+IR,Hennepin/Hopper,2023-12-21,22080
+IR,Hennepin/Hopper,2024-01-03,6715
+IR,Hennepin/Hopper,2024-09-04,30
+IR,Hennepin/Hopper,2024-09-09,70
+IR,Hennepin/Hopper,2024-09-16,105
+IR,Hennepin/Hopper,2024-10-15,1440
+IR,Hennepin/Hopper,2024-10-24,1970
+IR,Hennepin/Hopper,2024-11-01,9655
+IR,Hennepin/Hopper,2024-11-06,17250
+IR,Hennepin/Hopper,2024-11-15,36340
+IR,Hennepin/Hopper,2024-11-26,24460
+IR,Hennepin/Hopper,2024-12-03,30675
+IR,Hennepin/Hopper,2024-12-09,14385
+IR,Hennepin/Hopper,2024-12-23,1360
+IR,Hennepin/Hopper,2025-01-03,3175
+IR,Hennepin/Hopper,2025-01-07,970
+IR,Hennepin/Hopper,2025-08-27,0
+IR,Hennepin/Hopper,2025-09-11,30
+IR,Hennepin/Hopper,2025-09-19,265
+IR,Hennepin/Hopper,2025-10-14,1840
+IR,Hennepin/Hopper,2025-10-31,3250
+IR,Hennepin/Hopper,2025-11-13,22310
+IR,Hennepin/Hopper,2025-11-28,47830
+IR,Hennepin/Hopper,2025-12-09,430
+IR,Hennepin/Hopper,2025-12-16,1695
+IR,Hennepin/Hopper,2025-12-22,1620
+IR,Hennepin/Hopper,2026-01-02,10
+IR,Hennepin/Hopper,2026-01-07,0
+IR,Hennepin/Hopper,2026-01-12,1285
+MR,Keithsburg Refuge,2018-10-18,2050
+MR,Keithsburg Refuge,2018-10-24,450
+MR,Keithsburg Refuge,2018-11-02,1370
+MR,Keithsburg Refuge,2018-11-14,3900
+MR,Keithsburg Refuge,2018-11-20,1360
+MR,Keithsburg Refuge,2018-11-29,300
+MR,Keithsburg Refuge,2018-12-07,6200
+MR,Keithsburg Refuge,2018-12-11,2650
+MR,Keithsburg Refuge,2018-12-17,2050
+MR,Keithsburg Refuge,2019-01-03,3005
+MR,Keithsburg Refuge,2019-01-10,3100
+MR,Keithsburg Refuge,2019-10-17,0
+MR,Keithsburg Refuge,2019-10-24,310
+MR,Keithsburg Refuge,2019-10-28,3920
+MR,Keithsburg Refuge,2019-11-05,280
+MR,Keithsburg Refuge,2019-11-14,1330
+MR,Keithsburg Refuge,2019-11-25,675
+MR,Keithsburg Refuge,2019-12-02,1070
+MR,Keithsburg Refuge,2019-12-18,0
+MR,Keithsburg Refuge,2019-12-23,3105
+MR,Keithsburg Refuge,2020-01-02,4180
+MR,Keithsburg Refuge,2020-01-08,220
+MR,Keithsburg Refuge,2020-10-21,200
+MR,Keithsburg Refuge,2020-10-28,585
+MR,Keithsburg Refuge,2020-11-03,2770
+MR,Keithsburg Refuge,2020-11-09,1630
+MR,Keithsburg Refuge,2020-11-17,2350
+MR,Keithsburg Refuge,2020-11-23,2380
+MR,Keithsburg Refuge,2020-12-02,4050
+MR,Keithsburg Refuge,2020-12-10,2000
+MR,Keithsburg Refuge,2020-12-15,200
+MR,Keithsburg Refuge,2020-12-22,1530
+MR,Keithsburg Refuge,2020-12-31,0
+MR,Keithsburg Refuge,2021-01-05,0
+MR,Keithsburg Refuge,2021-09-17,10
+MR,Keithsburg Refuge,2021-10-19,560
+MR,Keithsburg Refuge,2021-10-26,1040
+MR,Keithsburg Refuge,2021-11-01,950
+MR,Keithsburg Refuge,2021-11-09,1945
+MR,Keithsburg Refuge,2021-11-15,1000
+MR,Keithsburg Refuge,2021-11-22,5620
+MR,Keithsburg Refuge,2021-11-30,2100
+MR,Keithsburg Refuge,2021-12-07,1800
+MR,Keithsburg Refuge,2021-12-14,1220
+MR,Keithsburg Refuge,2021-12-22,75
+MR,Keithsburg Refuge,2022-01-07,0
+MR,Keithsburg Refuge,2022-03-08,365
+MR,Keithsburg Refuge,2022-03-15,1290
+MR,Keithsburg Refuge,2022-08-31,15
+MR,Keithsburg Refuge,2022-09-08,0
+MR,Keithsburg Refuge,2022-09-13,10
+MR,Keithsburg Refuge,2022-09-22,35
+MR,Keithsburg Refuge,2022-10-10,120
+MR,Keithsburg Refuge,2022-10-19,690
+MR,Keithsburg Refuge,2022-10-27,2500
+MR,Keithsburg Refuge,2022-11-07,7000
+MR,Keithsburg Refuge,2022-11-14,10350
+MR,Keithsburg Refuge,2022-11-22,1070
+MR,Keithsburg Refuge,2022-12-01,0
+MR,Keithsburg Refuge,2022-12-19,0
+MR,Keithsburg Refuge,2022-12-27,0
+MR,Keithsburg Refuge,2023-01-09,20
+MR,Keithsburg Refuge,2023-08-31,40
+MR,Keithsburg Refuge,2023-09-08,70
+MR,Keithsburg Refuge,2023-09-15,75
+MR,Keithsburg Refuge,2023-09-19,165
+MR,Keithsburg Refuge,2023-10-09,210
+MR,Keithsburg Refuge,2023-10-20,335
+MR,Keithsburg Refuge,2023-10-30,1265
+MR,Keithsburg Refuge,2023-11-10,3910
+MR,Keithsburg Refuge,2023-11-15,4200
+MR,Keithsburg Refuge,2023-11-22,3650
+MR,Keithsburg Refuge,2023-11-28,0
+MR,Keithsburg Refuge,2023-12-06,130
+MR,Keithsburg Refuge,2023-12-13,460
+MR,Keithsburg Refuge,2023-12-21,0
+MR,Keithsburg Refuge,2024-01-03,35
+MR,Keithsburg Refuge,2024-09-04,375
+MR,Keithsburg Refuge,2024-09-09,280
+MR,Keithsburg Refuge,2024-09-16,310
+MR,Keithsburg Refuge,2024-10-15,100
+MR,Keithsburg Refuge,2024-10-24,460
+MR,Keithsburg Refuge,2024-11-01,120
+MR,Keithsburg Refuge,2024-11-06,665
+MR,Keithsburg Refuge,2024-11-15,645
+MR,Keithsburg Refuge,2024-11-26,315
+MR,Keithsburg Refuge,2024-12-03,210
+MR,Keithsburg Refuge,2024-12-09,200
+MR,Keithsburg Refuge,2024-12-23,0
+MR,Keithsburg Refuge,2025-01-03,0
+MR,Keithsburg Refuge,2025-01-07,0
+MR,Keithsburg Refuge,2025-08-27,0
+MR,Keithsburg Refuge,2025-09-11,0
+MR,Keithsburg Refuge,2025-09-19,0
+MR,Keithsburg Refuge,2025-10-14,245
+MR,Keithsburg Refuge,2025-10-31,550
+MR,Keithsburg Refuge,2025-11-13,950
+MR,Keithsburg Refuge,2025-11-28,435
+MR,Keithsburg Refuge,2025-12-09,0
+MR,Keithsburg Refuge,2025-12-16,0
+MR,Keithsburg Refuge,2025-12-22,0
+MR,Keithsburg Refuge,2026-01-02,0
+MR,Keithsburg Refuge,2026-01-12,0
+MR,Keokuk-Nauvoo,2018-10-18,1550
+MR,Keokuk-Nauvoo,2018-10-24,1370
+MR,Keokuk-Nauvoo,2018-11-02,1540
+MR,Keokuk-Nauvoo,2018-11-14,32150
+MR,Keokuk-Nauvoo,2018-11-20,12060
+MR,Keokuk-Nauvoo,2018-11-29,11450
+MR,Keokuk-Nauvoo,2018-12-07,29775
+MR,Keokuk-Nauvoo,2018-12-11,6300
+MR,Keokuk-Nauvoo,2018-12-17,11120
+MR,Keokuk-Nauvoo,2019-01-03,7470
+MR,Keokuk-Nauvoo,2019-01-10,22050
+MR,Keokuk-Nauvoo,2019-10-17,0
+MR,Keokuk-Nauvoo,2019-10-24,390
+MR,Keokuk-Nauvoo,2019-10-28,1750
+MR,Keokuk-Nauvoo,2019-11-05,3980
+MR,Keokuk-Nauvoo,2019-11-14,27050
+MR,Keokuk-Nauvoo,2019-11-25,18090
+MR,Keokuk-Nauvoo,2019-12-02,4040
+MR,Keokuk-Nauvoo,2019-12-18,5385
+MR,Keokuk-Nauvoo,2019-12-23,2880
+MR,Keokuk-Nauvoo,2020-01-02,5510
+MR,Keokuk-Nauvoo,2020-01-08,9250
+MR,Keokuk-Nauvoo,2020-10-21,310
+MR,Keokuk-Nauvoo,2020-10-28,5665
+MR,Keokuk-Nauvoo,2020-11-03,17325
+MR,Keokuk-Nauvoo,2020-11-09,12610
+MR,Keokuk-Nauvoo,2020-11-17,20700
+MR,Keokuk-Nauvoo,2020-11-23,31560
+MR,Keokuk-Nauvoo,2020-12-02,43560
+MR,Keokuk-Nauvoo,2020-12-10,20020
+MR,Keokuk-Nauvoo,2020-12-15,30720
+MR,Keokuk-Nauvoo,2020-12-22,7340
+MR,Keokuk-Nauvoo,2020-12-31,18950
+MR,Keokuk-Nauvoo,2021-01-05,16950
+MR,Keokuk-Nauvoo,2021-09-17,215
+MR,Keokuk-Nauvoo,2021-10-19,425
+MR,Keokuk-Nauvoo,2021-10-26,170
+MR,Keokuk-Nauvoo,2021-11-01,720
+MR,Keokuk-Nauvoo,2021-11-09,1950
+MR,Keokuk-Nauvoo,2021-11-15,1050
+MR,Keokuk-Nauvoo,2021-11-22,3535
+MR,Keokuk-Nauvoo,2021-11-30,3460
+MR,Keokuk-Nauvoo,2021-12-07,8105
+MR,Keokuk-Nauvoo,2021-12-14,8960
+MR,Keokuk-Nauvoo,2021-12-22,11090
+MR,Keokuk-Nauvoo,2022-01-07,235
+MR,Keokuk-Nauvoo,2022-08-31,0
+MR,Keokuk-Nauvoo,2022-09-08,0
+MR,Keokuk-Nauvoo,2022-09-13,0
+MR,Keokuk-Nauvoo,2022-09-22,0
+MR,Keokuk-Nauvoo,2022-10-10,30
+MR,Keokuk-Nauvoo,2022-10-19,20
+MR,Keokuk-Nauvoo,2022-10-27,220
+MR,Keokuk-Nauvoo,2022-11-07,5800
+MR,Keokuk-Nauvoo,2022-11-14,26250
+MR,Keokuk-Nauvoo,2022-11-22,48870
+MR,Keokuk-Nauvoo,2022-12-01,29510
+MR,Keokuk-Nauvoo,2022-12-19,22575
+MR,Keokuk-Nauvoo,2022-12-27,2880
+MR,Keokuk-Nauvoo,2023-01-09,12100
+MR,Keokuk-Nauvoo,2023-08-31,45
+MR,Keokuk-Nauvoo,2023-09-08,15
+MR,Keokuk-Nauvoo,2023-09-15,10
+MR,Keokuk-Nauvoo,2023-09-19,10
+MR,Keokuk-Nauvoo,2023-10-09,70
+MR,Keokuk-Nauvoo,2023-10-20,320
+MR,Keokuk-Nauvoo,2023-10-30,7060
+MR,Keokuk-Nauvoo,2023-11-10,22660
+MR,Keokuk-Nauvoo,2023-11-15,15650
+MR,Keokuk-Nauvoo,2023-11-22,22200
+MR,Keokuk-Nauvoo,2023-11-28,21955
+MR,Keokuk-Nauvoo,2023-12-06,42950
+MR,Keokuk-Nauvoo,2023-12-13,112200
+MR,Keokuk-Nauvoo,2023-12-21,72110
+MR,Keokuk-Nauvoo,2024-01-03,44280
+MR,Keokuk-Nauvoo,2024-09-04,0
+MR,Keokuk-Nauvoo,2024-09-09,20
+MR,Keokuk-Nauvoo,2024-09-16,0
+MR,Keokuk-Nauvoo,2024-10-15,305
+MR,Keokuk-Nauvoo,2024-10-24,5785
+MR,Keokuk-Nauvoo,2024-11-01,13350
+MR,Keokuk-Nauvoo,2024-11-06,16795
+MR,Keokuk-Nauvoo,2024-11-15,41195
+MR,Keokuk-Nauvoo,2024-11-26,80535
+MR,Keokuk-Nauvoo,2024-12-03,101505
+MR,Keokuk-Nauvoo,2024-12-09,58290
+MR,Keokuk-Nauvoo,2024-12-23,27905
+MR,Keokuk-Nauvoo,2025-01-03,40525
+MR,Keokuk-Nauvoo,2025-01-07,11625
+MR,Keokuk-Nauvoo,2025-08-27,5
+MR,Keokuk-Nauvoo,2025-09-11,0
+MR,Keokuk-Nauvoo,2025-09-19,35
+MR,Keokuk-Nauvoo,2025-10-14,500
+MR,Keokuk-Nauvoo,2025-10-31,3960
+MR,Keokuk-Nauvoo,2025-11-13,96200
+MR,Keokuk-Nauvoo,2025-11-28,117200
+MR,Keokuk-Nauvoo,2025-12-09,212045
+MR,Keokuk-Nauvoo,2025-12-16,8300
+MR,Keokuk-Nauvoo,2025-12-22,14220
+MR,Keokuk-Nauvoo,2026-01-02,31795
+MR,Keokuk-Nauvoo,2026-01-12,65265
+MR,Long Lake,2018-10-18,2700
+MR,Long Lake,2018-10-24,7100
+MR,Long Lake,2018-11-02,0
+MR,Long Lake,2018-11-09,15300
+MR,Long Lake,2018-11-14,35000
+MR,Long Lake,2018-11-20,12000
+MR,Long Lake,2018-11-29,45025
+MR,Long Lake,2018-12-07,31500
+MR,Long Lake,2018-12-11,35000
+MR,Long Lake,2018-12-17,1010
+MR,Long Lake,2019-01-03,25000
+MR,Long Lake,2019-01-10,5000
+MR,Long Lake,2019-10-17,250
+MR,Long Lake,2019-10-24,1250
+MR,Long Lake,2019-11-05,3300
+MR,Long Lake,2019-11-14,17000
+MR,Long Lake,2019-11-25,4800
+MR,Long Lake,2019-12-02,5900
+MR,Long Lake,2019-12-18,15000
+MR,Long Lake,2019-12-23,3000
+MR,Long Lake,2020-01-02,7000
+MR,Long Lake,2020-01-08,1110
+MR,Long Lake,2020-10-21,0
+MR,Long Lake,2020-10-28,12860
+MR,Long Lake,2020-11-03,34000
+MR,Long Lake,2020-11-09,35000
+MR,Long Lake,2020-11-17,42000
+MR,Long Lake,2020-11-23,60200
+MR,Long Lake,2020-12-02,-3600
+MR,Long Lake,2020-12-10,40000
+MR,Long Lake,2020-12-15,65000
+MR,Long Lake,2020-12-22,11000
+MR,Long Lake,2020-12-31,30000
+MR,Long Lake,2021-01-05,8500
+MR,Long Lake,2021-09-17,30
+MR,Long Lake,2021-10-19,4530
+MR,Long Lake,2021-10-26,1580
+MR,Long Lake,2021-11-01,15950
+MR,Long Lake,2021-11-09,32625
+MR,Long Lake,2021-11-15,45430
+MR,Long Lake,2021-11-22,41320
+MR,Long Lake,2021-11-30,34720
+MR,Long Lake,2021-12-07,50625
+MR,Long Lake,2021-12-14,30460
+MR,Long Lake,2021-12-22,30025
+MR,Long Lake,2022-01-07,780
+MR,Long Lake,2022-03-08,55
+MR,Long Lake,2022-03-15,155
+MR,Long Lake,2022-08-31,0
+MR,Long Lake,2022-09-08,15
+MR,Long Lake,2022-09-13,0
+MR,Long Lake,2022-09-22,10
+MR,Long Lake,2022-10-10,0
+MR,Long Lake,2022-10-19,30
+MR,Long Lake,2022-10-27,650
+MR,Long Lake,2022-11-07,9500
+MR,Long Lake,2022-11-14,11300
+MR,Long Lake,2022-11-22,17300
+MR,Long Lake,2022-12-01,16600
+MR,Long Lake,2022-12-19,14040
+MR,Long Lake,2022-12-27,6770
+MR,Long Lake,2023-01-09,3775
+MR,Long Lake,2023-08-31,0
+MR,Long Lake,2023-09-08,0
+MR,Long Lake,2023-09-15,0
+MR,Long Lake,2023-09-19,0
+MR,Long Lake,2023-10-09,0
+MR,Long Lake,2023-10-20,2790
+MR,Long Lake,2023-10-30,4800
+MR,Long Lake,2023-11-10,7300
+MR,Long Lake,2023-11-15,7500
+MR,Long Lake,2023-11-22,18250
+MR,Long Lake,2023-11-28,26500
+MR,Long Lake,2023-12-06,14550
+MR,Long Lake,2023-12-13,14750
+MR,Long Lake,2023-12-21,11800
+MR,Long Lake,2024-01-03,26210
+MR,Long Lake,2024-09-04,0
+MR,Long Lake,2024-09-09,10
+MR,Long Lake,2024-09-16,0
+MR,Long Lake,2024-10-15,180
+MR,Long Lake,2024-10-24,2170
+MR,Long Lake,2024-11-01,8910
+MR,Long Lake,2024-11-06,9000
+MR,Long Lake,2024-11-15,10650
+MR,Long Lake,2024-11-26,22380
+MR,Long Lake,2024-12-03,60390
+MR,Long Lake,2024-12-09,38260
+MR,Long Lake,2024-12-23,10100
+MR,Long Lake,2025-01-03,1165
+MR,Long Lake,2025-01-07,35
+MR,Long Lake,2025-08-27,0
+MR,Long Lake,2025-09-11,0
+MR,Long Lake,2025-09-19,140
+MR,Long Lake,2025-10-14,140
+MR,Long Lake,2025-10-31,9060
+MR,Long Lake,2025-11-13,16450
+MR,Long Lake,2025-11-28,20650
+MR,Long Lake,2025-12-09,13335
+MR,Long Lake,2025-12-16,0
+MR,Long Lake,2025-12-22,9450
+MR,Long Lake,2026-01-02,13720
+MR,Long Lake,2026-01-12,6850
+MR,Louisa Refuge,2018-10-18,130
+MR,Louisa Refuge,2018-10-24,900
+MR,Louisa Refuge,2018-11-02,9730
+MR,Louisa Refuge,2018-11-14,50000
+MR,Louisa Refuge,2018-11-20,21310
+MR,Louisa Refuge,2018-11-29,7050
+MR,Louisa Refuge,2018-12-07,9010
+MR,Louisa Refuge,2018-12-11,11000
+MR,Louisa Refuge,2018-12-17,3600
+MR,Louisa Refuge,2019-01-03,680
+MR,Louisa Refuge,2019-01-10,110
+MR,Louisa Refuge,2019-10-17,135
+MR,Louisa Refuge,2019-10-24,1470
+MR,Louisa Refuge,2019-10-28,3200
+MR,Louisa Refuge,2019-11-05,3370
+MR,Louisa Refuge,2019-11-14,6205
+MR,Louisa Refuge,2019-11-25,6350
+MR,Louisa Refuge,2019-12-02,7600
+MR,Louisa Refuge,2019-12-18,450
+MR,Louisa Refuge,2019-12-23,8300
+MR,Louisa Refuge,2020-01-02,2075
+MR,Louisa Refuge,2020-01-08,420
+MR,Louisa Refuge,2020-10-21,2270
+MR,Louisa Refuge,2020-10-28,14830
+MR,Louisa Refuge,2020-11-03,17000
+MR,Louisa Refuge,2020-11-09,22560
+MR,Louisa Refuge,2020-11-17,20600
+MR,Louisa Refuge,2020-11-23,21150
+MR,Louisa Refuge,2020-12-02,13000
+MR,Louisa Refuge,2020-12-10,7905
+MR,Louisa Refuge,2020-12-15,4555
+MR,Louisa Refuge,2020-12-22,3110
+MR,Louisa Refuge,2020-12-31,0
+MR,Louisa Refuge,2021-01-05,0
+MR,Louisa Refuge,2021-09-17,85
+MR,Louisa Refuge,2021-10-19,3080
+MR,Louisa Refuge,2021-10-26,490
+MR,Louisa Refuge,2021-11-01,6060
+MR,Louisa Refuge,2021-11-09,6870
+MR,Louisa Refuge,2021-11-15,15155
+MR,Louisa Refuge,2021-11-22,11050
+MR,Louisa Refuge,2021-11-30,12135
+MR,Louisa Refuge,2021-12-07,15570
+MR,Louisa Refuge,2021-12-14,9615
+MR,Louisa Refuge,2021-12-22,7675
+MR,Louisa Refuge,2022-01-07,0
+MR,Louisa Refuge,2022-03-08,27400
+MR,Louisa Refuge,2022-03-15,27910
+MR,Louisa Refuge,2022-08-31,5
+MR,Louisa Refuge,2022-09-08,0
+MR,Louisa Refuge,2022-09-13,0
+MR,Louisa Refuge,2022-09-22,170
+MR,Louisa Refuge,2022-10-10,580
+MR,Louisa Refuge,2022-10-19,2620
+MR,Louisa Refuge,2022-10-27,4830
+MR,Louisa Refuge,2022-11-07,11905
+MR,Louisa Refuge,2022-11-14,16775
+MR,Louisa Refuge,2022-11-22,29650
+MR,Louisa Refuge,2022-12-01,31675
+MR,Louisa Refuge,2022-12-19,11580
+MR,Louisa Refuge,2022-12-27,550
+MR,Louisa Refuge,2023-01-09,40
+MR,Louisa Refuge,2023-08-31,25
+MR,Louisa Refuge,2023-09-08,200
+MR,Louisa Refuge,2023-09-15,390
+MR,Louisa Refuge,2023-09-19,255
+MR,Louisa Refuge,2023-10-09,3215
+MR,Louisa Refuge,2023-10-20,6545
+MR,Louisa Refuge,2023-10-30,18410
+MR,Louisa Refuge,2023-11-10,18750
+MR,Louisa Refuge,2023-11-15,19950
+MR,Louisa Refuge,2023-11-22,16225
+MR,Louisa Refuge,2023-11-28,29355
+MR,Louisa Refuge,2023-12-06,17595
+MR,Louisa Refuge,2023-12-13,22570
+MR,Louisa Refuge,2023-12-21,23505
+MR,Louisa Refuge,2024-01-03,1685
+MR,Louisa Refuge,2024-09-04,70
+MR,Louisa Refuge,2024-09-09,165
+MR,Louisa Refuge,2024-09-16,245
+MR,Louisa Refuge,2024-10-15,690
+MR,Louisa Refuge,2024-10-24,855
+MR,Louisa Refuge,2024-11-01,1120
+MR,Louisa Refuge,2024-11-06,5060
+MR,Louisa Refuge,2024-11-15,5230
+MR,Louisa Refuge,2024-11-26,12300
+MR,Louisa Refuge,2024-12-03,24580
+MR,Louisa Refuge,2024-12-09,24860
+MR,Louisa Refuge,2024-12-23,880
+MR,Louisa Refuge,2025-01-03,70
+MR,Louisa Refuge,2025-01-07,0
+MR,Louisa Refuge,2025-08-27,0
+MR,Louisa Refuge,2025-09-11,0
+MR,Louisa Refuge,2025-09-19,15
+MR,Louisa Refuge,2025-10-14,470
+MR,Louisa Refuge,2025-10-31,1375
+MR,Louisa Refuge,2025-11-13,7180
+MR,Louisa Refuge,2025-11-28,32185
+MR,Louisa Refuge,2025-12-09,1200
+MR,Louisa Refuge,2025-12-16,0
+MR,Louisa Refuge,2025-12-22,0
+MR,Louisa Refuge,2026-01-02,0
+MR,Louisa Refuge,2026-01-12,3980
+MR,Nauvoo-Ft. Madison,2018-10-18,1710
+MR,Nauvoo-Ft. Madison,2018-10-24,3400
+MR,Nauvoo-Ft. Madison,2018-11-02,10910
+MR,Nauvoo-Ft. Madison,2018-11-14,60100
+MR,Nauvoo-Ft. Madison,2018-11-20,18205
+MR,Nauvoo-Ft. Madison,2018-11-29,27810
+MR,Nauvoo-Ft. Madison,2018-12-07,22490
+MR,Nauvoo-Ft. Madison,2018-12-11,11470
+MR,Nauvoo-Ft. Madison,2018-12-17,30600
+MR,Nauvoo-Ft. Madison,2019-01-03,15850
+MR,Nauvoo-Ft. Madison,2019-01-10,23900
+MR,Nauvoo-Ft. Madison,2019-10-17,0
+MR,Nauvoo-Ft. Madison,2019-10-24,370
+MR,Nauvoo-Ft. Madison,2019-10-28,1650
+MR,Nauvoo-Ft. Madison,2019-11-05,8850
+MR,Nauvoo-Ft. Madison,2019-11-14,2900
+MR,Nauvoo-Ft. Madison,2019-11-25,9320
+MR,Nauvoo-Ft. Madison,2019-12-02,2860
+MR,Nauvoo-Ft. Madison,2019-12-18,10000
+MR,Nauvoo-Ft. Madison,2019-12-23,11410
+MR,Nauvoo-Ft. Madison,2020-01-02,5940
+MR,Nauvoo-Ft. Madison,2020-01-08,3965
+MR,Nauvoo-Ft. Madison,2020-10-21,1160
+MR,Nauvoo-Ft. Madison,2020-10-28,3365
+MR,Nauvoo-Ft. Madison,2020-11-03,26415
+MR,Nauvoo-Ft. Madison,2020-11-09,19000
+MR,Nauvoo-Ft. Madison,2020-11-17,42690
+MR,Nauvoo-Ft. Madison,2020-11-23,54520
+MR,Nauvoo-Ft. Madison,2020-12-02,29660
+MR,Nauvoo-Ft. Madison,2020-12-10,56000
+MR,Nauvoo-Ft. Madison,2020-12-15,13415
+MR,Nauvoo-Ft. Madison,2020-12-22,74170
+MR,Nauvoo-Ft. Madison,2020-12-31,35600
+MR,Nauvoo-Ft. Madison,2021-01-05,37900
+MR,Nauvoo-Ft. Madison,2021-09-17,1995
+MR,Nauvoo-Ft. Madison,2021-10-19,9540
+MR,Nauvoo-Ft. Madison,2021-10-26,9390
+MR,Nauvoo-Ft. Madison,2021-11-01,10360
+MR,Nauvoo-Ft. Madison,2021-11-09,8790
+MR,Nauvoo-Ft. Madison,2021-11-15,27465
+MR,Nauvoo-Ft. Madison,2021-11-22,46145
+MR,Nauvoo-Ft. Madison,2021-11-30,83255
+MR,Nauvoo-Ft. Madison,2021-12-07,73600
+MR,Nauvoo-Ft. Madison,2021-12-14,52600
+MR,Nauvoo-Ft. Madison,2021-12-22,51925
+MR,Nauvoo-Ft. Madison,2022-01-07,5040
+MR,Nauvoo-Ft. Madison,2022-08-31,100
+MR,Nauvoo-Ft. Madison,2022-09-08,1425
+MR,Nauvoo-Ft. Madison,2022-09-13,600
+MR,Nauvoo-Ft. Madison,2022-09-22,3030
+MR,Nauvoo-Ft. Madison,2022-10-10,6270
+MR,Nauvoo-Ft. Madison,2022-10-19,11250
+MR,Nauvoo-Ft. Madison,2022-10-27,15060
+MR,Nauvoo-Ft. Madison,2022-11-07,71050
+MR,Nauvoo-Ft. Madison,2022-11-14,55500
+MR,Nauvoo-Ft. Madison,2022-11-22,44925
+MR,Nauvoo-Ft. Madison,2022-12-01,46550
+MR,Nauvoo-Ft. Madison,2022-12-19,72205
+MR,Nauvoo-Ft. Madison,2022-12-27,1110
+MR,Nauvoo-Ft. Madison,2023-01-09,23610
+MR,Nauvoo-Ft. Madison,2023-08-31,495
+MR,Nauvoo-Ft. Madison,2023-09-08,1865
+MR,Nauvoo-Ft. Madison,2023-09-15,1635
+MR,Nauvoo-Ft. Madison,2023-09-19,2275
+MR,Nauvoo-Ft. Madison,2023-10-09,7640
+MR,Nauvoo-Ft. Madison,2023-10-20,10530
+MR,Nauvoo-Ft. Madison,2023-10-30,12000
+MR,Nauvoo-Ft. Madison,2023-11-10,32770
+MR,Nauvoo-Ft. Madison,2023-11-15,66470
+MR,Nauvoo-Ft. Madison,2023-11-22,59270
+MR,Nauvoo-Ft. Madison,2023-11-28,81000
+MR,Nauvoo-Ft. Madison,2023-12-06,68950
+MR,Nauvoo-Ft. Madison,2023-12-13,27545
+MR,Nauvoo-Ft. Madison,2023-12-21,112600
+MR,Nauvoo-Ft. Madison,2024-01-03,62970
+MR,Nauvoo-Ft. Madison,2024-09-04,335
+MR,Nauvoo-Ft. Madison,2024-09-09,345
+MR,Nauvoo-Ft. Madison,2024-09-16,545
+MR,Nauvoo-Ft. Madison,2024-10-15,4600
+MR,Nauvoo-Ft. Madison,2024-10-24,6645
+MR,Nauvoo-Ft. Madison,2024-11-01,8885
+MR,Nauvoo-Ft. Madison,2024-11-06,9925
+MR,Nauvoo-Ft. Madison,2024-11-15,18965
+MR,Nauvoo-Ft. Madison,2024-11-26,17070
+MR,Nauvoo-Ft. Madison,2024-12-03,18580
+MR,Nauvoo-Ft. Madison,2024-12-09,64440
+MR,Nauvoo-Ft. Madison,2024-12-23,17135
+MR,Nauvoo-Ft. Madison,2025-01-03,12195
+MR,Nauvoo-Ft. Madison,2025-01-07,17880
+MR,Nauvoo-Ft. Madison,2025-08-27,10
+MR,Nauvoo-Ft. Madison,2025-09-11,145
+MR,Nauvoo-Ft. Madison,2025-09-19,1160
+MR,Nauvoo-Ft. Madison,2025-10-14,1965
+MR,Nauvoo-Ft. Madison,2025-10-31,5150
+MR,Nauvoo-Ft. Madison,2025-11-13,24220
+MR,Nauvoo-Ft. Madison,2025-11-28,16825
+MR,Nauvoo-Ft. Madison,2025-12-09,33620
+MR,Nauvoo-Ft. Madison,2025-12-16,3250
+MR,Nauvoo-Ft. Madison,2025-12-22,13895
+MR,Nauvoo-Ft. Madison,2026-01-02,20220
+MR,Nauvoo-Ft. Madison,2026-01-12,24830
+IR,Rice Lake,2018-10-12,175
+IR,Rice Lake,2018-10-18,900
+IR,Rice Lake,2018-10-24,700
+IR,Rice Lake,2018-11-02,500
+IR,Rice Lake,2018-11-09,500
+IR,Rice Lake,2018-11-14,230
+IR,Rice Lake,2018-11-20,1005
+IR,Rice Lake,2018-11-29,0
+IR,Rice Lake,2018-12-07,0
+IR,Rice Lake,2018-12-11,5
+IR,Rice Lake,2018-12-17,1020
+IR,Rice Lake,2019-01-03,2550
+IR,Rice Lake,2019-01-10,5905
+IR,Rice Lake,2019-10-17,3560
+IR,Rice Lake,2019-10-28,1510
+IR,Rice Lake,2019-11-05,6715
+IR,Rice Lake,2019-11-14,7130
+IR,Rice Lake,2019-11-25,3500
+IR,Rice Lake,2019-12-02,3620
+IR,Rice Lake,2019-12-18,40
+IR,Rice Lake,2019-12-23,70
+IR,Rice Lake,2020-01-02,2700
+IR,Rice Lake,2020-01-08,2015
+IR,Rice Lake,2020-10-16,250
+IR,Rice Lake,2020-10-21,460
+IR,Rice Lake,2020-10-28,605
+IR,Rice Lake,2020-11-03,300
+IR,Rice Lake,2020-11-08,1000
+IR,Rice Lake,2020-11-17,1220
+IR,Rice Lake,2020-12-02,350
+IR,Rice Lake,2020-12-10,1200
+IR,Rice Lake,2020-12-15,900
+IR,Rice Lake,2020-12-22,1715
+IR,Rice Lake,2020-12-31,0
+IR,Rice Lake,2021-01-05,0
+IR,Rice Lake,2021-09-23,0
+IR,Rice Lake,2021-10-19,40
+IR,Rice Lake,2021-10-26,320
+IR,Rice Lake,2021-11-01,3020
+IR,Rice Lake,2021-11-09,2500
+IR,Rice Lake,2021-11-15,5550
+IR,Rice Lake,2021-11-22,4715
+IR,Rice Lake,2021-11-30,4565
+IR,Rice Lake,2021-12-07,6920
+IR,Rice Lake,2021-12-14,3130
+IR,Rice Lake,2021-12-22,3740
+IR,Rice Lake,2022-01-07,0
+IR,Rice Lake,2022-03-08,1560
+IR,Rice Lake,2022-03-15,4700
+IR,Rice Lake,2022-08-31,5
+IR,Rice Lake,2022-09-08,0
+IR,Rice Lake,2022-09-13,10
+IR,Rice Lake,2022-09-22,150
+IR,Rice Lake,2022-10-10,205
+IR,Rice Lake,2022-10-19,3850
+IR,Rice Lake,2022-10-27,3150
+IR,Rice Lake,2022-11-07,950
+IR,Rice Lake,2022-11-22,210
+IR,Rice Lake,2022-12-01,2165
+IR,Rice Lake,2022-12-12,605
+IR,Rice Lake,2022-12-19,10
+IR,Rice Lake,2022-12-27,0
+IR,Rice Lake,2023-01-09,795
+IR,Rice Lake,2023-08-31,335
+IR,Rice Lake,2023-09-08,85
+IR,Rice Lake,2023-09-15,0
+IR,Rice Lake,2023-09-19,0
+IR,Rice Lake,2023-10-30,2245
+IR,Rice Lake,2023-11-10,300
+IR,Rice Lake,2023-11-15,1025
+IR,Rice Lake,2023-11-22,3400
+IR,Rice Lake,2023-11-28,2560
+IR,Rice Lake,2023-12-06,470
+IR,Rice Lake,2023-12-13,1455
+IR,Rice Lake,2023-12-21,1110
+IR,Rice Lake,2024-01-03,11185
+IR,Rice Lake,2024-09-04,335
+IR,Rice Lake,2024-09-09,55
+IR,Rice Lake,2024-09-16,70
+IR,Rice Lake,2024-10-15,2520
+IR,Rice Lake,2024-10-24,3130
+IR,Rice Lake,2024-11-01,1965
+IR,Rice Lake,2024-11-06,2095
+IR,Rice Lake,2024-11-15,1195
+IR,Rice Lake,2024-11-26,1635
+IR,Rice Lake,2024-12-03,70
+IR,Rice Lake,2024-12-09,445
+IR,Rice Lake,2024-12-23,380
+IR,Rice Lake,2025-01-03,4365
+IR,Rice Lake,2025-01-07,20
+IR,Rice Lake,2025-08-27,0
+IR,Rice Lake,2025-09-11,0
+IR,Rice Lake,2025-09-19,0
+IR,Rice Lake,2025-10-14,410
+IR,Rice Lake,2025-10-31,1425
+IR,Rice Lake,2025-11-13,1376
+IR,Rice Lake,2025-11-28,3050
+IR,Rice Lake,2025-12-09,0
+IR,Rice Lake,2025-12-16,0
+IR,Rice Lake,2025-12-22,15
+IR,Rice Lake,2026-01-02,15
+IR,Rice Lake,2026-01-07,325
+IR,Rice Lake,2026-01-12,215
+IR,Senachwine Lake,2018-10-12,1020
+IR,Senachwine Lake,2018-10-18,7400
+IR,Senachwine Lake,2018-10-24,3610
+IR,Senachwine Lake,2018-11-02,11000
+IR,Senachwine Lake,2018-11-14,12470
+IR,Senachwine Lake,2018-11-20,17000
+IR,Senachwine Lake,2018-11-29,1850
+IR,Senachwine Lake,2018-12-07,8100
+IR,Senachwine Lake,2018-12-11,1800
+IR,Senachwine Lake,2018-12-17,700
+IR,Senachwine Lake,2019-01-03,610
+IR,Senachwine Lake,2019-01-10,1420
+IR,Senachwine Lake,2019-10-17,0
+IR,Senachwine Lake,2019-10-28,1155
+IR,Senachwine Lake,2019-11-05,11015
+IR,Senachwine Lake,2019-11-14,4850
+IR,Senachwine Lake,2019-11-25,2850
+IR,Senachwine Lake,2019-12-02,3230
+IR,Senachwine Lake,2019-12-18,1860
+IR,Senachwine Lake,2019-12-23,6350
+IR,Senachwine Lake,2020-01-02,3300
+IR,Senachwine Lake,2020-01-08,3310
+IR,Senachwine Lake,2020-10-16,5370
+IR,Senachwine Lake,2020-10-21,7470
+IR,Senachwine Lake,2020-10-28,10830
+IR,Senachwine Lake,2020-11-03,23700
+IR,Senachwine Lake,2020-11-08,18150
+IR,Senachwine Lake,2020-11-17,19000
+IR,Senachwine Lake,2020-12-02,200
+IR,Senachwine Lake,2020-12-10,1420
+IR,Senachwine Lake,2020-12-15,4410
+IR,Senachwine Lake,2020-12-22,7380
+IR,Senachwine Lake,2020-12-31,290
+IR,Senachwine Lake,2021-01-05,1370
+IR,Senachwine Lake,2021-09-23,1310
+IR,Senachwine Lake,2021-10-19,10335
+IR,Senachwine Lake,2021-10-26,165
+IR,Senachwine Lake,2021-11-01,2435
+IR,Senachwine Lake,2021-11-09,2700
+IR,Senachwine Lake,2021-11-15,8110
+IR,Senachwine Lake,2021-11-22,8185
+IR,Senachwine Lake,2021-11-30,1635
+IR,Senachwine Lake,2021-12-07,120
+IR,Senachwine Lake,2021-12-14,515
+IR,Senachwine Lake,2021-12-22,950
+IR,Senachwine Lake,2022-01-07,210
+IR,Senachwine Lake,2022-03-08,6290
+IR,Senachwine Lake,2022-03-15,2740
+IR,Senachwine Lake,2022-08-31,25
+IR,Senachwine Lake,2022-09-08,255
+IR,Senachwine Lake,2022-09-13,1095
+IR,Senachwine Lake,2022-09-22,2280
+IR,Senachwine Lake,2022-10-10,3750
+IR,Senachwine Lake,2022-10-19,3550
+IR,Senachwine Lake,2022-10-27,8440
+IR,Senachwine Lake,2022-11-07,21930
+IR,Senachwine Lake,2022-11-22,1050
+IR,Senachwine Lake,2022-12-01,75
+IR,Senachwine Lake,2022-12-12,185
+IR,Senachwine Lake,2022-12-19,1020
+IR,Senachwine Lake,2022-12-27,15
+IR,Senachwine Lake,2023-01-09,250
+IR,Senachwine Lake,2023-08-31,60
+IR,Senachwine Lake,2023-09-08,1005
+IR,Senachwine Lake,2023-09-15,210
+IR,Senachwine Lake,2023-09-19,3015
+IR,Senachwine Lake,2023-10-30,7425
+IR,Senachwine Lake,2023-11-10,6300
+IR,Senachwine Lake,2023-11-15,9870
+IR,Senachwine Lake,2023-11-22,12840
+IR,Senachwine Lake,2023-11-28,760
+IR,Senachwine Lake,2023-12-06,625
+IR,Senachwine Lake,2023-12-13,640
+IR,Senachwine Lake,2023-12-21,2295
+IR,Senachwine Lake,2024-01-03,3530
+IR,Senachwine Lake,2024-09-04,275
+IR,Senachwine Lake,2024-09-09,375
+IR,Senachwine Lake,2024-09-16,365
+IR,Senachwine Lake,2024-10-15,685
+IR,Senachwine Lake,2024-10-24,870
+IR,Senachwine Lake,2024-11-01,1520
+IR,Senachwine Lake,2024-11-06,2375
+IR,Senachwine Lake,2024-11-15,14005
+IR,Senachwine Lake,2024-11-26,15975
+IR,Senachwine Lake,2024-12-03,7145
+IR,Senachwine Lake,2024-12-09,9250
+IR,Senachwine Lake,2024-12-23,3470
+IR,Senachwine Lake,2025-01-03,5965
+IR,Senachwine Lake,2025-01-07,2870
+IR,Senachwine Lake,2025-08-27,0
+IR,Senachwine Lake,2025-09-11,0
+IR,Senachwine Lake,2025-09-19,1110
+IR,Senachwine Lake,2025-10-14,8970
+IR,Senachwine Lake,2025-10-31,0
+IR,Senachwine Lake,2025-11-13,6625
+IR,Senachwine Lake,2025-11-28,3680
+IR,Senachwine Lake,2025-12-09,2060
+IR,Senachwine Lake,2025-12-16,435
+IR,Senachwine Lake,2025-12-22,570
+IR,Senachwine Lake,2026-01-02,400
+IR,Senachwine Lake,2026-01-07,5335
+IR,Senachwine Lake,2026-01-12,2625
+MR,Shanks Refuge,2018-10-18,670
+MR,Shanks Refuge,2018-10-24,850
+MR,Shanks Refuge,2018-11-02,12005
+MR,Shanks Refuge,2018-11-09,46005
+MR,Shanks Refuge,2018-11-14,158000
+MR,Shanks Refuge,2018-11-20,109660
+MR,Shanks Refuge,2018-11-29,60000
+MR,Shanks Refuge,2018-12-07,85020
+MR,Shanks Refuge,2018-12-11,15000
+MR,Shanks Refuge,2018-12-17,13700
+MR,Shanks Refuge,2019-01-03,67900
+MR,Shanks Refuge,2019-01-10,43850
+MR,Shanks Refuge,2019-10-17,20
+MR,Shanks Refuge,2019-10-24,3050
+MR,Shanks Refuge,2019-10-28,16910
+MR,Shanks Refuge,2019-11-05,5900
+MR,Shanks Refuge,2019-11-14,31650
+MR,Shanks Refuge,2019-11-25,19225
+MR,Shanks Refuge,2019-12-02,64200
+MR,Shanks Refuge,2019-12-18,18000
+MR,Shanks Refuge,2019-12-23,1500
+MR,Shanks Refuge,2020-01-02,13010
+MR,Shanks Refuge,2020-01-08,8700
+MR,Shanks Refuge,2020-10-21,3340
+MR,Shanks Refuge,2020-10-28,22200
+MR,Shanks Refuge,2020-11-03,3200
+MR,Shanks Refuge,2020-11-09,33450
+MR,Shanks Refuge,2020-11-17,66450
+MR,Shanks Refuge,2020-11-23,56650
+MR,Shanks Refuge,2020-12-02,-5700
+MR,Shanks Refuge,2020-12-10,20000
+MR,Shanks Refuge,2020-12-15,50200
+MR,Shanks Refuge,2020-12-22,4700
+MR,Shanks Refuge,2020-12-31,2015
+MR,Shanks Refuge,2021-01-05,4000
+MR,Shanks Refuge,2021-09-17,0
+MR,Shanks Refuge,2021-10-19,795
+MR,Shanks Refuge,2021-10-26,2830
+MR,Shanks Refuge,2021-11-01,6460
+MR,Shanks Refuge,2021-11-09,4140
+MR,Shanks Refuge,2021-11-15,8175
+MR,Shanks Refuge,2021-11-22,16270
+MR,Shanks Refuge,2021-11-30,35175
+MR,Shanks Refuge,2021-12-07,50555
+MR,Shanks Refuge,2021-12-14,35745
+MR,Shanks Refuge,2021-12-22,19950
+MR,Shanks Refuge,2022-01-07,10670
+MR,Shanks Refuge,2022-03-08,27205
+MR,Shanks Refuge,2022-03-15,11315
+MR,Shanks Refuge,2022-08-31,0
+MR,Shanks Refuge,2022-09-08,5
+MR,Shanks Refuge,2022-09-13,0
+MR,Shanks Refuge,2022-09-22,0
+MR,Shanks Refuge,2022-10-10,0
+MR,Shanks Refuge,2022-10-19,2600
+MR,Shanks Refuge,2022-10-27,8150
+MR,Shanks Refuge,2022-11-07,28600
+MR,Shanks Refuge,2022-11-14,28300
+MR,Shanks Refuge,2022-11-22,46020
+MR,Shanks Refuge,2022-12-01,34020
+MR,Shanks Refuge,2022-12-19,16330
+MR,Shanks Refuge,2022-12-27,305
+MR,Shanks Refuge,2023-01-09,9915
+MR,Shanks Refuge,2023-08-31,15
+MR,Shanks Refuge,2023-09-08,10
+MR,Shanks Refuge,2023-09-15,0
+MR,Shanks Refuge,2023-09-19,50
+MR,Shanks Refuge,2023-10-09,165
+MR,Shanks Refuge,2023-10-20,0
+MR,Shanks Refuge,2023-10-30,15900
+MR,Shanks Refuge,2023-11-10,18000
+MR,Shanks Refuge,2023-11-15,15050
+MR,Shanks Refuge,2023-11-22,14500
+MR,Shanks Refuge,2023-11-28,19400
+MR,Shanks Refuge,2023-12-06,39650
+MR,Shanks Refuge,2023-12-13,29500
+MR,Shanks Refuge,2023-12-21,24385
+MR,Shanks Refuge,2024-01-03,48290
+MR,Shanks Refuge,2024-09-04,0
+MR,Shanks Refuge,2024-09-09,20
+MR,Shanks Refuge,2024-09-16,0
+MR,Shanks Refuge,2024-10-15,855
+MR,Shanks Refuge,2024-10-24,5855
+MR,Shanks Refuge,2024-11-01,10400
+MR,Shanks Refuge,2024-11-06,20860
+MR,Shanks Refuge,2024-11-15,5505
+MR,Shanks Refuge,2024-11-26,27165
+MR,Shanks Refuge,2024-12-03,51320
+MR,Shanks Refuge,2024-12-09,58185
+MR,Shanks Refuge,2024-12-23,46060
+MR,Shanks Refuge,2025-01-03,6250
+MR,Shanks Refuge,2025-01-07,3375
+MR,Shanks Refuge,2025-08-27,20
+MR,Shanks Refuge,2025-09-11,0
+MR,Shanks Refuge,2025-09-19,30
+MR,Shanks Refuge,2025-10-14,6955
+MR,Shanks Refuge,2025-10-31,5750
+MR,Shanks Refuge,2025-11-13,10450
+MR,Shanks Refuge,2025-11-28,37055
+MR,Shanks Refuge,2025-12-09,3400
+MR,Shanks Refuge,2025-12-16,9010
+MR,Shanks Refuge,2025-12-22,13100
+MR,Shanks Refuge,2026-01-02,14165
+MR,Shanks Refuge,2026-01-12,32760
+MR,Swan Lake,2018-10-18,24800
+MR,Swan Lake,2018-10-24,70865
+MR,Swan Lake,2018-11-02,0
+MR,Swan Lake,2018-11-09,163250
+MR,Swan Lake,2018-11-20,121400
+MR,Swan Lake,2018-11-29,74525
+MR,Swan Lake,2018-12-07,84850
+MR,Swan Lake,2018-12-11,90210
+MR,Swan Lake,2018-12-17,30800
+MR,Swan Lake,2019-01-03,49600
+MR,Swan Lake,2019-01-10,45615
+MR,Swan Lake,2019-10-24,23250
+MR,Swan Lake,2019-10-28,50220
+MR,Swan Lake,2019-11-05,44320
+MR,Swan Lake,2019-11-14,73000
+MR,Swan Lake,2019-11-25,3760
+MR,Swan Lake,2019-12-02,5570
+MR,Swan Lake,2019-12-18,1720
+MR,Swan Lake,2019-12-23,11540
+MR,Swan Lake,2020-01-02,1860
+MR,Swan Lake,2020-01-08,4280
+MR,Swan Lake,2020-10-21,0
+MR,Swan Lake,2020-10-28,58275
+MR,Swan Lake,2020-11-03,75000
+MR,Swan Lake,2020-11-09,108000
+MR,Swan Lake,2020-11-17,99100
+MR,Swan Lake,2020-11-23,86060
+MR,Swan Lake,2020-12-02,-18680
+MR,Swan Lake,2020-12-10,54240
+MR,Swan Lake,2020-12-15,39650
+MR,Swan Lake,2020-12-22,36010
+MR,Swan Lake,2020-12-31,2725
+MR,Swan Lake,2021-01-05,9355
+MR,Swan Lake,2021-09-17,2105
+MR,Swan Lake,2021-10-19,15820
+MR,Swan Lake,2021-10-26,19320
+MR,Swan Lake,2021-11-01,36950
+MR,Swan Lake,2021-11-09,74260
+MR,Swan Lake,2021-11-15,76435
+MR,Swan Lake,2021-11-22,66630
+MR,Swan Lake,2021-11-30,80895
+MR,Swan Lake,2021-12-07,73595
+MR,Swan Lake,2021-12-14,46235
+MR,Swan Lake,2021-12-22,24700
+MR,Swan Lake,2022-01-07,1465
+IR,Swan Lake,2022-03-08,420
+MR,Swan Lake,2022-03-08,7275
+IR,Swan Lake,2022-03-15,895
+MR,Swan Lake,2022-03-15,7775
+MR,Swan Lake,2022-08-31,965
+MR,Swan Lake,2022-09-08,1240
+MR,Swan Lake,2022-09-13,2935
+MR,Swan Lake,2022-09-22,4800
+MR,Swan Lake,2022-10-10,15300
+MR,Swan Lake,2022-10-19,49500
+MR,Swan Lake,2022-10-27,64410
+MR,Swan Lake,2022-11-07,140120
+MR,Swan Lake,2022-11-14,109740
+MR,Swan Lake,2022-11-22,115250
+MR,Swan Lake,2022-12-01,49080
+MR,Swan Lake,2022-12-19,32410
+MR,Swan Lake,2022-12-27,1190
+MR,Swan Lake,2023-01-09,21300
+MR,Swan Lake,2023-08-31,645
+MR,Swan Lake,2023-09-08,790
+MR,Swan Lake,2023-09-15,905
+MR,Swan Lake,2023-09-19,1880
+MR,Swan Lake,2023-10-09,9900
+MR,Swan Lake,2023-10-20,22255
+MR,Swan Lake,2023-10-30,68400
+MR,Swan Lake,2023-11-10,146000
+MR,Swan Lake,2023-11-15,152700
+MR,Swan Lake,2023-11-22,155240
+MR,Swan Lake,2023-11-28,71500
+MR,Swan Lake,2023-12-06,48760
+MR,Swan Lake,2023-12-13,39530
+MR,Swan Lake,2023-12-21,27170
+MR,Swan Lake,2024-01-03,36975
+MR,Swan Lake,2024-09-04,690
+MR,Swan Lake,2024-09-09,530
+MR,Swan Lake,2024-09-16,360
+MR,Swan Lake,2024-10-15,5140
+MR,Swan Lake,2024-10-24,9100
+MR,Swan Lake,2024-11-01,34615
+MR,Swan Lake,2024-11-06,78330
+MR,Swan Lake,2024-11-15,92380
+MR,Swan Lake,2024-11-26,69705
+MR,Swan Lake,2024-12-03,80760
+MR,Swan Lake,2024-12-09,67840
+MR,Swan Lake,2024-12-23,20630
+MR,Swan Lake,2025-01-03,14320
+MR,Swan Lake,2025-01-07,1455
+MR,Swan Lake,2025-08-27,105
+MR,Swan Lake,2025-09-11,1025
+MR,Swan Lake,2025-09-19,2415
+MR,Swan Lake,2025-10-14,15535
+MR,Swan Lake,2025-10-31,35860
+MR,Swan Lake,2025-11-13,67770
+MR,Swan Lake,2025-11-28,133140
+MR,Swan Lake,2025-12-09,64320
+MR,Swan Lake,2025-12-16,64150
+MR,Swan Lake,2025-12-22,46235
+MR,Swan Lake,2026-01-02,45345
+MR,Swan Lake,2026-01-12,42435
+MR,Towhead Lake,2018-10-18,15200
+MR,Towhead Lake,2018-10-24,2700
+MR,Towhead Lake,2018-11-02,15110
+MR,Towhead Lake,2018-11-09,17175
+MR,Towhead Lake,2018-11-14,30200
+MR,Towhead Lake,2018-11-20,17900
+MR,Towhead Lake,2018-11-29,18000
+MR,Towhead Lake,2018-12-07,12500
+MR,Towhead Lake,2018-12-11,6100
+MR,Towhead Lake,2018-12-17,6700
+MR,Towhead Lake,2019-01-03,3000
+MR,Towhead Lake,2019-01-10,4000
+MR,Towhead Lake,2019-10-17,14800
+MR,Towhead Lake,2019-10-24,6800
+MR,Towhead Lake,2019-10-28,5400
+MR,Towhead Lake,2019-11-05,2100
+MR,Towhead Lake,2019-11-14,16200
+MR,Towhead Lake,2019-11-25,5210
+MR,Towhead Lake,2019-12-02,7200
+MR,Towhead Lake,2019-12-18,8500
+MR,Towhead Lake,2019-12-23,9150
+MR,Towhead Lake,2020-01-02,2600
+MR,Towhead Lake,2020-01-08,710
+MR,Towhead Lake,2020-10-21,23600
+MR,Towhead Lake,2020-10-28,24530
+MR,Towhead Lake,2020-11-03,24100
+MR,Towhead Lake,2020-11-09,19310
+MR,Towhead Lake,2020-11-17,25350
+MR,Towhead Lake,2020-11-23,30020
+MR,Towhead Lake,2020-12-02,-250
+MR,Towhead Lake,2020-12-10,8005
+MR,Towhead Lake,2020-12-15,11220
+MR,Towhead Lake,2020-12-22,4800
+MR,Towhead Lake,2020-12-31,5300
+MR,Towhead Lake,2021-01-05,2100
+MR,Towhead Lake,2021-09-17,10
+MR,Towhead Lake,2021-10-19,11670
+MR,Towhead Lake,2021-10-26,11560
+MR,Towhead Lake,2021-11-01,8290
+MR,Towhead Lake,2021-11-09,9690
+MR,Towhead Lake,2021-11-15,12800
+MR,Towhead Lake,2021-11-22,12000
+MR,Towhead Lake,2021-11-30,12945
+MR,Towhead Lake,2021-12-07,13955
+MR,Towhead Lake,2021-12-14,12500
+MR,Towhead Lake,2021-12-22,14400
+MR,Towhead Lake,2022-01-07,1140
+MR,Towhead Lake,2022-08-31,0
+MR,Towhead Lake,2022-09-08,10
+MR,Towhead Lake,2022-09-13,60
+MR,Towhead Lake,2022-09-22,40
+MR,Towhead Lake,2022-10-10,1465
+MR,Towhead Lake,2022-10-19,6500
+MR,Towhead Lake,2022-10-27,15820
+MR,Towhead Lake,2022-11-07,3800
+MR,Towhead Lake,2022-11-14,7250
+MR,Towhead Lake,2022-11-22,11050
+MR,Towhead Lake,2022-12-01,24250
+MR,Towhead Lake,2022-12-19,7610
+MR,Towhead Lake,2022-12-27,280
+MR,Towhead Lake,2023-01-09,795
+MR,Towhead Lake,2023-08-31,45
+MR,Towhead Lake,2023-09-08,110
+MR,Towhead Lake,2023-09-15,295
+MR,Towhead Lake,2023-09-19,205
+MR,Towhead Lake,2023-10-09,4785
+MR,Towhead Lake,2023-10-20,6400
+MR,Towhead Lake,2023-10-30,16760
+MR,Towhead Lake,2023-11-10,19500
+MR,Towhead Lake,2023-11-15,14400
+MR,Towhead Lake,2023-11-22,18100
+MR,Towhead Lake,2023-11-28,19000
+MR,Towhead Lake,2023-12-06,18450
+MR,Towhead Lake,2023-12-13,24000
+MR,Towhead Lake,2023-12-21,13750
+MR,Towhead Lake,2024-01-03,8100
+MR,Towhead Lake,2024-09-04,225
+MR,Towhead Lake,2024-09-09,265
+MR,Towhead Lake,2024-09-16,55
+MR,Towhead Lake,2024-10-15,4615
+MR,Towhead Lake,2024-10-24,13990
+MR,Towhead Lake,2024-11-01,9250
+MR,Towhead Lake,2024-11-06,12220
+MR,Towhead Lake,2024-11-15,4695
+MR,Towhead Lake,2024-11-26,17530
+MR,Towhead Lake,2024-12-03,44050
+MR,Towhead Lake,2024-12-09,21000
+MR,Towhead Lake,2024-12-23,5450
+MR,Towhead Lake,2025-01-03,7570
+MR,Towhead Lake,2025-01-07,4980
+MR,Towhead Lake,2025-08-27,0
+MR,Towhead Lake,2025-09-11,0
+MR,Towhead Lake,2025-09-19,105
+MR,Towhead Lake,2025-10-14,10500
+MR,Towhead Lake,2025-10-31,2795
+MR,Towhead Lake,2025-11-13,5265
+MR,Towhead Lake,2025-11-28,19640
+MR,Towhead Lake,2025-12-09,39500
+MR,Towhead Lake,2025-12-16,33540
+MR,Towhead Lake,2025-12-22,6000
+MR,Towhead Lake,2026-01-02,1085
+MR,Towhead Lake,2026-01-12,5190
+IR,Upper Peoria,2018-10-12,300
+IR,Upper Peoria,2018-10-18,5550
+IR,Upper Peoria,2018-10-24,12700
+IR,Upper Peoria,2018-11-02,36450
+IR,Upper Peoria,2018-11-14,29320
+IR,Upper Peoria,2018-11-20,23400
+IR,Upper Peoria,2018-11-29,14910
+IR,Upper Peoria,2018-12-07,10950
+IR,Upper Peoria,2018-12-11,7110
+IR,Upper Peoria,2018-12-17,10700
+IR,Upper Peoria,2019-01-03,11120
+IR,Upper Peoria,2019-01-10,31600
+IR,Upper Peoria,2019-10-17,2250
+IR,Upper Peoria,2019-10-28,8570
+IR,Upper Peoria,2019-11-05,15140
+IR,Upper Peoria,2019-11-14,25570
+IR,Upper Peoria,2019-11-25,18285
+IR,Upper Peoria,2019-12-02,24410
+IR,Upper Peoria,2019-12-18,16750
+IR,Upper Peoria,2019-12-23,10690
+IR,Upper Peoria,2020-01-02,13310
+IR,Upper Peoria,2020-01-08,7200
+IR,Upper Peoria,2020-10-16,695
+IR,Upper Peoria,2020-10-21,230
+IR,Upper Peoria,2020-10-28,2210
+IR,Upper Peoria,2020-11-03,6565
+IR,Upper Peoria,2020-11-08,5060
+IR,Upper Peoria,2020-11-17,7050
+IR,Upper Peoria,2020-12-02,7465
+IR,Upper Peoria,2020-12-10,16025
+IR,Upper Peoria,2020-12-15,9495
+IR,Upper Peoria,2020-12-22,5470
+IR,Upper Peoria,2020-12-31,15180
+IR,Upper Peoria,2021-01-05,6685
+IR,Upper Peoria,2021-09-23,10
+IR,Upper Peoria,2021-10-19,75
+IR,Upper Peoria,2021-10-26,25
+IR,Upper Peoria,2021-11-01,1945
+IR,Upper Peoria,2021-11-09,1495
+IR,Upper Peoria,2021-11-15,1460
+IR,Upper Peoria,2021-11-22,9260
+IR,Upper Peoria,2021-11-30,6965
+IR,Upper Peoria,2021-12-07,19980
+IR,Upper Peoria,2021-12-14,4960
+IR,Upper Peoria,2021-12-22,7130
+IR,Upper Peoria,2022-01-07,13690
+IR,Upper Peoria,2022-03-08,12765
+IR,Upper Peoria,2022-03-15,16800
+IR,Upper Peoria,2022-08-31,5
+IR,Upper Peoria,2022-09-08,25
+IR,Upper Peoria,2022-09-13,75
+IR,Upper Peoria,2022-09-22,90
+IR,Upper Peoria,2022-10-10,200
+IR,Upper Peoria,2022-10-19,590
+IR,Upper Peoria,2022-10-27,345
+IR,Upper Peoria,2022-11-07,9860
+IR,Upper Peoria,2022-11-22,10265
+IR,Upper Peoria,2022-12-01,8720
+IR,Upper Peoria,2022-12-12,7455
+IR,Upper Peoria,2022-12-19,11930
+IR,Upper Peoria,2022-12-27,0
+IR,Upper Peoria,2023-01-09,5780
+IR,Upper Peoria,2023-08-31,30
+IR,Upper Peoria,2023-09-08,45
+IR,Upper Peoria,2023-09-15,70
+IR,Upper Peoria,2023-09-19,50
+IR,Upper Peoria,2023-10-30,5020
+IR,Upper Peoria,2023-11-10,7400
+IR,Upper Peoria,2023-11-15,8600
+IR,Upper Peoria,2023-11-22,10250
+IR,Upper Peoria,2023-11-28,8680
+IR,Upper Peoria,2023-12-06,12350
+IR,Upper Peoria,2023-12-13,17575
+IR,Upper Peoria,2023-12-21,19800
+IR,Upper Peoria,2024-01-03,10800
+IR,Upper Peoria,2024-09-04,20
+IR,Upper Peoria,2024-09-09,65
+IR,Upper Peoria,2024-09-16,35
+IR,Upper Peoria,2024-10-15,85
+IR,Upper Peoria,2024-10-24,1475
+IR,Upper Peoria,2024-11-01,9355
+IR,Upper Peoria,2024-11-06,12015
+IR,Upper Peoria,2024-11-15,32215
+IR,Upper Peoria,2024-11-26,22385
+IR,Upper Peoria,2024-12-03,9545
+IR,Upper Peoria,2024-12-09,6420
+IR,Upper Peoria,2024-12-23,3625
+IR,Upper Peoria,2025-01-03,3380
+IR,Upper Peoria,2025-01-07,3130
+IR,Upper Peoria,2025-08-27,10
+IR,Upper Peoria,2025-09-11,0
+IR,Upper Peoria,2025-09-19,10
+IR,Upper Peoria,2025-10-14,1470
+IR,Upper Peoria,2025-10-31,2250
+IR,Upper Peoria,2025-11-13,31355
+IR,Upper Peoria,2025-11-28,10090
+IR,Upper Peoria,2025-12-09,3810
+IR,Upper Peoria,2025-12-16,61610
+IR,Upper Peoria,2025-12-22,1175
+IR,Upper Peoria,2026-01-02,1155
+IR,Upper Peoria,2026-01-07,9665
+IR,Upper Peoria,2026-01-12,7080

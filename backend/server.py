@@ -1998,6 +1998,12 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
+# SOURCE DATA: 41 of the 121 anchors can now be rebuilt from data in this repo
+# (backend/data/parse_*.py + surveys/). The remaining 80 were built offline and
+# their curves exist only as literals here -- they cannot be audited or fixed
+# without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
+# its raw data and a rebuild script.
+#
 # ABUNDANCE is the peak duck count at the site, used only as an IDW voting
 # weight (abundance ** _MIG_ABUND_EXP). It is NOT perfectly consistent across
 # the cloud; audited 2026-08-26, and left as-is deliberately:
@@ -2080,30 +2086,30 @@ MIGRATION_ANCHORS = [
     ("St. Marks FL", 30.1, -84.2, "Atlantic", 50000, [6, 10, 25, 45, 68, 88, 100, 92, 78, 68]),
     ("Lake Champlain VT", 44.4, -73.3, "Atlantic", 7844, [20, 35, 60, 85, 100, 88, 55, 25, 10, 5]),
     ("Montezuma NY", 43.0, -76.75, "Atlantic", 120000, [5, 14, 32, 58, 92, 100, 55, 28, 15, 9]),
-    ("Hennepin IL", 41.28, -89.34, "Mississippi", 40400, [5, 4, 52, 100, 93, 61, 19, 14, 5, 3]),
-    ("Senachwine IL", 41.1, -89.35, "Mississippi", 25250, [2, 6, 20, 35, 92, 100, 12, 32, 13, 9]),
-    ("Douglas Lake IL", 40.95, -89.5, "Mississippi", 67500, [5, 3, 33, 63, 71, 100, 23, 60, 30, 21]),
-    ("Upper Peoria IL", 40.75, -89.6, "Mississippi", 29320, [0, 0, 23, 46, 97, 100, 80, 52, 54, 38]),
-    ("Duck Creek IL", 40.58, -89.92, "Mississippi", 42720, [0, 0, 12, 25, 91, 44, 100, 70, 34, 23]),
-    ("Clear Lake IL", 40.55, -89.9, "Mississippi", 15980, [10, 21, 53, 85, 61, 100, 32, 49, 52, 36]),
-    ("Rice Lake IL", 40.47, -90.1, "Mississippi", 6715, [1, 0, 18, 35, 100, 76, 17, 35, 86, 60]),
-    ("Chautauqua IL", 40.42, -90.16, "Mississippi", 122050, [7, 15, 29, 43, 64, 100, 39, 31, 9, 7]),
-    ("Big Lake IRV IL", 40.38, -90.1, "Mississippi", 14250, [1, 2, 47, 91, 92, 100, 22, 39, 54, 38]),
-    ("Emiquon IL", 40.32, -90.05, "Mississippi", 127020, [8, 17, 59, 100, 65, 16, 8, 20, 25, 17]),
-    ("Louisa MR", 41.2, -91.02, "Mississippi", 8300, [0, 1, 10, 18, 41, 77, 95, 100, 25, 18]),
-    ("Keithsburg MR", 41.1, -90.93, "Mississippi", 4180, [0, 0, 4, 7, 7, 16, 29, 74, 100, 70]),
-    ("Henderson Ck MR", 40.83, -90.92, "Mississippi", 19050, [8, 3, 17, 31, 100, 62, 19, 47, 10, 7]),
-    ("Nauvoo-FtMad MR", 40.62, -91.35, "Mississippi", 17250, [5, 0, 1, 2, 51, 54, 100, 66, 34, 24]),
-    ("Keokuk-Nauvoo MR", 40.45, -91.4, "Mississippi", 18090, [0, 0, 1, 2, 22, 100, 88, 16, 30, 21]),
-    ("Delair MR", 39.6, -91.25, "Mississippi", 49100, [3, 1, 11, 21, 22, 17, 100, 65, 11, 8]),
-    ("Shanks MR", 39.42, -90.95, "Mississippi", 29600, [5, 0, 5, 10, 20, 65, 100, 5, 44, 31]),
-    ("Swan Lake MR", 39.3, -90.7, "Mississippi", 44320, [4, 20, 37, 53, 100, 8, 53, 26, 4, 3]),
-    ("Cannon MR", 39.2, -90.68, "Mississippi", 71000, [0, 0, 8, 16, 100, 71, 25, 1, 9, 6]),
-    ("Towhead MR", 39.1, -90.62, "Mississippi", 9150, [2, 1, 38, 74, 23, 57, 84, 100, 28, 20]),
-    ("Cuivre Club MR", 39.02, -90.72, "Mississippi", 86000, [0, 0, 6, 13, 12, 13, 100, 95, 24, 17]),
-    ("Batchtown MR", 38.98, -90.68, "Mississippi", 12600, [0, 0, 15, 30, 12, 10, 100, 79, 14, 10]),
-    ("Dardenne MR", 38.85, -90.42, "Mississippi", 75300, [0, 0, 13, 26, 34, 100, 69, 20, 18, 12]),
-    ("Long Lake MR", 38.9, -90.5, "Mississippi", 12200, [0, 0, 5, 10, 27, 39, 100, 25, 57, 40]),
+    ("Hennepin IL", 41.28, -89.34, "Mississippi", 27382, [3, 3, 14, 63, 100, 97, 64, 29, 7, 4]),
+    ("Senachwine IL", 41.1, -89.35, "Mississippi", 12600, [3, 20, 38, 46, 100, 76, 26, 22, 24, 10]),
+    ("Douglas Lake IL", 40.95, -89.5, "Mississippi", 49624, [3, 3, 35, 52, 95, 100, 60, 38, 40, 18]),
+    ("Upper Peoria IL", 40.75, -89.6, "Mississippi", 20728, [3, 3, 3, 18, 100, 94, 92, 90, 73, 32]),
+    ("Duck Creek IL", 40.58, -89.92, "Mississippi", 25695, [3, 3, 3, 7, 30, 65, 91, 100, 35, 16]),
+    ("Clear Lake IL", 40.55, -89.9, "Mississippi", 20034, [5, 32, 24, 59, 100, 82, 40, 24, 40, 18]),
+    ("Rice Lake IL", 40.47, -90.1, "Mississippi", 4782, [4, 3, 47, 82, 84, 100, 62, 44, 76, 35]),
+    ("Chautauqua IL", 40.42, -90.16, "Mississippi", 77764, [3, 15, 32, 67, 100, 85, 34, 16, 15, 7]),
+    ("Big Lake IRV IL", 40.38, -90.1, "Mississippi", 10140, [3, 3, 11, 68, 100, 83, 52, 26, 9, 4]),
+    ("Emiquon IL", 40.32, -90.05, "Mississippi", 40099, [12, 20, 43, 100, 86, 56, 27, 28, 32, 15]),
+    ("Louisa MR", 41.2, -91.02, "Mississippi", 22877, [3, 3, 6, 23, 75, 100, 84, 40, 5, 4]),
+    ("Keithsburg MR", 41.1, -90.93, "Mississippi", 3376, [23, 18, 17, 51, 100, 67, 53, 24, 27, 12]),
+    ("Henderson Ck MR", 40.83, -90.92, "Mississippi", 19847, [3, 4, 7, 27, 94, 100, 81, 47, 33, 14]),
+    ("Nauvoo-FtMad MR", 40.62, -91.35, "Mississippi", 52100, [3, 4, 11, 16, 78, 96, 93, 100, 64, 28]),
+    ("Keokuk-Nauvoo MR", 40.45, -91.4, "Mississippi", 62209, [3, 3, 3, 6, 56, 85, 100, 59, 48, 22]),
+    ("Delair MR", 39.6, -91.25, "Mississippi", 40166, [3, 3, 12, 27, 71, 100, 76, 52, 11, 4]),
+    ("Shanks MR", 39.42, -90.95, "Mississippi", 54981, [3, 3, 7, 15, 53, 100, 96, 46, 53, 24]),
+    ("Swan Lake MR", 39.3, -90.7, "Mississippi", 100586, [3, 3, 10, 39, 100, 94, 60, 28, 21, 10]),
+    ("Cannon MR", 39.2, -90.68, "Mississippi", 61229, [3, 3, 9, 26, 81, 100, 94, 42, 39, 18]),
+    ("Towhead MR", 39.1, -90.62, "Mississippi", 23695, [3, 3, 21, 71, 78, 89, 100, 61, 19, 9]),
+    ("Cuivre Club MR", 39.02, -90.72, "Mississippi", 49789, [3, 3, 3, 12, 70, 89, 100, 67, 55, 25]),
+    ("Batchtown MR", 38.98, -90.68, "Mississippi", 24283, [3, 3, 5, 22, 41, 88, 100, 80, 71, 32]),
+    ("Dardenne MR", 38.85, -90.42, "Mississippi", 86877, [3, 3, 3, 26, 72, 89, 100, 67, 60, 27]),
+    ("Long Lake MR", 38.9, -90.5, "Mississippi", 31066, [3, 3, 3, 16, 73, 100, 98, 54, 43, 20]),
     ("Sacramento Valley", 39.4, -122.2, "Pacific", 901000, [20, 25, 65, 74, 94, 100, 85, 75, 78, 64]),
     ("Summer Lake OR", 42.85, -120.78, "Pacific", 35000, [58, 72, 100, 89, 72, 45, 23, 16, 12, 12]),
     ("Klamath Basin", 41.9, -121.8, "Pacific", 1200000, [30, 50, 78, 100, 82, 58, 38, 25, 18, 14]),
