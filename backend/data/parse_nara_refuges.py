@@ -61,7 +61,8 @@ MAX_ERR, MIN_COLS, MIN_WEEKS, MIN_SEASONS, MIN_BIN = 0.25, 9, 14, 8, 6
 # Laguna Atascosa season to 5,923,566,850. Drop such seasons outright, and take
 # the MEDIAN of seasonal peaks for abundance so one survivor cannot skew it.
 MAX_PLAUSIBLE_PEAK = 2_000_000
-ADOPTED = {"Blackwater MD", "Kirwin", "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains"}
+ADOPTED = {"Bear River UT", "Blackwater MD", "Kirwin", "Klamath Basin", "Lacreek SD",
+           "Laguna Atascosa", "Ruby Lake NV", "Salt Plains"}
 
 def sunday_on_or_before_sep1(y):
     d = date(y, 9, 1)
