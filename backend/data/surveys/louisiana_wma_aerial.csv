@@ -5,12 +5,18 @@
 # 160 dated per-area duck totals across 13 seasons and 9 areas.
 #
 # THIS DOES NOT REPRODUCE THE TWO LOUISIANA ANCHORS AND IS NOT USED FOR THEM.
-# 'Louisiana coast' and 'SE Louisiana' carry abundances of 2,500,000 and 315,000 --
-# they are LDWF's COASTAL TRANSECT ZONE estimates (27 transect lines), not sums of
-# individual WMAs, which are a small subset of the zone. Rebuilding from these WMA
-# totals gave wobble 2 against the shipped 1, with uneven bin support (Jan-1 n=3 but
-# Jan-2 n=10), so no curve was changed. Committed because it is real dated fall data
-# for coastal Louisiana and the transect reports were not locatable on the LDWF site.
+# 'Louisiana coast' and 'SE Louisiana' are LDWF's COASTAL TRANSECT ZONE estimates
+# (27 transect lines), not sums of individual WMAs, which are a small subset of the
+# zone. Rebuilding from these WMA totals gave wobble 2 against the shipped 1, with
+# uneven bin support (Jan-1 n=3 but Jan-2 n=10), so no curve was built from it.
+#
+# THE TRANSECT REPORTS WERE FOUND on 2026-08-31 -- an earlier revision of this note
+# said they were not locatable, which was wrong; the listing is JS-rendered and its
+# results come from an endpoint plain curl never reaches. Both anchors are now built
+# from them: see surveys/louisiana_transect.csv and parse_louisiana.py. This file is
+# kept as supporting evidence -- it is the only Louisiana source here with late
+# January and February flights, and it is what showed that late January does not
+# collapse (late-Jan mean 20,819 against early-Jan 10,473, unpaired).
 wma,year,month,day,total_ducks
 Atchafalaya Delta WMA,2005,12,14,4942
 Atchafalaya Delta WMA,2006,10,31,1053

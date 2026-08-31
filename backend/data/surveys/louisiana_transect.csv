@@ -1,0 +1,170 @@
+# LDWF coastal-transect waterfowl population estimates, Louisiana Department of
+# Wildlife & Fisheries. 74 monthly reports, 20 seasons 2004-05 to 2023-24.
+# Source: wlf.louisiana.gov -> Resources -> Waterfowl -> Aerial Surveys,
+#   assets/Resources/Publications/Waterfowl/Aerial-Surveys/
+#     Louisiana_Aerial_Waterfowl_Survey_<Month>_<Year>.pdf
+# Rebuild this file with: python3 extract_louisiana_pdfs.py <folder-of-PDFs>
+#
+# These are the 27-transect ZONE estimates flown coastwide below US-90, which is
+# what the two Louisiana anchors describe. They are NOT the per-WMA counts in
+# louisiana_wma_aerial.csv -- those cover a small subset of the same zone.
+#
+# ducks_teal_excluded = TOTAL DUCKS - BW TEAL - GW TEAL, all three read off the
+# sheet, so teal exclusion is exact rather than estimated.
+#
+# LDWF flies four surveys a season: early September, early November, early
+# December, early January. There is NO October flight and nothing after about
+# January 11, so Oct1/Oct2 are interpolated and Jan2 is unmeasured.
+#
+# Validated against each sheet's own printed TOTALS column: 70 of 74 reconcile
+# exactly. The other four are LDWF's own arithmetic -- in January 2018 the sheet
+# prints TOTAL DUCKS of 2,136,000 for the southwest while its own dabbler and
+# diver subtotals for that zone sum to 2,146,000.
+zone,season,month,day,total_ducks,bw_teal,gw_teal,ducks_teal_excluded,source_file
+SOUTHEAST,2004,1,4,1074000,7000,152000,915000,Louisiana_Aerial_Waterfowl_Survey_January_2005.pdf
+SOUTHEAST,2004,9,13,70000,41000,0,29000,Louisiana_Aerial_Waterfowl_Survey_September_2004.pdf
+SOUTHEAST,2004,11,8,207000,40000,19000,148000,Louisiana_Aerial_Waterfowl_Survey_November_2004.pdf
+SOUTHEAST,2004,12,13,791000,15000,133000,643000,Louisiana_Aerial_Waterfowl_Survey_December_2004.pdf
+SOUTHEAST,2005,1,3,802000,31000,57000,714000,Louisiana_Aerial_Waterfowl_Survey_January_2006.pdf
+SOUTHEAST,2005,11,7,506000,36000,37000,433000,Louisiana_Aerial_Waterfowl_Survey_November_2005.pdf
+SOUTHEAST,2005,12,12,1507000,42000,192000,1273000,Louisiana_Aerial_Waterfowl_Survey_December_2005.pdf
+SOUTHEAST,2006,1,3,685000,2000,64000,619000,Louisiana_Aerial_Waterfowl_Survey_January_2007.pdf
+SOUTHEAST,2006,9,11,51000,42000,0,9000,Louisiana_Aerial_Waterfowl_Survey_September_2006.pdf
+SOUTHEAST,2006,11,7,598000,10000,34000,554000,Louisiana_Aerial_Waterfowl_Survey_November_2006.pdf
+SOUTHEAST,2006,12,11,925000,29000,42000,854000,Louisiana_Aerial_Waterfowl_Survey_December_2006.pdf
+SOUTHEAST,2007,1,11,419000,43000,52000,324000,Louisiana_Aerial_Waterfowl_Survey_January_2008.pdf
+SOUTHEAST,2007,9,10,37000,21000,0,16000,Louisiana_Aerial_Waterfowl_Survey_September_2007.pdf
+SOUTHEAST,2007,11,5,160000,22000,11000,127000,Louisiana_Aerial_Waterfowl_Survey_November_2007.pdf
+SOUTHEAST,2007,12,10,795000,46000,11000,738000,Louisiana_Aerial_Waterfowl_Survey_December_2007.pdf
+SOUTHEAST,2008,1,7,621000,29000,76000,516000,Louisiana_Aerial_Waterfowl_Survey_January_2009.pdf
+SOUTHEAST,2008,9,8,19000,13000,0,6000,Louisiana_Aerial_Waterfowl_Survey_September_2008.pdf
+SOUTHEAST,2008,11,3,200000,19000,43000,138000,Louisiana_Aerial_Waterfowl_Survey_November_2008.pdf
+SOUTHEAST,2009,1,4,1232000,59000,172000,1001000,Louisiana_Aerial_Waterfowl_Survey_January_2010.pdf
+SOUTHEAST,2009,9,4,26000,18000,0,8000,Louisiana_Aerial_Waterfowl_Survey_September_2009.pdf
+SOUTHEAST,2009,11,10,170000,61000,20000,89000,Louisiana_Aerial_Waterfowl_Survey_November_2009.pdf
+SOUTHEAST,2009,12,16,555000,30000,52000,473000,Louisiana_Aerial_Waterfowl_Survey_December_2009.pdf
+SOUTHEAST,2010,1,3,1406000,64000,245000,1097000,Louisiana_Aerial_Waterfowl_Survey_January_2011.pdf
+SOUTHEAST,2010,9,8,18000,11000,0,7000,Louisiana_Aerial_Waterfowl_Survey_September_2010.pdf
+SOUTHEAST,2010,11,8,491000,170000,82000,239000,Louisiana_Aerial_Waterfowl_Survey_November_2010.pdf
+SOUTHEAST,2010,12,10,799000,21000,170000,608000,Louisiana_Aerial_Waterfowl_Survey_December_2010.pdf
+SOUTHEAST,2011,1,3,1512000,72000,224000,1216000,Louisiana_Aerial_Waterfowl_Survey_January_2012.pdf
+SOUTHEAST,2011,9,6,43000,30000,0,13000,Louisiana_Aerial_Waterfowl_Survey_September_2011.pdf
+SOUTHEAST,2011,11,4,596000,283000,31000,282000,Louisiana_Aerial_Waterfowl_Survey_November_2011.pdf
+SOUTHEAST,2011,12,12,1121000,70000,169000,882000,Louisiana_Aerial_Waterfowl_Survey_December_2011.pdf
+SOUTHEAST,2012,1,11,718000,21000,193000,504000,Louisiana_Aerial_Waterfowl_Survey_January_2013.pdf
+SOUTHEAST,2012,9,10,12000,7000,0,5000,Louisiana_Aerial_Waterfowl_Survey_September_2012.pdf
+SOUTHEAST,2012,11,7,383000,9000,78000,296000,Louisiana_Aerial_Waterfowl_Survey_November_2012.pdf
+SOUTHEAST,2012,12,2,627000,8000,52000,567000,Louisiana_Aerial_Waterfowl_Survey_December_2012.pdf
+SOUTHEAST,2013,1,6,914000,12000,229000,673000,Louisiana_Aerial_Waterfowl_Survey_January_2014.pdf
+SOUTHEAST,2013,9,9,12000,4000,0,8000,Louisiana_Aerial_Waterfowl_Survey_September_2013.pdf
+SOUTHEAST,2013,11,4,280000,58000,34000,188000,Louisiana_Aerial_Waterfowl_Survey_November_2013.pdf
+SOUTHEAST,2013,12,10,679000,14000,73000,592000,Louisiana_Aerial_Waterfowl_Survey_December_2013.pdf
+SOUTHEAST,2014,1,5,1694000,5000,165000,1524000,Louisiana_Aerial_Waterfowl_Survey_January_2015.pdf
+SOUTHEAST,2014,9,8,31000,9000,0,22000,Louisiana_Aerial_Waterfowl_Survey_September_2014.pdf
+SOUTHEAST,2014,11,10,1611000,40000,57000,1514000,Louisiana_Aerial_Waterfowl_Survey_November_2014.pdf
+SOUTHEAST,2014,12,16,1439000,30000,114000,1295000,Louisiana_Aerial_Waterfowl_Survey_December_2014.pdf
+SOUTHEAST,2015,1,4,637000,53000,86000,498000,Louisiana_Aerial_Waterfowl_Survey_January_2016.pdf
+SOUTHEAST,2015,11,2,458000,97000,34000,327000,Louisiana_Aerial_Waterfowl_Survey_November_2015.pdf
+SOUTHEAST,2015,12,8,1320000,44000,52000,1224000,Louisiana_Aerial_Waterfowl_Survey_December_2015.pdf
+SOUTHEAST,2016,1,3,711000,27000,68000,616000,Louisiana_Aerial_Waterfowl_Survey_January_2017.pdf
+SOUTHEAST,2016,9,6,5500,500,0,5000,Louisiana_Aerial_Waterfowl_Survey_September_2016.pdf
+SOUTHEAST,2016,11,7,1454000,109000,204000,1141000,Louisiana_Aerial_Waterfowl_Survey_November_2016.pdf
+SOUTHEAST,2016,12,15,1603000,50000,90000,1463000,Louisiana_Aerial_Waterfowl_Survey_December_2016.pdf
+SOUTHEAST,2017,1,3,870000,17000,93000,760000,Louisiana_Aerial_Waterfowl_Survey_January_2018.pdf
+SOUTHEAST,2017,9,11,33000,21000,0,12000,Louisiana_Aerial_Waterfowl_Survey_September_2017.pdf
+SOUTHEAST,2017,11,6,545000,88000,64000,393000,Louisiana_Aerial_Waterfowl_Survey_November_2017.pdf
+SOUTHEAST,2017,12,11,1214000,31000,99000,1084000,Louisiana_Aerial_Waterfowl_Survey_December_2017.pdf
+SOUTHEAST,2018,1,9,752000,37000,55000,660000,Louisiana_Aerial_Waterfowl_Survey_January_2019.pdf
+SOUTHEAST,2018,9,10,12000,5000,0,7000,Louisiana_Aerial_Waterfowl_Survey_September_2018.pdf
+SOUTHEAST,2018,12,10,890000,31000,47000,812000,Louisiana_Aerial_Waterfowl_Survey_December_2018.pdf
+SOUTHEAST,2019,1,6,745000,52000,58000,635000,Louisiana_Aerial_Waterfowl_Survey_January_2020.pdf
+SOUTHEAST,2019,9,9,18000,12000,0,6000,Louisiana_Aerial_Waterfowl_Survey_September_2019.pdf
+SOUTHEAST,2019,11,4,357000,87000,35000,235000,Louisiana_Aerial_Waterfowl_Survey_November_2019.pdf
+SOUTHEAST,2019,12,13,1332000,28000,62000,1242000,Louisiana_Aerial_Waterfowl_Survey_December_2019.pdf
+SOUTHEAST,2020,1,4,598000,22000,40000,536000,Louisiana_Aerial_Waterfowl_Survey_January_2021.pdf
+SOUTHEAST,2020,9,8,30000,16000,0,14000,Louisiana_Aerial_Waterfowl_Survey_September_2020.pdf
+SOUTHEAST,2020,11,9,316000,54000,37000,225000,Louisiana_Aerial_Waterfowl_Survey_November_2020.pdf
+SOUTHEAST,2020,12,14,943000,35000,114000,794000,Louisiana_Aerial_Waterfowl_Survey_December_2020.pdf
+SOUTHEAST,2021,1,3,919000,72000,68000,779000,Louisiana-Aerial-Waterfowl-Survey-January-2022.pdf
+SOUTHEAST,2021,9,7,79000,66000,0,13000,Louisiana_Aerial_Waterfowl_Survey_September_2021.pdf
+SOUTHEAST,2021,11,8,377000,36000,1000,340000,Louisiana_Aerial_Waterfowl_Survey_November_2021.pdf
+SOUTHEAST,2021,12,13,297000,50000,20000,227000,Louisiana_Aerial_Waterfowl_Survey_December_2021.pdf
+SOUTHEAST,2022,1,4,675000,65000,82000,528000,Louisiana_Aerial_Waterfowl_Survey_January_2023.pdf
+SOUTHEAST,2022,9,6,18000,7000,0,11000,Louisiana-Aerial-Waterfowl-Survey-September-2022.pdf
+SOUTHEAST,2022,11,7,116000,26000,4000,86000,Louisiana_Aerial-Waterfowl-Survey-November-2022.pdf
+SOUTHEAST,2022,12,12,705000,56000,90000,559000,Louisiana-Aerial-Waterfowl-Survey-December-2022.pdf
+SOUTHEAST,2023,11,6,72000,11000,46000,15000,Louisiana_Aerial_Waterfowl_Survey_November_2023.pdf
+SOUTHWEST,2004,1,4,1400000,26000,446000,928000,Louisiana_Aerial_Waterfowl_Survey_January_2005.pdf
+SOUTHWEST,2004,9,13,301000,251000,0,50000,Louisiana_Aerial_Waterfowl_Survey_September_2004.pdf
+SOUTHWEST,2004,11,8,797000,25000,231000,541000,Louisiana_Aerial_Waterfowl_Survey_November_2004.pdf
+SOUTHWEST,2004,12,13,842000,20000,221000,601000,Louisiana_Aerial_Waterfowl_Survey_December_2004.pdf
+SOUTHWEST,2005,1,3,1972000,46000,864000,1062000,Louisiana_Aerial_Waterfowl_Survey_January_2006.pdf
+SOUTHWEST,2005,11,7,677000,27000,210000,440000,Louisiana_Aerial_Waterfowl_Survey_November_2005.pdf
+SOUTHWEST,2005,12,12,910000,40000,117000,753000,Louisiana_Aerial_Waterfowl_Survey_December_2005.pdf
+SOUTHWEST,2006,1,3,3529000,422000,1150000,1957000,Louisiana_Aerial_Waterfowl_Survey_January_2007.pdf
+SOUTHWEST,2006,9,11,335000,295000,0,40000,Louisiana_Aerial_Waterfowl_Survey_September_2006.pdf
+SOUTHWEST,2006,11,7,1593000,89000,127000,1377000,Louisiana_Aerial_Waterfowl_Survey_November_2006.pdf
+SOUTHWEST,2006,12,11,1737000,276000,347000,1114000,Louisiana_Aerial_Waterfowl_Survey_December_2006.pdf
+SOUTHWEST,2007,1,11,1308000,127000,324000,857000,Louisiana_Aerial_Waterfowl_Survey_January_2008.pdf
+SOUTHWEST,2007,9,10,245000,208000,17000,20000,Louisiana_Aerial_Waterfowl_Survey_September_2007.pdf
+SOUTHWEST,2007,11,5,1378000,432000,152000,794000,Louisiana_Aerial_Waterfowl_Survey_November_2007.pdf
+SOUTHWEST,2007,12,10,1065000,189000,227000,649000,Louisiana_Aerial_Waterfowl_Survey_December_2007.pdf
+SOUTHWEST,2008,1,7,971000,37000,235000,699000,Louisiana_Aerial_Waterfowl_Survey_January_2009.pdf
+SOUTHWEST,2008,9,8,473000,444000,0,29000,Louisiana_Aerial_Waterfowl_Survey_September_2008.pdf
+SOUTHWEST,2008,11,3,684000,80000,164000,440000,Louisiana_Aerial_Waterfowl_Survey_November_2008.pdf
+SOUTHWEST,2009,1,4,1404000,117000,301000,986000,Louisiana_Aerial_Waterfowl_Survey_January_2010.pdf
+SOUTHWEST,2009,9,4,145000,99000,0,46000,Louisiana_Aerial_Waterfowl_Survey_September_2009.pdf
+SOUTHWEST,2009,11,10,1167000,537000,136000,494000,Louisiana_Aerial_Waterfowl_Survey_November_2009.pdf
+SOUTHWEST,2009,12,16,1536000,116000,352000,1068000,Louisiana_Aerial_Waterfowl_Survey_December_2009.pdf
+SOUTHWEST,2010,1,3,1757000,57000,439000,1261000,Louisiana_Aerial_Waterfowl_Survey_January_2011.pdf
+SOUTHWEST,2010,9,8,191000,155000,0,36000,Louisiana_Aerial_Waterfowl_Survey_September_2010.pdf
+SOUTHWEST,2010,11,8,915000,292000,55000,568000,Louisiana_Aerial_Waterfowl_Survey_November_2010.pdf
+SOUTHWEST,2010,12,10,1090000,54000,206000,830000,Louisiana_Aerial_Waterfowl_Survey_December_2010.pdf
+SOUTHWEST,2011,1,3,1185000,16000,271000,898000,Louisiana_Aerial_Waterfowl_Survey_January_2012.pdf
+SOUTHWEST,2011,9,6,152000,135000,0,17000,Louisiana_Aerial_Waterfowl_Survey_September_2011.pdf
+SOUTHWEST,2011,11,4,1114000,145000,168000,801000,Louisiana_Aerial_Waterfowl_Survey_November_2011.pdf
+SOUTHWEST,2011,12,12,1093000,30000,220000,843000,Louisiana_Aerial_Waterfowl_Survey_December_2011.pdf
+SOUTHWEST,2012,1,11,1862000,35000,389000,1438000,Louisiana_Aerial_Waterfowl_Survey_January_2013.pdf
+SOUTHWEST,2012,9,10,178000,164000,0,14000,Louisiana_Aerial_Waterfowl_Survey_September_2012.pdf
+SOUTHWEST,2012,11,7,978000,24000,169000,785000,Louisiana_Aerial_Waterfowl_Survey_November_2012.pdf
+SOUTHWEST,2012,12,2,1195000,26000,184000,985000,Louisiana_Aerial_Waterfowl_Survey_December_2012.pdf
+SOUTHWEST,2013,1,6,1894000,17000,371000,1506000,Louisiana_Aerial_Waterfowl_Survey_January_2014.pdf
+SOUTHWEST,2013,9,9,60000,43000,0,17000,Louisiana_Aerial_Waterfowl_Survey_September_2013.pdf
+SOUTHWEST,2013,11,4,581000,68000,99000,414000,Louisiana_Aerial_Waterfowl_Survey_November_2013.pdf
+SOUTHWEST,2013,12,10,1202000,25000,212000,965000,Louisiana_Aerial_Waterfowl_Survey_December_2013.pdf
+SOUTHWEST,2014,1,5,1601000,15000,394000,1192000,Louisiana_Aerial_Waterfowl_Survey_January_2015.pdf
+SOUTHWEST,2014,9,8,102000,90000,0,12000,Louisiana_Aerial_Waterfowl_Survey_September_2014.pdf
+SOUTHWEST,2014,11,10,1370000,113000,155000,1102000,Louisiana_Aerial_Waterfowl_Survey_November_2014.pdf
+SOUTHWEST,2014,12,16,1683000,33000,395000,1255000,Louisiana_Aerial_Waterfowl_Survey_December_2014.pdf
+SOUTHWEST,2015,1,4,1174000,58000,194000,922000,Louisiana_Aerial_Waterfowl_Survey_January_2016.pdf
+SOUTHWEST,2015,11,2,726000,189000,68000,469000,Louisiana_Aerial_Waterfowl_Survey_November_2015.pdf
+SOUTHWEST,2015,12,8,1234000,68000,251000,915000,Louisiana_Aerial_Waterfowl_Survey_December_2015.pdf
+SOUTHWEST,2016,1,3,1106000,42000,413000,651000,Louisiana_Aerial_Waterfowl_Survey_January_2017.pdf
+SOUTHWEST,2016,9,6,102000,95000,0,7000,Louisiana_Aerial_Waterfowl_Survey_September_2016.pdf
+SOUTHWEST,2016,11,7,1433000,163000,290000,980000,Louisiana_Aerial_Waterfowl_Survey_November_2016.pdf
+SOUTHWEST,2016,12,15,1881000,45000,715000,1121000,Louisiana_Aerial_Waterfowl_Survey_December_2016.pdf
+SOUTHWEST,2017,1,3,2136000,41000,530000,1565000,Louisiana_Aerial_Waterfowl_Survey_January_2018.pdf
+SOUTHWEST,2017,9,11,365000,352000,0,13000,Louisiana_Aerial_Waterfowl_Survey_September_2017.pdf
+SOUTHWEST,2017,11,6,968000,135000,144000,689000,Louisiana_Aerial_Waterfowl_Survey_November_2017.pdf
+SOUTHWEST,2017,12,11,1690000,91000,265000,1334000,Louisiana_Aerial_Waterfowl_Survey_December_2017.pdf
+SOUTHWEST,2018,1,9,1293000,52000,330000,911000,Louisiana_Aerial_Waterfowl_Survey_January_2019.pdf
+SOUTHWEST,2018,9,10,57000,48000,0,9000,Louisiana_Aerial_Waterfowl_Survey_September_2018.pdf
+SOUTHWEST,2018,11,5,247000,67000,10000,170000,Louisiana_Aerial_Waterfowl_Survey_November_2018.pdf
+SOUTHWEST,2018,12,10,886000,102000,134000,650000,Louisiana_Aerial_Waterfowl_Survey_December_2018.pdf
+SOUTHWEST,2019,1,6,1481000,84000,348000,1049000,Louisiana_Aerial_Waterfowl_Survey_January_2020.pdf
+SOUTHWEST,2019,9,9,119000,110000,0,9000,Louisiana_Aerial_Waterfowl_Survey_September_2019.pdf
+SOUTHWEST,2019,11,4,597000,66000,44000,487000,Louisiana_Aerial_Waterfowl_Survey_November_2019.pdf
+SOUTHWEST,2019,12,13,1090000,122000,91000,877000,Louisiana_Aerial_Waterfowl_Survey_December_2019.pdf
+SOUTHWEST,2020,1,4,1321000,68000,327000,926000,Louisiana_Aerial_Waterfowl_Survey_January_2021.pdf
+SOUTHWEST,2020,9,8,220000,202000,0,18000,Louisiana_Aerial_Waterfowl_Survey_September_2020.pdf
+SOUTHWEST,2020,11,9,527000,106000,12000,409000,Louisiana_Aerial_Waterfowl_Survey_November_2020.pdf
+SOUTHWEST,2020,12,14,1195000,128000,188000,879000,Louisiana_Aerial_Waterfowl_Survey_December_2020.pdf
+SOUTHWEST,2021,1,3,1097000,160000,200000,737000,Louisiana-Aerial-Waterfowl-Survey-January-2022.pdf
+SOUTHWEST,2021,9,7,216000,209000,0,7000,Louisiana_Aerial_Waterfowl_Survey_September_2021.pdf
+SOUTHWEST,2021,11,8,829000,253000,102000,474000,Louisiana_Aerial_Waterfowl_Survey_November_2021.pdf
+SOUTHWEST,2021,12,13,874000,152000,165000,557000,Louisiana_Aerial_Waterfowl_Survey_December_2021.pdf
+SOUTHWEST,2022,1,4,1227000,80000,345000,802000,Louisiana_Aerial_Waterfowl_Survey_January_2023.pdf
+SOUTHWEST,2022,9,6,267000,257000,0,10000,Louisiana-Aerial-Waterfowl-Survey-September-2022.pdf
+SOUTHWEST,2022,11,7,644000,171000,118000,355000,Louisiana_Aerial-Waterfowl-Survey-November-2022.pdf
+SOUTHWEST,2022,12,12,1387000,102000,711000,574000,Louisiana-Aerial-Waterfowl-Survey-December-2022.pdf
+SOUTHWEST,2023,11,6,2000,63000,98000,0,Louisiana_Aerial_Waterfowl_Survey_November_2023.pdf

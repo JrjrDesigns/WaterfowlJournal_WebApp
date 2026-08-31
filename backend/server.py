@@ -1999,9 +1999,9 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 #   (name, lat, lng, flyway, abundance, curve)
 #
 # SOURCE DATA STATUS (counted 2026-08-31):
-#   76 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+#   78 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
-#   16 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
+#   14 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
 #      different thing (see each parse_*.py for the specific reason).
 #   29 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
@@ -2011,8 +2011,8 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 MIGRATION_ANCHORS = [
     ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1160465, [3, 5, 12, 26, 57, 59, 73, 86, 100, 85]),
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
-    ("Louisiana coast", 29.9, -92.2, "Mississippi", 2500000, [5, 8, 20, 42, 68, 88, 100, 96, 88, 78]),
-    ("SE Louisiana", 29.6, -89.8, "Mississippi", 315000, [3, 6, 16, 36, 58, 80, 95, 100, 96, 86]),
+    ("Louisiana coast", 29.9, -92.2, "Mississippi", 1070894, [2, 15, 28, 42, 55, 68, 80, 90, 100, 100]),
+    ("SE Louisiana", 29.6, -89.8, "Mississippi", 847625, [1, 11, 22, 32, 42, 71, 100, 94, 88, 88]),
     ("White Lake TN", 35.72, -89.72, "Mississippi", 83270, [3, 3, 3, 6, 14, 31, 63, 82, 100, 70]),
     ("Black Bayou TN", 35.8, -89.62, "Mississippi", 94852, [3, 3, 3, 3, 5, 12, 27, 43, 64, 100]),
     ("Lake Lauderdale TN", 35.85, -89.55, "Mississippi", 36154, [3, 3, 3, 3, 7, 15, 32, 78, 72, 100]),
