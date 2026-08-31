@@ -1,57 +1,297 @@
 # TWRA bi-weekly waterfowl refuge surveys, Tennessee Wildlife Resources Agency.
 # Source: Tennessee State Library & Archives, Digital Tennessee,
-#   digitaltennessee.tnsos.gov/wildlife_resources_waterfowl_counts (item 6).
-# ONE SEASON ONLY (2020-21). Not enough to build an anchor -- the repo floor is 4
-# seasons -- so no Tennessee curve is changed from this. Committed because the
-# extraction works and 5 more seasons (items 1-5 of that collection) would make
-# these 8 anchors rebuildable.
-# TWRA counts on the 1st and 15th of each month; the 1st is binned to the first
-# half-month and the 15th to the second. Surveys start Nov 15 -- there is NO
-# Sep/Oct coverage at all in this source.
-# ducks only (the GEESE column is dropped); DNS = did not survey -> blank.
-anchor,survey_label,bin,ducks
-Black Bayou TN,Nov 15,Nov2,5300
-Black Bayou TN,Dec 1,Dec1,2300
-Black Bayou TN,Dec 15,Dec2,1500
-Black Bayou TN,Jan 1,Jan1,11090
-Black Bayou TN,Jan 15,Jan2,9072
-Black Bayou TN,Feb 1,,30530
-Hop-In TN,Nov 15,Nov2,1300
-Hop-In TN,Dec 1,Dec1,5400
-Hop-In TN,Dec 15,Dec2,7900
-Hop-In TN,Jan 1,Jan1,14715
-Hop-In TN,Jan 15,Jan2,11404
-Hop-In TN,Feb 1,,7200
-Maness Swamp TN,Nov 15,Nov2,2
-Maness Swamp TN,Dec 1,Dec1,0
-Maness Swamp TN,Dec 15,Dec2,2325
-Maness Swamp TN,Jan 1,Jan1,8655
-Maness Swamp TN,Jan 15,Jan2,7400
-Maness Swamp TN,Feb 1,,11602
-White Lake TN,Nov 15,Nov2,23550
-White Lake TN,Dec 1,Dec1,62755
-White Lake TN,Dec 15,Dec2,82025
-White Lake TN,Jan 1,Jan1,109982
-White Lake TN,Jan 15,Jan2,95255
-Lake Lauderdale TN,Nov 15,Nov2,0
-Lake Lauderdale TN,Dec 1,Dec1,7072
-Lake Lauderdale TN,Dec 15,Dec2,15800
-Lake Lauderdale TN,Jan 1,Jan1,48950
-Lake Lauderdale TN,Jan 15,Jan2,21000
-Lake Lauderdale TN,Feb 1,,20400
-Horns Bluff TN,Nov 15,Nov2,1555
-Horns Bluff TN,Dec 1,Dec1,3860
-Horns Bluff TN,Dec 15,Dec2,4850
-Horns Bluff TN,Jan 1,Jan1,9560
-Horns Bluff TN,Jan 15,Jan2,18105
-Horns Bluff TN,Feb 1,,38525
-Old Hickory L5 TN,Nov 15,Nov2,1314
-Old Hickory L5 TN,Dec 1,Dec1,4241
-Old Hickory L5 TN,Dec 15,Dec2,6679
-Old Hickory L5 TN,Jan 1,Jan1,9778
-Old Hickory L5 TN,Jan 15,Jan2,6780
-Old Hickory L5 TN,Feb 1,,4564
-Cheatham Lake TN,Nov 15,Nov2,1470
-Cheatham Lake TN,Dec 1,Dec1,2495
-Cheatham Lake TN,Dec 15,Dec2,3015
-Cheatham Lake TN,Jan 1,Jan1,3395
+#   digitaltennessee.tnsos.gov/wildlife_resources_waterfowl_counts (items 1-6).
+# SIX SEASONS, 2015-16 through 2020-21. The site sits behind Cloudflare and
+# refuses automated fetching, so the PDFs were downloaded by hand.
+#
+# ducks = the sheet's DUCKS column for that refuge on that date. Geese and
+# sandhill cranes are excluded; note that TWRA folds cranes INTO its own printed
+# Regional Total, so these rows will read low against that total by exactly the
+# crane row. Reconciled against the printed Regional Total for Regions I and II:
+# 14/14 columns exact in 2018-19, 2019-20 and 2020-21, and every residual in the
+# other three seasons equals a crane row.
+#
+# Counts are made on the 1st and the 15th; TWRA's first count of the season is
+# NOV 15, so this source has NO September or October coverage. February columns
+# are outside the model window and are kept here but ignored by the parser.
+# Cheatham Lake is the sum of its two sub-refuges (Dyson Ditch + Pardue Pond).
+# Rebuild the curves with: python3 parse_tennessee.py
+location,season,month,day,ducks
+Black Bayou TN,2015,1,1,150462
+Black Bayou TN,2015,1,4,188024
+Black Bayou TN,2015,1,17,263100
+Black Bayou TN,2015,11,15,9775
+Black Bayou TN,2015,12,1,10516
+Black Bayou TN,2015,12,15,80680
+Black Bayou TN,2016,1,2,72686
+Black Bayou TN,2016,1,17,107128
+Black Bayou TN,2016,2,1,22300
+Black Bayou TN,2016,11,15,3950
+Black Bayou TN,2016,12,1,92650
+Black Bayou TN,2016,12,15,45561
+Black Bayou TN,2017,1,2,55850
+Black Bayou TN,2017,2,1,80624
+Black Bayou TN,2017,11,15,15850
+Black Bayou TN,2017,12,1,1762
+Black Bayou TN,2017,12,15,10837
+Black Bayou TN,2018,1,7,11000
+Black Bayou TN,2018,11,15,27055
+Black Bayou TN,2018,12,1,2360
+Black Bayou TN,2018,12,15,46500
+Black Bayou TN,2019,1,1,46528
+Black Bayou TN,2019,1,15,110
+Black Bayou TN,2019,2,1,8665
+Black Bayou TN,2019,11,15,8839
+Black Bayou TN,2019,12,1,42146
+Black Bayou TN,2019,12,15,58509
+Black Bayou TN,2020,1,1,11090
+Black Bayou TN,2020,1,15,9072
+Black Bayou TN,2020,2,1,30530
+Black Bayou TN,2020,11,15,5300
+Black Bayou TN,2020,12,1,2300
+Black Bayou TN,2020,12,15,1500
+Cheatham Lake TN,2016,1,2,2227
+Cheatham Lake TN,2016,1,17,2425
+Cheatham Lake TN,2016,2,1,2040
+Cheatham Lake TN,2016,11,15,2300
+Cheatham Lake TN,2016,12,1,2672
+Cheatham Lake TN,2016,12,15,2862
+Cheatham Lake TN,2017,1,17,332
+Cheatham Lake TN,2017,2,1,1095
+Cheatham Lake TN,2017,11,15,1090
+Cheatham Lake TN,2017,12,1,3225
+Cheatham Lake TN,2017,12,15,2745
+Cheatham Lake TN,2018,1,7,1980
+Cheatham Lake TN,2018,1,15,1110
+Cheatham Lake TN,2018,11,15,2740
+Cheatham Lake TN,2018,12,1,3190
+Cheatham Lake TN,2018,12,15,3040
+Cheatham Lake TN,2019,1,1,2930
+Cheatham Lake TN,2019,1,15,780
+Cheatham Lake TN,2019,11,15,1765
+Cheatham Lake TN,2019,12,1,1980
+Cheatham Lake TN,2019,12,15,3430
+Cheatham Lake TN,2020,1,1,3395
+Cheatham Lake TN,2020,11,15,1470
+Cheatham Lake TN,2020,12,1,2495
+Cheatham Lake TN,2020,12,15,3015
+Hop-In TN,2015,1,1,18010
+Hop-In TN,2015,1,4,18010
+Hop-In TN,2015,1,17,34700
+Hop-In TN,2015,2,1,23200
+Hop-In TN,2015,2,15,3250
+Hop-In TN,2015,11,15,210
+Hop-In TN,2015,12,1,250
+Hop-In TN,2015,12,15,4000
+Hop-In TN,2016,1,2,35452
+Hop-In TN,2016,1,17,36952
+Hop-In TN,2016,2,1,38500
+Hop-In TN,2016,2,15,1275
+Hop-In TN,2016,11,15,9
+Hop-In TN,2016,12,1,600
+Hop-In TN,2016,12,15,16500
+Hop-In TN,2017,1,2,24855
+Hop-In TN,2017,1,17,28502
+Hop-In TN,2017,2,1,350
+Hop-In TN,2017,11,15,7500
+Hop-In TN,2017,12,1,23913
+Hop-In TN,2017,12,15,34127
+Hop-In TN,2018,1,7,33600
+Hop-In TN,2018,1,15,19500
+Hop-In TN,2018,11,15,3050
+Hop-In TN,2018,12,1,1450
+Hop-In TN,2018,12,15,22800
+Hop-In TN,2019,1,1,16300
+Hop-In TN,2019,1,15,28500
+Hop-In TN,2019,2,1,16200
+Hop-In TN,2019,2,15,25100
+Hop-In TN,2019,11,15,255
+Hop-In TN,2019,12,1,24800
+Hop-In TN,2019,12,15,19000
+Hop-In TN,2020,1,1,14715
+Hop-In TN,2020,1,15,11404
+Hop-In TN,2020,2,1,7200
+Hop-In TN,2020,11,15,1300
+Hop-In TN,2020,12,1,5400
+Hop-In TN,2020,12,15,7900
+Horns Bluff TN,2015,1,1,41751
+Horns Bluff TN,2015,1,4,30615
+Horns Bluff TN,2015,1,17,43376
+Horns Bluff TN,2015,11,15,478
+Horns Bluff TN,2015,12,1,16990
+Horns Bluff TN,2015,12,15,14280
+Horns Bluff TN,2016,1,2,53151
+Horns Bluff TN,2016,1,17,15430
+Horns Bluff TN,2016,2,1,34750
+Horns Bluff TN,2016,11,15,0
+Horns Bluff TN,2016,12,1,803
+Horns Bluff TN,2016,12,15,21480
+Horns Bluff TN,2017,1,2,52580
+Horns Bluff TN,2017,1,17,15650
+Horns Bluff TN,2017,11,15,1746
+Horns Bluff TN,2017,12,1,2263
+Horns Bluff TN,2017,12,15,26560
+Horns Bluff TN,2018,1,15,4260
+Horns Bluff TN,2018,11,15,150
+Horns Bluff TN,2018,12,1,8051
+Horns Bluff TN,2018,12,15,5810
+Horns Bluff TN,2019,1,1,12111
+Horns Bluff TN,2019,1,15,15415
+Horns Bluff TN,2019,2,1,21150
+Horns Bluff TN,2019,2,15,1415
+Horns Bluff TN,2019,11,15,1560
+Horns Bluff TN,2019,12,1,5285
+Horns Bluff TN,2019,12,15,1157
+Horns Bluff TN,2020,1,1,9560
+Horns Bluff TN,2020,1,15,18105
+Horns Bluff TN,2020,2,1,38525
+Horns Bluff TN,2020,11,15,1555
+Horns Bluff TN,2020,12,1,3860
+Horns Bluff TN,2020,12,15,4850
+Lake Lauderdale TN,2015,1,1,53562
+Lake Lauderdale TN,2015,1,4,34649
+Lake Lauderdale TN,2015,1,17,64777
+Lake Lauderdale TN,2015,11,15,9748
+Lake Lauderdale TN,2015,12,1,31001
+Lake Lauderdale TN,2015,12,15,60521
+Lake Lauderdale TN,2016,1,2,42201
+Lake Lauderdale TN,2016,1,17,28103
+Lake Lauderdale TN,2016,2,1,42502
+Lake Lauderdale TN,2016,11,15,235
+Lake Lauderdale TN,2016,12,1,2081
+Lake Lauderdale TN,2016,12,15,12701
+Lake Lauderdale TN,2017,1,2,0
+Lake Lauderdale TN,2017,1,17,46659
+Lake Lauderdale TN,2017,11,15,15
+Lake Lauderdale TN,2017,12,1,220
+Lake Lauderdale TN,2017,12,15,9710
+Lake Lauderdale TN,2018,1,7,8550
+Lake Lauderdale TN,2018,1,15,35000
+Lake Lauderdale TN,2018,11,15,18111
+Lake Lauderdale TN,2018,12,1,9500
+Lake Lauderdale TN,2018,12,15,33120
+Lake Lauderdale TN,2019,1,1,11575
+Lake Lauderdale TN,2019,1,15,21385
+Lake Lauderdale TN,2019,2,1,44401
+Lake Lauderdale TN,2019,2,15,13000
+Lake Lauderdale TN,2019,11,15,5190
+Lake Lauderdale TN,2019,12,1,20375
+Lake Lauderdale TN,2019,12,15,37606
+Lake Lauderdale TN,2020,1,1,48950
+Lake Lauderdale TN,2020,1,15,21000
+Lake Lauderdale TN,2020,2,1,20400
+Lake Lauderdale TN,2020,11,15,0
+Lake Lauderdale TN,2020,12,1,7072
+Lake Lauderdale TN,2020,12,15,15800
+Maness Swamp TN,2015,1,1,25845
+Maness Swamp TN,2015,1,4,23845
+Maness Swamp TN,2015,1,17,19850
+Maness Swamp TN,2015,2,1,12500
+Maness Swamp TN,2015,2,15,2200
+Maness Swamp TN,2015,11,15,291
+Maness Swamp TN,2015,12,1,2900
+Maness Swamp TN,2015,12,15,2952
+Maness Swamp TN,2016,1,2,19100
+Maness Swamp TN,2016,1,17,26500
+Maness Swamp TN,2016,2,1,17328
+Maness Swamp TN,2016,2,15,2175
+Maness Swamp TN,2016,11,15,45
+Maness Swamp TN,2016,12,1,3500
+Maness Swamp TN,2016,12,15,8801
+Maness Swamp TN,2017,1,2,19504
+Maness Swamp TN,2017,1,17,6050
+Maness Swamp TN,2017,2,1,120
+Maness Swamp TN,2017,11,15,2572
+Maness Swamp TN,2017,12,1,4450
+Maness Swamp TN,2017,12,15,22200
+Maness Swamp TN,2018,1,7,16800
+Maness Swamp TN,2018,1,15,18200
+Maness Swamp TN,2018,11,15,5150
+Maness Swamp TN,2018,12,1,8500
+Maness Swamp TN,2018,12,15,13758
+Maness Swamp TN,2019,1,1,8200
+Maness Swamp TN,2019,1,15,11000
+Maness Swamp TN,2019,2,1,4452
+Maness Swamp TN,2019,2,15,4700
+Maness Swamp TN,2019,11,15,3750
+Maness Swamp TN,2019,12,1,5000
+Maness Swamp TN,2019,12,15,5400
+Maness Swamp TN,2020,1,1,8655
+Maness Swamp TN,2020,1,15,7400
+Maness Swamp TN,2020,2,1,11602
+Maness Swamp TN,2020,11,15,2
+Maness Swamp TN,2020,12,1,0
+Maness Swamp TN,2020,12,15,2325
+Old Hickory L5 TN,2015,1,4,2891
+Old Hickory L5 TN,2015,1,17,3454
+Old Hickory L5 TN,2015,2,15,259
+Old Hickory L5 TN,2015,11,15,1470
+Old Hickory L5 TN,2015,12,1,2235
+Old Hickory L5 TN,2015,12,15,3014
+Old Hickory L5 TN,2016,1,2,6325
+Old Hickory L5 TN,2016,1,17,2236
+Old Hickory L5 TN,2016,2,1,385
+Old Hickory L5 TN,2016,2,15,153
+Old Hickory L5 TN,2016,11,15,1613
+Old Hickory L5 TN,2016,12,1,1531
+Old Hickory L5 TN,2016,12,15,3918
+Old Hickory L5 TN,2017,1,2,5050
+Old Hickory L5 TN,2017,1,17,2141
+Old Hickory L5 TN,2017,2,1,2464
+Old Hickory L5 TN,2017,11,15,164
+Old Hickory L5 TN,2017,12,1,2877
+Old Hickory L5 TN,2017,12,15,7646
+Old Hickory L5 TN,2018,1,7,4518
+Old Hickory L5 TN,2018,1,15,3622
+Old Hickory L5 TN,2018,11,15,1449
+Old Hickory L5 TN,2018,12,1,1999
+Old Hickory L5 TN,2018,12,15,2534
+Old Hickory L5 TN,2019,1,1,4191
+Old Hickory L5 TN,2019,1,15,4586
+Old Hickory L5 TN,2019,2,1,4724
+Old Hickory L5 TN,2019,2,15,2842
+Old Hickory L5 TN,2019,11,15,1600
+Old Hickory L5 TN,2019,12,1,3100
+Old Hickory L5 TN,2019,12,15,6446
+Old Hickory L5 TN,2020,1,1,9778
+Old Hickory L5 TN,2020,1,15,6780
+Old Hickory L5 TN,2020,2,1,4564
+Old Hickory L5 TN,2020,11,15,1314
+Old Hickory L5 TN,2020,12,1,4241
+Old Hickory L5 TN,2020,12,15,6679
+White Lake TN,2015,1,1,89122
+White Lake TN,2015,1,4,98930
+White Lake TN,2015,1,17,34000
+White Lake TN,2015,2,15,28000
+White Lake TN,2015,11,15,660
+White Lake TN,2015,12,1,68996
+White Lake TN,2015,12,15,72300
+White Lake TN,2016,1,2,96307
+White Lake TN,2016,1,17,70205
+White Lake TN,2016,2,1,129200
+White Lake TN,2016,11,15,120
+White Lake TN,2016,12,1,31658
+White Lake TN,2016,12,15,71660
+White Lake TN,2017,1,2,97527
+White Lake TN,2017,1,17,35500
+White Lake TN,2017,2,1,5400
+White Lake TN,2017,11,15,34025
+White Lake TN,2017,12,1,24225
+White Lake TN,2017,12,15,50594
+White Lake TN,2018,1,7,38500
+White Lake TN,2018,1,15,72108
+White Lake TN,2018,11,15,72016
+White Lake TN,2018,12,1,81479
+White Lake TN,2018,12,15,108510
+White Lake TN,2019,1,1,63279
+White Lake TN,2019,1,15,41060
+White Lake TN,2019,2,1,75368
+White Lake TN,2019,2,15,29800
+White Lake TN,2019,11,15,26351
+White Lake TN,2019,12,1,48000
+White Lake TN,2019,12,15,23386
+White Lake TN,2020,1,1,109982
+White Lake TN,2020,1,15,95255
+White Lake TN,2020,11,15,23550
+White Lake TN,2020,12,1,62755
+White Lake TN,2020,12,15,82025

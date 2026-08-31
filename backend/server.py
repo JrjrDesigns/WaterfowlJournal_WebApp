@@ -1998,10 +1998,10 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA STATUS (counted 2026-08-29):
-#   68 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+# SOURCE DATA STATUS (counted 2026-08-31):
+#   76 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
-#   24 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
+#   16 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
 #      different thing (see each parse_*.py for the specific reason).
 #   29 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
@@ -2013,14 +2013,14 @@ MIGRATION_ANCHORS = [
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
     ("Louisiana coast", 29.9, -92.2, "Mississippi", 2500000, [5, 8, 20, 42, 68, 88, 100, 96, 88, 78]),
     ("SE Louisiana", 29.6, -89.8, "Mississippi", 315000, [3, 6, 16, 36, 58, 80, 95, 100, 96, 86]),
-    ("White Lake TN", 35.72, -89.72, "Mississippi", 95000, [0, 1, 1, 2, 4, 6, 43, 78, 100, 68]),
-    ("Black Bayou TN", 35.8, -89.62, "Mississippi", 12500, [0, 0, 0, 1, 1, 2, 20, 48, 64, 100]),
-    ("Lake Lauderdale TN", 35.85, -89.55, "Mississippi", 39500, [0, 0, 0, 0, 0, 0, 13, 57, 100, 11]),
-    ("Maness Swamp TN", 35.83, -89.2, "Mississippi", 8000, [0, 0, 1, 2, 3, 5, 38, 100, 91, 25]),
-    ("Horns Bluff TN", 35.95, -89.3, "Mississippi", 43000, [0, 1, 2, 4, 6, 10, 72, 100, 60, 0]),
-    ("Hop-In TN", 36.35, -89.42, "Mississippi", 44000, [1, 2, 3, 6, 10, 16, 50, 64, 100, 55]),
-    ("Cheatham Lake TN", 36.28, -87.15, "Mississippi", 5800, [1, 1, 2, 5, 8, 12, 22, 100, 91, 91]),
-    ("Old Hickory L5 TN", 36.28, -86.65, "Mississippi", 6600, [1, 3, 5, 11, 18, 27, 42, 45, 79, 100]),
+    ("White Lake TN", 35.72, -89.72, "Mississippi", 83270, [3, 3, 3, 6, 14, 31, 63, 82, 100, 70]),
+    ("Black Bayou TN", 35.8, -89.62, "Mississippi", 94852, [3, 3, 3, 3, 5, 12, 27, 43, 64, 100]),
+    ("Lake Lauderdale TN", 35.85, -89.55, "Mississippi", 36154, [3, 3, 3, 3, 7, 15, 32, 78, 72, 100]),
+    ("Maness Swamp TN", 35.83, -89.2, "Mississippi", 16184, [3, 3, 3, 3, 5, 12, 25, 57, 100, 92]),
+    ("Horns Bluff TN", 35.95, -89.3, "Mississippi", 32717, [3, 3, 3, 3, 3, 3, 19, 38, 100, 57]),
+    ("Hop-In TN", 36.35, -89.42, "Mississippi", 26593, [3, 3, 3, 3, 4, 8, 35, 65, 90, 100]),
+    ("Cheatham Lake TN", 36.28, -87.15, "Mississippi", 3018, [3, 3, 6, 13, 28, 62, 90, 100, 87, 38]),
+    ("Old Hickory L5 TN", 36.28, -86.65, "Mississippi", 5458, [3, 3, 3, 5, 10, 23, 49, 92, 100, 70]),
     ("Ballard area KY", 37.05, -89.02, "Mississippi", 85138, [3, 3, 3, 5, 11, 20, 55, 57, 78, 100]),
     ("Sloughs KY", 37.72, -87.62, "Mississippi", 20820, [4, 4, 5, 11, 24, 53, 100, 69, 70, 95]),
     ("Southern Ohio", 39.0, -82.9, "Mississippi", 3861, [3, 3, 9, 25, 16, 64, 100, 49, 69, 45]),
