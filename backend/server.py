@@ -1999,9 +1999,9 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 #   (name, lat, lng, flyway, abundance, curve)
 #
 # SOURCE DATA STATUS (counted 2026-08-31):
-#   78 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+#   82 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
-#   14 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
+#   10 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
 #      different thing (see each parse_*.py for the specific reason).
 #   29 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
@@ -2027,7 +2027,7 @@ MIGRATION_ANCHORS = [
     ("North-central Ohio", 40.6, -82.9, "Mississippi", 176802, [4, 9, 28, 61, 86, 100, 90, 57, 35, 26]),
     ("Lake Erie marshes", 41.6, -83.2, "Mississippi", 116702, [4, 5, 22, 78, 99, 98, 100, 52, 23, 11]),
     ("Ohio River Zone", 38.7, -83.5, "Mississippi", 3135, [5, 15, 14, 47, 78, 67, 100, 71, 62, 73]),
-    ("Crescent Lake", 41.75, -102.45, "Central", 33866, [71, 92, 100, 80, 45, 18, 10, 1, 1, 0]),
+    ("Crescent Lake", 41.75, -102.45, "Central", 9293, [67, 88, 100, 80, 32, 4, 3, 3, 3, 3]),
     ("North Platte", 41.75, -103.65, "Central", 163855, [1, 3, 7, 29, 63, 93, 100, 85, 65, 54]),
     ("Kirwin", 39.68, -99.2, "Central", 38451, [3, 3, 18, 37, 79, 100, 82, 70, 31, 14]),
     ("Flint Hills", 38.4, -95.75, "Central", 89075, [5, 6, 14, 42, 75, 97, 100, 86, 70, 56]),
@@ -2037,7 +2037,7 @@ MIGRATION_ANCHORS = [
     ("Deep Fork", 35.55, -96.1, "Central", 4335, [17, 17, 17, 37, 61, 81, 94, 98, 100, 93]),
     ("Tishomingo", 34.2, -96.62, "Central", 46410, [4, 4, 8, 58, 83, 100, 74, 70, 51, 38]),
     ("Bosque del Apache", 33.8, -106.88, "Central", 82174, [5, 10, 29, 60, 88, 100, 93, 86, 77, 76]),
-    ("Bitter Lake", 33.45, -104.4, "Central", 13571, [29, 32, 42, 63, 84, 95, 100, 94, 86, 77]),
+    ("Bitter Lake", 33.45, -104.4, "Central", 27569, [3, 9, 20, 38, 50, 51, 87, 100, 100, 100]),
     ("Texas Point", 29.68, -93.93, "Central", 38566, [2, 6, 19, 78, 90, 100, 48, 38, 35, 41]),
     ("McFaddin", 29.68, -94.08, "Central", 161598, [2, 5, 11, 33, 47, 81, 79, 88, 88, 100]),
     ("Attwater Prairie Chicken", 29.67, -96.28, "Central", 49375, [1, 1, 4, 9, 30, 60, 100, 80, 85, 60]),
@@ -2049,7 +2049,7 @@ MIGRATION_ANCHORS = [
     ("Matagorda Island", 28.2, -96.45, "Central", 801024, [1, 3, 7, 28, 48, 81, 93, 86, 100, 100]),
     ("Laguna Atascosa", 26.3, -97.35, "Central", 257271, [4, 5, 12, 49, 100, 99, 89, 53, 24, 11]),
     ("Arrowwood ND", 47.2, -98.8, "Central", 80000, [25, 55, 85, 100, 88, 45, 20, 10, 5, 3]),
-    ("Upper Souris ND", 48.6, -101.5, "Central", 120000, [30, 60, 88, 100, 70, 32, 15, 7, 3, 1]),
+    ("Upper Souris ND", 48.6, -101.5, "Central", 31830, [85, 100, 88, 87, 68, 8, 4, 3, 3, 3]),
     ("DE zone 1", 39.75, -75.52, "Atlantic", 2518, [3, 13, 26, 33, 41, 71, 100, 86, 71, 32]),
     ("DE zone 2", 39.6, -75.55, "Atlantic", 910, [8, 23, 39, 52, 66, 83, 100, 87, 73, 33]),
     ("DE zone 3", 39.45, -75.5, "Atlantic", 2812, [5, 38, 72, 86, 100, 98, 95, 83, 71, 32]),
@@ -2064,7 +2064,7 @@ MIGRATION_ANCHORS = [
     ("Blackwater MD", 38.4, -76.06, "Atlantic", 100050, [3, 11, 26, 71, 97, 100, 86, 68, 31, 14]),
     ("Mattamuskeet NC", 35.45, -76.18, "Atlantic", 120000, [5, 12, 28, 40, 46, 70, 100, 93, 68, 59]),
     ("South Carolina coast", 33.2, -80.35, "Atlantic", 100000, [8, 12, 16, 24, 34, 48, 66, 84, 100, 96]),
-    ("Georgia coast", 31.3, -81.4, "Atlantic", 86706, [7, 11, 20, 34, 50, 68, 86, 100, 96, 84]),
+    ("Georgia coast", 31.3, -81.4, "Atlantic", 28247, [1, 4, 9, 22, 33, 39, 91, 100, 100, 100]),
     ("St. Marks FL", 30.1, -84.2, "Atlantic", 50000, [6, 10, 25, 45, 68, 88, 100, 92, 78, 68]),
     ("Lake Champlain VT", 44.4, -73.3, "Atlantic", 7844, [20, 35, 60, 85, 100, 88, 55, 25, 10, 5]),
     ("Montezuma NY", 43.0, -76.75, "Atlantic", 120000, [5, 14, 32, 58, 92, 100, 55, 28, 15, 9]),
