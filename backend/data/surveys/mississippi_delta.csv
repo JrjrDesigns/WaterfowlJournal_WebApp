@@ -1,0 +1,100 @@
+# MDWFP aerial waterfowl survey estimates for the Mississippi Delta, Mississippi
+# Department of Wildlife, Fisheries, and Parks. 19 seasons, 2007-08 to 2025-26.
+# Source: mdwfp.com/wildlife-hunting/wildlife-species-program/waterfowl-program/
+#   aerial-survey-reports
+# Rebuild with: python3 extract_mississippi_pdfs.py <folder-of-PDFs>
+#
+# MDWFP flies east-west transects from the Mississippi River to the hill line and
+# counts every duck in a 250 m strip, four times a season: November, December,
+# early January and LATE JANUARY. The late-January flight makes this the only
+# source in this repo that actually measures the second half of January.
+#
+# The whole record comes from four PDFs: each report's Table 1 prints the full
+# historical series for its own survey period.
+#
+# TEAL ARE NOT EXCLUDED. MDWFP reports only Mallards / Other Dabblers / Diving
+# Ducks and teal sit inside "Other Dabblers" with no way to separate them. Blue-
+# winged teal are long gone from the Delta by the mid-November first flight, so
+# the exposure is green-winged teal only.
+#
+# The day column is the survey period's representative date, not a per-year
+# flight date -- the historical tables print only the year. Actual flights run
+# Nov 12-17, Dec 11-15, Jan 5-8 and Jan 21-25, which bin the same way every year.
+#
+# mallards + other_dabblers + divers does NOT always equal total_ducks. That is
+# MDWFP's own arithmetic: Total Ducks is estimated separately from the category
+# estimates. 11 of 72 rows differ, worst 9.9% (late January 2008). The curve uses
+# total_ducks.
+period,season,month,day,mallards,other_dabblers,divers,total_ducks,source_file
+EarlyJanuary,2007,1,6,204322,248542,74342,527205,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2007,1,22,110476,182869,70396,363741,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2007,11,13,25872,34241,27992,88106,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2007,12,13,50368,75604,41738,167710,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2008,1,6,191236,278601,66691,536529,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2008,1,22,262235,318638,232878,740591,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2008,11,13,30748,96245,105089,232081,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2008,12,13,223976,389939,70750,684665,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2009,1,6,281622,440314,170797,892734,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2009,1,22,234937,333240,112167,680344,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2009,11,13,24281,137996,77839,240117,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2009,12,13,116748,209346,74396,400491,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2010,1,6,197319,352858,120700,670878,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2010,1,22,247913,454578,215821,918313,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2010,11,13,10481,70123,100740,181344,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2010,12,13,210531,388064,236966,835561,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2011,1,6,215268,339908,100202,655379,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2011,1,22,278205,436996,199926,915127,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2011,11,13,43845,183823,80928,308596,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2011,12,13,136776,281560,111423,529758,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2012,1,6,131930,263852,70775,448586,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2012,1,22,146782,273905,83119,503806,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+December,2012,12,13,122779,176950,171542,471271,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2013,1,6,313851,742182,191888,1244714,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+December,2013,12,13,230634,638386,100412,969432,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2014,1,6,145153,364349,74502,584004,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2014,1,22,162098,356993,82733,596092,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2014,11,13,88005,229810,79400,397215,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2014,12,13,86838,331460,102117,520415,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2015,1,6,213759,210159,109414,521662,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2015,1,22,307177,482843,206983,997003,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2015,11,13,30933,57702,54167,142802,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2015,12,13,139805,193719,90958,424482,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2016,1,6,678235,620432,143739,1442406,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2016,1,22,267078,483037,106419,815903,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2016,11,13,36540,212469,124240,373249,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2016,12,13,202135,460752,146707,809594,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2017,1,6,484121,595303,49488,1128912,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2017,1,22,334140,516240,45587,895968,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2017,11,13,88019,303472,109101,500591,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2017,12,13,100389,366802,208749,675940,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2018,1,6,111787,186633,69791,368211,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2018,1,22,151742,309696,74525,532413,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2018,11,13,55258,103181,55932,214371,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2018,12,13,84032,176070,143417,403519,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2019,1,6,173834,367714,58875,600423,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2019,1,22,252276,507754,106770,839005,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2019,11,13,26866,123036,178488,328390,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2019,12,13,105827,176863,104843,387533,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2020,1,6,73724,381903,34315,489942,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2020,1,22,183868,209731,44407,438006,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2020,11,13,40100,157750,68343,266194,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2020,12,13,99767,167139,143458,410365,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2021,1,6,195533,379391,113217,688141,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2021,1,22,138551,222967,99631,461149,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2021,11,13,27462,142941,71940,242344,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2021,12,13,26403,151460,177615,355478,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2022,1,6,125221,156929,80177,362327,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2022,1,22,182649,307643,25942,516153,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2022,11,13,33149,95574,53346,182069,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2022,12,13,44554,155597,73045,273196,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2023,1,6,20869,82800,51401,155070,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2023,1,22,152099,450950,64056,667105,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2023,11,13,16446,39438,30152,86035,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2023,12,13,29753,108173,21809,159735,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2024,1,6,91865,380573,87833,560204,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+LateJanuary,2024,1,22,136688,257872,58814,446817,2025_Late_January_Aerial_Waterfowl_Survey_Report.pdf
+November,2024,11,13,5741,75902,5369,87011,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2024,12,13,49533,210620,41975,302128,December_2025_Aerial_Waterfowl_survey_report.pdf
+EarlyJanuary,2025,1,6,140042,414947,48175,603165,Early_January_2026_Aerial_Waterfowl_survey_report.pdf
+November,2025,11,13,22231,224513,59166,305910,November_2025_Aerial_Waterfowl_survey_report.pdf
+December,2025,12,13,92947,223389,73847,390183,December_2025_Aerial_Waterfowl_survey_report.pdf
