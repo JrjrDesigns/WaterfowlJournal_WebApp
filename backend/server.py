@@ -1998,34 +1998,16 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA: 78 of the 121 anchors (+8 Tennessee with data but too few seasons) can now be rebuilt from data in this repo
-# (backend/data/parse_*.py + surveys/). The remaining 53 were built offline and
-# their curves exist only as literals here -- they cannot be audited or fixed
-# without re-collecting. See ANCHOR_RULES.md; every new anchor must ship with
-# its raw data and a rebuild script.
-#
-# ABUNDANCE is the peak duck count at the site, used only as an IDW voting
-# weight (abundance ** _MIG_ABUND_EXP). It is NOT perfectly consistent across
-# the cloud; audited 2026-08-26, and left as-is deliberately:
-#
-#   * Two peak definitions are in use. Most anchors (Michigan, Green Bay, the
-#     Ontario Great Lakes) use the max half-month BIN MEAN. Pools 7-9 WI and
-#     Agassiz MN use the mean of each season's single PEAK count, which runs
-#     1.17-1.27x higher. Harmonising them shifts blended curves by at most
-#     2 points anywhere tested, because the 0.38 exponent compresses hard --
-#     not worth re-opening the multiplier calibration for.
-#   * Geographic scale varies ~1000x, from single survey zones (DE zone 10,
-#     2,331) to whole ecoregions (Louisiana coast, 2,500,000). That 1073x
-#     spread becomes only a 14x weight difference. It is arguably correct --
-#     a region-scale anchor should carry farther -- but it means abundance
-#     conflates "how many birds" with "how large an area".
-#   * The original 104 anchors were built offline and their abundance cannot
-#     be reproduced from this repo (build_migration_curves.py is deprecated and
-#     emits no abundance). Only the 15 added since are reproducible from
-#     backend/data/parse_*.py.
-#
-# If you add an anchor: use the max half-month bin mean, and correct for survey
-# effort first if the source's coverage varies (see parse_greatlakes.py).
+# SOURCE DATA STATUS (counted 2026-08-29):
+#   68 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+#      from data in surveys/. Run the script and diff to audit one.
+#   24 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
+#      rebuild was noisier than what shipped, had too few seasons, or measured a
+#      different thing (see each parse_*.py for the specific reason).
+#   29 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
+#   An earlier revision of this note said "78 rebuildable", which wrongly counted the
+#   data-only 24 as rebuilt. See ANCHOR_RULES.md; every new anchor must ship with its
+#   raw data and a rebuild script.
 MIGRATION_ANCHORS = [
     ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1160465, [3, 5, 12, 26, 57, 59, 73, 86, 100, 85]),
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 657000, [2, 4, 9, 18, 33, 45, 60, 74, 100, 96]),
