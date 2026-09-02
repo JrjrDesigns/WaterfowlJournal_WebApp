@@ -197,12 +197,24 @@ export const deleteBlind = (id: string) =>
   apiRequest(`/api/blinds/${id}`, { method: 'DELETE' });
 
 // Hunts
-export const fetchHunts = (year?: number) =>
-  apiRequest(year ? `/api/hunts?year=${year}` : '/api/hunts');
+//
+// Everything is filtered by season, not calendar year — a season runs from
+// July 1 through June 30, so the hunts either side of New Year's stay together.
+// `season` is the year the season opened in: 2025 is the one labelled "25/26".
+export const fetchHunts = (season?: number) =>
+  apiRequest(season ? `/api/hunts?season=${season}` : '/api/hunts');
 
 export const fetchHunt = (id: string) => apiRequest(`/api/hunts/${id}`);
 
-export const fetchHuntYears = () => apiRequest('/api/hunts/years');
+export interface Season {
+  start: number;
+  label: string;
+}
+
+/* The label ("25/26") comes from the server so this app and the web app can't
+ * drift on what a season is called. */
+export const fetchHuntSeasons = (): Promise<{ seasons: Season[] }> =>
+  apiRequest('/api/hunts/seasons');
 
 export const createHunt = (data: unknown) =>
   apiRequest('/api/hunts', { method: 'POST', body: JSON.stringify(data) });
@@ -214,14 +226,14 @@ export const deleteHunt = (id: string) =>
   apiRequest(`/api/hunts/${id}`, { method: 'DELETE' });
 
 // Statistics. Two endpoints, deliberately — see fetchSeasonSummary.
-export const fetchStatistics = (year?: number) =>
-  apiRequest(year ? `/api/statistics?year=${year}` : '/api/statistics');
+export const fetchStatistics = (season?: number) =>
+  apiRequest(season ? `/api/statistics?season=${season}` : '/api/statistics');
 
 /* The free Season Card. Its own endpoint, not a trimmed /api/statistics — the
  * Pro payload is never sent to a free client in the first place, so there is
  * nothing to uncover by reading the response. */
-export const fetchSeasonSummary = (year?: number) =>
-  apiRequest(year ? `/api/statistics/summary?year=${year}` : '/api/statistics/summary');
+export const fetchSeasonSummary = (season?: number) =>
+  apiRequest(season ? `/api/statistics/summary?season=${season}` : '/api/statistics/summary');
 
 /* locationId only does anything on free accounts, which see one location at a
  * time; Pro always gets every location back. */

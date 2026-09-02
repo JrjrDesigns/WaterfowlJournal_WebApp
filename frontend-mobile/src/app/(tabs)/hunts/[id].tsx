@@ -225,18 +225,20 @@ export default function HuntDetail() {
                   <View style={styles.stat}>
                     {w.temp_max != null && w.temp_min != null ? (
                       <>
+                        {/* Reads the same direction as the numbers under it:
+                          * the low on the left, the high on the right. */}
                         <LinearGradient
                           colors={[tempColor(w.temp_min), tempColor(w.temp_max)]}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 0 }}
                           style={styles.tempBar}
                         />
-                        <Text style={styles.statValue}>{w.temp_max}° / {w.temp_min}°</Text>
+                        <Text style={styles.statValue}>{w.temp_min}° / {w.temp_max}°</Text>
                       </>
                     ) : (
                       <Text style={styles.statValue}>—</Text>
                     )}
-                    <Text style={styles.statLabel}>HI / LO</Text>
+                    <Text style={styles.statLabel}>LO / HI</Text>
                   </View>
 
                   {w.moon_phase != null ? (

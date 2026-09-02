@@ -20,7 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { ConditionIcon } from '@/components/condition-icon';
 import { LocationTypeThumb } from '@/components/location-type-thumb';
 import { ErrorBanner } from '@/components/ui';
-import { fetchHunts, fetchHuntYears } from '@/utils/api';
+import { fetchHunts, fetchHuntSeasons, type Season } from '@/utils/api';
 import { colors, type, space, radius } from '@/constants/theme';
 
 interface Hunt {
@@ -41,24 +41,26 @@ interface Hunt {
 
 export default function HuntList() {
   const [hunts, setHunts] = useState<Hunt[]>([]);
-  const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // Years first; the newest becomes the default tab, as on web.
+  // Seasons first; the newest becomes the default tab, as on web. A season is
+  // identified by the year it opened in and shown as "25/26", so the hunts on
+  // either side of New Year's sit under one tab.
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetchHuntYears();
-        const available: number[] = data.years ?? [];
-        setYears(available);
-        if (available.length > 0) setSelectedYear(available[0]);
+        const data = await fetchHuntSeasons();
+        const available = data.seasons ?? [];
+        setSeasons(available);
+        if (available.length > 0) setSelectedSeason(available[0].start);
         else setLoading(false);
       } catch {
-        // A missing year list is not fatal — the unfiltered hunt list still loads.
+        // A missing season list is not fatal — the unfiltered hunt list still loads.
         setLoading(false);
       }
     })();
@@ -69,7 +71,7 @@ export default function HuntList() {
       if (mode === 'refresh') setRefreshing(true);
       setError('');
       try {
-        setHunts(await fetchHunts(selectedYear ?? undefined));
+        setHunts(await fetchHunts(selectedSeason ?? undefined));
       } catch (err: unknown) {
         // Unlike web, a failure says so rather than showing an empty journal —
         // "no hunts" and "couldn't ask" must not look identical.
@@ -79,7 +81,7 @@ export default function HuntList() {
         setRefreshing(false);
       }
     },
-    [selectedYear],
+    [selectedSeason],
   );
 
   useFocusEffect(
@@ -118,24 +120,25 @@ export default function HuntList() {
         </Pressable>
       </View>
 
-      {years.length > 0 ? (
+      {seasons.length > 0 ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.yearScroll}
-          contentContainerStyle={styles.yearRow}
+          style={styles.seasonScroll}
+          contentContainerStyle={styles.seasonRow}
         >
-          {years.map(year => {
-            const on = selectedYear === year;
+          {seasons.map(season => {
+            const on = selectedSeason === season.start;
             return (
               <Pressable
-                key={year}
+                key={season.start}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
-                onPress={() => setSelectedYear(year)}
-                style={[styles.yearPill, on && styles.yearPillOn]}
+                accessibilityLabel={`${season.label} season`}
+                onPress={() => setSelectedSeason(season.start)}
+                style={[styles.seasonPill, on && styles.seasonPillOn]}
               >
-                <Text style={[styles.yearText, on && styles.yearTextOn]}>{year}</Text>
+                <Text style={[styles.seasonText, on && styles.seasonTextOn]}>{season.label}</Text>
               </Pressable>
             );
           })}
@@ -278,8 +281,8 @@ const styles = StyleSheet.create({
   /* A ScrollView inside a flex column grows to fill the space left over,
    * which parked three pills in the middle of a tall empty band. Pinning the
    * height to the pill plus its padding keeps the row the size it looks. */
-  yearScroll: { flexGrow: 0, height: 34 + space.lg },
-  yearRow: {
+  seasonScroll: { flexGrow: 0, height: 34 + space.lg },
+  seasonRow: {
     paddingHorizontal: space.lg,
     paddingBottom: space.lg,
     gap: space.sm,
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
     // height, which turned these pills into tall ovals.
     alignItems: 'center',
   },
-  yearPill: {
+  seasonPill: {
     paddingHorizontal: space.lg,
     minHeight: 34,
     justifyContent: 'center',
@@ -296,9 +299,9 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
     backgroundColor: colors.surface,
   },
-  yearPillOn: { backgroundColor: colors.text, borderColor: colors.text },
-  yearText: { ...type.label, color: colors.textMuted },
-  yearTextOn: { color: colors.textInverse },
+  seasonPillOn: { backgroundColor: colors.text, borderColor: colors.text },
+  seasonText: { ...type.label, color: colors.textMuted },
+  seasonTextOn: { color: colors.textInverse },
 
   list: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
   divider: { height: 1, backgroundColor: colors.hairline },

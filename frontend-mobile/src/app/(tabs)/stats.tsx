@@ -18,7 +18,7 @@ import { SpeciesIcon } from '@/components/species-icon';
 import { PaywallModal } from '@/components/paywall-modal';
 import { ErrorBanner } from '@/components/ui';
 import { useAuth } from '@/contexts/auth';
-import { fetchStatistics, fetchSeasonSummary, fetchHuntYears } from '@/utils/api';
+import { fetchStatistics, fetchSeasonSummary, fetchHuntSeasons, type Season } from '@/utils/api';
 import { colors, type, space, radius } from '@/constants/theme';
 
 interface Bucket { name: string; hunts: number; harvested: number }
@@ -74,8 +74,8 @@ export default function Stats() {
 
   const [stats, setStats] = useState<Statistics | null>(null);
   const [summary, setSummary] = useState<SeasonSummary | null>(null);
-  const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -84,10 +84,10 @@ export default function Stats() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetchHuntYears();
-        const available: number[] = data.years ?? [];
-        setYears(available);
-        if (available.length > 0) setSelectedYear(available[0]);
+        const data = await fetchHuntSeasons();
+        const available = data.seasons ?? [];
+        setSeasons(available);
+        if (available.length > 0) setSelectedSeason(available[0].start);
       } catch {
         // Not fatal — the unfiltered season still loads.
       }
@@ -102,8 +102,8 @@ export default function Stats() {
         /* Two endpoints, deliberately. A free account requests the summary and
          * never receives the Pro payload at all — nothing is hidden client-side,
          * so there is nothing to uncover by reading the response. */
-        if (isPro) setStats(await fetchStatistics(selectedYear ?? undefined));
-        else setSummary(await fetchSeasonSummary(selectedYear ?? undefined));
+        if (isPro) setStats(await fetchStatistics(selectedSeason ?? undefined));
+        else setSummary(await fetchSeasonSummary(selectedSeason ?? undefined));
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Could not load your season.');
       } finally {
@@ -111,7 +111,7 @@ export default function Stats() {
         setRefreshing(false);
       }
     },
-    [isPro, selectedYear],
+    [isPro, selectedSeason],
   );
 
   useFocusEffect(
@@ -131,24 +131,27 @@ export default function Stats() {
           <Text style={styles.title}>STATISTICS</Text>
         </View>
       </View>
-      {years.length > 0 ? (
+      {/* A season is named by the year it opened in and shown as "25/26", so a
+        * season that runs past New Year's stays under one tab. */}
+      {seasons.length > 0 ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.yearScroll}
-          contentContainerStyle={styles.yearRow}
+          style={styles.seasonScroll}
+          contentContainerStyle={styles.seasonRow}
         >
-          {years.map(year => {
-            const on = selectedYear === year;
+          {seasons.map(season => {
+            const on = selectedSeason === season.start;
             return (
               <Pressable
-                key={year}
+                key={season.start}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
-                onPress={() => setSelectedYear(year)}
-                style={[styles.yearPill, on && styles.yearPillOn]}
+                accessibilityLabel={`${season.label} season`}
+                onPress={() => setSelectedSeason(season.start)}
+                style={[styles.seasonPill, on && styles.seasonPillOn]}
               >
-                <Text style={[styles.yearText, on && styles.yearTextOn]}>{year}</Text>
+                <Text style={[styles.seasonText, on && styles.seasonTextOn]}>{season.label}</Text>
               </Pressable>
             );
           })}
@@ -600,7 +603,7 @@ function LockedPro({ onPress }: { onPress: () => void }) {
     'Your best blind, best spot and best day',
     'Morning versus evening performance',
     'How wind, sky, temperature and moon shaped your season',
-    'Month-by-month and year-over-year trends',
+    'Month-by-month and season-over-season trends',
     'CSV export of everything you have logged',
   ];
   return (
@@ -639,9 +642,9 @@ const styles = StyleSheet.create({
   rule: { width: 20, height: 1, backgroundColor: colors.textMuted, opacity: 0.5 },
   eyebrow: { ...type.label, color: colors.textMuted },
   title: { ...type.screenTitle, fontSize: 36, lineHeight: 38, color: colors.text, letterSpacing: 1 },
-  yearScroll: { flexGrow: 0, height: 34 + space.md },
-  yearRow: { gap: space.sm, alignItems: 'center' },
-  yearPill: {
+  seasonScroll: { flexGrow: 0, height: 34 + space.md },
+  seasonRow: { gap: space.sm, alignItems: 'center' },
+  seasonPill: {
     paddingHorizontal: space.md,
     minHeight: 30,
     justifyContent: 'center',
@@ -650,9 +653,9 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
     backgroundColor: colors.surface,
   },
-  yearPillOn: { backgroundColor: colors.text, borderColor: colors.text },
-  yearText: { ...type.label, fontSize: 11, color: colors.textMuted },
-  yearTextOn: { color: colors.textInverse },
+  seasonPillOn: { backgroundColor: colors.text, borderColor: colors.text },
+  seasonText: { ...type.label, fontSize: 11, color: colors.textMuted },
+  seasonTextOn: { color: colors.textInverse },
 
   card: {
     backgroundColor: colors.surface,
