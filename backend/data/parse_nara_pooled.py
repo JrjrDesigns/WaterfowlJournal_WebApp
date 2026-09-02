@@ -58,6 +58,19 @@ ALREADY = {"Bear River UT", "Blackwater MD", "Kirwin", "Klamath Basin",
            "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains",
            "Sacramento Valley"}
 
+# Held by judgement, not by a threshold, with the reason stated. The automatic
+# rules below cannot see WHERE a refuge sits inside the area its anchor covers.
+HOLD = {
+    "Lake Champlain VT":
+        "the source is Missisquoi NWR, a shallow marsh at the lake's northern "
+        "tip 65 km from the anchor point. It empties by late November, while the "
+        "open water the anchor actually sits on holds diving ducks into January. "
+        "The rebuild would take December from 55% to 4% of peak across the whole "
+        "basin on the strength of one marsh that freezes early. 18 seasons are "
+        "committed and the curve is reproducible -- what is missing is a count "
+        "from the main lake.",
+}
+
 
 def load_anchors(path):
     s = open(path).read()
@@ -138,6 +151,8 @@ def build(src, anchors):
         ro, rn = reversals(old[5]), reversals(curve)
         if a in ALREADY:
             verdict = "held (parse_nara_refuges.py owns this one)"
+        elif a in HOLD:
+            verdict = f"held -- {HOLD[a]}"
         elif rn > ro:
             verdict = f"retained (wobblier, {ro} -> {rn})"
         elif ratio > MAX_ABUND_RATIO:
