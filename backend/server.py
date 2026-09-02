@@ -2001,10 +2001,10 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # SOURCE DATA STATUS (counted 2026-08-31):
 #   83 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
-#   12 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
+#   15 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
 #      different thing (see each parse_*.py for the specific reason).
-#   26 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
+#   23 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
 #   An earlier revision of this note said "78 rebuildable", which wrongly counted the
 #   data-only 24 as rebuilt. See ANCHOR_RULES.md; every new anchor must ship with its
 #   raw data and a rebuild script.
