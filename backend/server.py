@@ -1998,8 +1998,8 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 # Mississippi 80, Atlantic 78, Central 64, Pacific 60). See model-test-report.md.
 #   (name, lat, lng, flyway, abundance, curve)
 #
-# SOURCE DATA STATUS (counted 2026-08-31):
-#   86 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+# SOURCE DATA STATUS (counted 2026-09-02):
+#   87 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
 #   15 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
@@ -2101,6 +2101,7 @@ MIGRATION_ANCHORS = [
     ("Columbia Basin WA", 46.9, -119.3, "Pacific", 268000, [18, 28, 48, 68, 85, 95, 100, 92, 78, 58]),
     ("Stillwater NV", 39.5, -118.55, "Pacific", 100000, [30, 55, 85, 100, 78, 42, 20, 9, 4, 2]),
     ("Ruby Lake NV", 40.15, -115.5, "Pacific", 21300, [80, 89, 100, 89, 72, 39, 19, 10, 5, 4]),
+    ("Fish Springs UT", 39.84, -113.39, "Pacific", 4434, [40, 41, 43, 44, 54, 100, 68, 59, 59, 59]),
     ("Malheur OR", 43.25, -118.85, "Pacific", 150000, [42, 68, 92, 100, 72, 42, 22, 10, 5, 3]),
     ("Cibola AZ", 33.3, -114.68, "Pacific", 20000, [3, 5, 12, 25, 45, 68, 90, 100, 95, 88]),
     ("Kern NWR CA", 35.73, -119.6, "Pacific", 44058, [10, 15, 35, 55, 78, 92, 100, 95, 85, 72]),

@@ -58,6 +58,33 @@ ALREADY = {"Bear River UT", "Blackwater MD", "Kirwin", "Klamath Basin",
            "Lacreek SD", "Laguna Atascosa", "Ruby Lake NV", "Salt Plains",
            "Sacramento Valley"}
 
+# NEW anchors -- refuges that turned up during the rebuild and have no anchor at
+# all, so there is no shipped curve to compare against. They are held to the same
+# floors as everything else (8 seasons, 4 half-months, 5 seasons per half-month)
+# and their abundance comes from the data, since nothing is being replaced.
+#
+#   Fish Springs NWR sits in Utah's west desert with no anchor within 180 km --
+#     Ruby Lake is 180 km west and Bear River 200 km north-east.
+#   Sabine NWR is the refuge whose data was filed under the code SBN and mistaken
+#     here for San Bernard, 250 km away in Texas. It is real coastal Louisiana
+#     data and sits between Texas Point and the Louisiana coast anchors.
+NEW_ANCHORS = {
+    "Fish Springs UT": (39.84, -113.39, "Pacific"),
+}
+
+# Sabine is NOT added, and the reason is era rather than data quality. Its nine
+# seasons run 1958-1969; the two anchors covering the same coast 120 km away,
+# Louisiana coast and SE Louisiana, are built on twenty LDWF seasons from
+# 2004-2023. Sabine's season centre is 5.73 against their 6.15 and 6.24 -- half a
+# half-month earlier -- and LDWF's own record says that is real: their 1977-2003
+# summary runs November at 0.69 of January against 0.55 in 2004-2023, so the
+# coast genuinely takes birds later now than it did. The model has no era
+# dimension, so dropping a 1960s anchor beside two modern, better-supported ones
+# asserts they disagree about the same place at the same time. It costs the
+# Mississippi flyway real coherence, -0.787 -> -0.747, measured. The nine seasons
+# stay committed in surveys/nara_refuges_weekly.csv; what would justify adding it
+# is an era term in the model, which is exactly what the weather project is for.
+
 # Held by judgement, not by a threshold, with the reason stated. The automatic
 # rules below cannot see WHERE a refuge sits inside the area its anchor covers.
 HOLD = {
@@ -107,9 +134,10 @@ def build(src, anchors):
     print(f"{'anchor':<22}{'seas':>5}{'bins':>5}{'rev':>10}{'abundance shipped -> rebuilt':>34}   verdict")
     out = []
     for a in sorted(per):
-        if a not in anchors:
+        new_anchor = a in NEW_ANCHORS and a not in anchors
+        if a not in anchors and not new_anchor:
             continue
-        old = anchors[a]
+        old = anchors.get(a)
         keep = {b: s for b, s in per[a].items() if len(s) >= MIN_SEASONS_PER_BIN}
         if len(keep) < MIN_BINS or len(seasons[a]) < MIN_SEASONS:
             print(f"{a:<22}{len(seasons[a]):>5}{len(keep):>5}"
@@ -147,6 +175,13 @@ def build(src, anchors):
                 curve[i] = round(max(FLOOR, curve[last] * (0.45 ** (i - last))))
 
         ab = int(mx)
+        if new_anchor:
+            lat, lng, fw = NEW_ANCHORS[a]
+            rn = reversals(curve)
+            print(f"{a:<22}{len(seasons[a]):>5}{len(keep):>5}{'':>6}  {rn:<3}"
+                  f"{'(new anchor)':>16} ->{ab:>13,}   ADD")
+            out.append((a, lat, lng, fw, ab, curve))
+            continue
         ratio = max(ab, old[4]) / max(1, min(ab, old[4]))
         ro, rn = reversals(old[5]), reversals(curve)
         if a in ALREADY:
