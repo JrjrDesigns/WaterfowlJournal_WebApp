@@ -1999,12 +1999,12 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 #   (name, lat, lng, flyway, abundance, curve)
 #
 # SOURCE DATA STATUS (counted 2026-08-31):
-#   83 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
+#   86 anchors are REBUILDABLE - a parse_*.py here reproduces the exact curve below
 #      from data in surveys/. Run the script and diff to audit one.
 #   15 more have their SOURCE DATA COMMITTED but their curve unchanged, because the
 #      rebuild was noisier than what shipped, had too few seasons, or measured a
 #      different thing (see each parse_*.py for the specific reason).
-#   23 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
+#   20 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
 #   An earlier revision of this note said "78 rebuildable", which wrongly counted the
 #   data-only 24 as rebuilt. See ANCHOR_RULES.md; every new anchor must ship with its
 #   raw data and a rebuild script.
@@ -2042,9 +2042,9 @@ MIGRATION_ANCHORS = [
     ("McFaddin", 29.68, -94.08, "Central", 161598, [2, 5, 11, 33, 47, 81, 79, 88, 88, 100]),
     ("Attwater Prairie Chicken", 29.67, -96.28, "Central", 49375, [1, 1, 4, 9, 30, 60, 100, 80, 85, 60]),
     ("Anahuac", 29.62, -94.52, "Central", 207301, [3, 6, 16, 39, 66, 87, 100, 84, 77, 59]),
-    ("Brazoria", 29.03, -95.25, "Central", 60389, [3, 15, 30, 69, 87, 100, 97, 95, 93, 82]),
-    ("San Bernard", 28.88, -95.58, "Central", 56858, [2, 9, 21, 43, 75, 89, 100, 95, 89, 82]),
-    ("Big Boggy", 28.85, -95.83, "Central", 27650, [5, 20, 32, 67, 83, 100, 82, 65, 58, 57]),
+    ("Brazoria", 29.03, -95.25, "Central", 60389, [9, 17, 30, 46, 65, 79, 88, 100, 90, 75]),
+    ("San Bernard", 28.88, -95.58, "Central", 56858, [11, 21, 37, 50, 59, 72, 90, 100, 84, 78]),
+    ("Big Boggy", 28.85, -95.83, "Central", 27650, [17, 24, 35, 47, 63, 75, 84, 99, 100, 98]),
     ("Aransas", 28.3, -96.8, "Central", 253124, [2, 9, 15, 51, 76, 93, 100, 69, 63, 28]),
     ("Matagorda Island", 28.2, -96.45, "Central", 801024, [1, 3, 7, 28, 48, 81, 93, 86, 100, 100]),
     ("Laguna Atascosa", 26.3, -97.35, "Central", 257271, [4, 5, 12, 49, 100, 99, 89, 53, 24, 11]),
