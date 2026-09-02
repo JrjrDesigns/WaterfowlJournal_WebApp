@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { fetchStatistics, fetchSeasonSummary, fetchHuntYears } from '../utils/api'
+import { fetchStatistics, fetchSeasonSummary, fetchHuntSeasons, type Season } from '../utils/api'
 import { useAuth } from '../contexts/AuthContext'
 import PaywallModal from '../components/PaywallModal'
 import SpeciesIcon from '../components/SpeciesIcon'
@@ -105,7 +105,7 @@ function LockedPro({ onClick }: { onClick: () => void }) {
     'Your best blind, best spot and best day',
     'Morning versus evening performance',
     'How wind, sky, temperature and moon shaped your season',
-    'Month-by-month and year-over-year trends',
+    'Month-by-month and season-over-season trends',
     'CSV export of everything you have logged',
   ]
   return (
@@ -208,59 +208,59 @@ function MoonIcon({ name, size = 16 }: { name: string; size?: number }) {
 export default function Stats() {
   const [stats, setStats] = useState<Statistics | null>(null)
   const [summary, setSummary] = useState<SeasonSummary | null>(null)
-  const [years, setYears] = useState<number[]>([])
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [seasons, setSeasons] = useState<Season[]>([])
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [showPaywall, setShowPaywall] = useState(false)
   const { isPro } = useAuth()
-  const latestRequestYear = useRef<number | null>(null)
+  const latestRequestSeason = useRef<number | null>(null)
 
-  useEffect(() => { loadYears() }, [])
+  useEffect(() => { loadSeasons() }, [])
   // Two different endpoints, not one endpoint with fields hidden: the full Pro
   // analytics payload is never sent to a free client.
   useEffect(() => {
     if (isPro) loadStats()
     else loadSummary()
-  }, [selectedYear, isPro])
+  }, [selectedSeason, isPro])
 
-  const loadYears = async () => {
+  const loadSeasons = async () => {
     try {
-      const data = await fetchHuntYears()
-      const available = data.years || []
-      setYears(available)
-      if (available.length > 0 && selectedYear === null) setSelectedYear(available[0])
+      const data = await fetchHuntSeasons()
+      const available = data.seasons || []
+      setSeasons(available)
+      if (available.length > 0 && selectedSeason === null) setSelectedSeason(available[0].start)
     } catch { /* ignore */ }
   }
 
   const loadSummary = async () => {
-    const requestYear = selectedYear
-    latestRequestYear.current = requestYear
+    const requestSeason = selectedSeason
+    latestRequestSeason.current = requestSeason
     setLoading(true)
     try {
-      const data = await fetchSeasonSummary(requestYear || undefined)
-      if (latestRequestYear.current !== requestYear) return
+      const data = await fetchSeasonSummary(requestSeason || undefined)
+      if (latestRequestSeason.current !== requestSeason) return
       setSummary(data)
     } catch {
       /* ignore */
     } finally {
-      if (latestRequestYear.current === requestYear) setLoading(false)
+      if (latestRequestSeason.current === requestSeason) setLoading(false)
     }
   }
 
   const loadStats = async () => {
-    const requestYear = selectedYear
-    latestRequestYear.current = requestYear
+    const requestSeason = selectedSeason
+    latestRequestSeason.current = requestSeason
     setLoading(true)
     try {
-      const data = await fetchStatistics(requestYear || undefined)
-      // Ignore this response if a newer year has been selected in the meantime —
-      // otherwise a slow request for a stale year can overwrite fresher data.
-      if (latestRequestYear.current !== requestYear) return
+      const data = await fetchStatistics(requestSeason || undefined)
+      // Ignore this response if a newer season has been selected in the meantime —
+      // otherwise a slow request for a stale season can overwrite fresher data.
+      if (latestRequestSeason.current !== requestSeason) return
       setStats(data)
     } catch {
       /* ignore */
     } finally {
-      if (latestRequestYear.current === requestYear) setLoading(false)
+      if (latestRequestSeason.current === requestSeason) setLoading(false)
     }
   }
 
@@ -274,19 +274,19 @@ export default function Stats() {
 
   // Shared by both tiers' headers. Plain JSX rather than a nested component so
   // it isn't remounted on every render.
-  const yearTabs = years.length > 0 ? (
+  const seasonTabs = seasons.length > 0 ? (
     <div className="flex gap-2 mt-1">
-      {years.map(year => (
+      {seasons.map(season => (
         <button
-          key={year}
-          onClick={() => setSelectedYear(year)}
+          key={season.start}
+          onClick={() => setSelectedSeason(season.start)}
           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
-            selectedYear === year
+            selectedSeason === season.start
               ? 'bg-ink text-white border-ink'
               : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
           }`}
         >
-          {year}
+          {season.label}
         </button>
       ))}
     </div>
@@ -311,7 +311,7 @@ export default function Stats() {
             </p>
             <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
           </div>
-          {yearTabs}
+          {seasonTabs}
         </div>
 
         {!hasHunts ? (
@@ -438,7 +438,7 @@ export default function Stats() {
           <h1 className="font-display text-4xl text-ink tracking-wider leading-none">STATISTICS</h1>
         </div>
 
-        {yearTabs}
+        {seasonTabs}
       </div>
 
       {/* Season summary */}

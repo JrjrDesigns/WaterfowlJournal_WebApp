@@ -1079,20 +1079,69 @@ def _blind_doc(b: dict) -> dict:
         "created_at": b.get("created_at", datetime.utcnow())
     }
 
+# ============ SEASONS ============
+#
+# Hunts are grouped by season, never by calendar year. A waterfowl season runs
+# from early autumn into the new year, so a January 8th sit belongs with the
+# November hunts before it, not to a "2026" of its own. A season is named by the
+# year it opens in and shown as "25/26".
+#
+# July 1 is the cut. Nothing is open in July anywhere in the flyways, so the
+# boundary never lands mid-season; September would clip the early goose and teal
+# seasons that open in August in some states.
+SEASON_START_MONTH = 7
+
+
+def season_of(date_str) -> Optional[int]:
+    """The opening year of the season a YYYY-MM-DD date falls in, or None."""
+    try:
+        parts = date_str.split("-")
+        year, month = int(parts[0]), int(parts[1])
+    except (AttributeError, IndexError, ValueError):
+        return None
+    return year if month >= SEASON_START_MONTH else year - 1
+
+
+def season_label(start: int) -> str:
+    """2025 -> "25/26". The label the hunter actually calls the season."""
+    return f"{start % 100:02d}/{(start + 1) % 100:02d}"
+
+
+def season_date_filter(start: int) -> dict:
+    """A Mongo range over the ISO date strings hunts store their date in.
+
+    Dates are "YYYY-MM-DD" strings, so a lexicographic range is a date range.
+    """
+    return {"$gte": f"{start}-07-01", "$lte": f"{start + 1}-06-30"}
+
+
+def hunt_date_filter(season: Optional[int], year: Optional[int]) -> Optional[dict]:
+    """Resolve the date filter for the two query params these routes accept.
+
+    `season` is what the apps send now. `year` stays supported because a browser
+    running a cached bundle from before the switch still sends it, and dropping
+    it would silently show those users every hunt they have ever logged.
+    """
+    if season:
+        return season_date_filter(season)
+    if year:
+        return {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+    return None
+
+
 # ============ HUNTS ROUTES ============
 
 @api_router.get("/hunts", response_model=List[Hunt])
-async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+async def get_hunts(season: Optional[int] = None, year: Optional[int] = None,
+                    current_user: dict = Depends(get_current_user)):
     user_id = str(current_user["_id"])
-    
+
     # Build query filter
     query_filter = {"user_id": user_id}
-    
-    # Add year filter if provided
-    if year:
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
-        query_filter["date"] = {"$gte": start_date, "$lte": end_date}
+
+    date_filter = hunt_date_filter(season, year)
+    if date_filter:
+        query_filter["date"] = date_filter
     
     hunts = await fetch_capped(db.hunts.find(query_filter).sort("date", -1), 1000, "hunt list", user_id)
     
@@ -1134,22 +1183,43 @@ async def get_hunts(year: Optional[int] = None, current_user: dict = Depends(get
 
     return result
 
+@api_router.get("/hunts/seasons")
+async def get_hunt_seasons(current_user: dict = Depends(get_current_user)):
+    """The seasons this hunter has logged in, newest first.
+
+    The label is built here rather than in each client so the web app and the
+    phone app can never disagree about what "25/26" means.
+    """
+    user_id = str(current_user["_id"])
+
+    cursor = db.hunts.find({"user_id": user_id}, {"date": 1})
+    hunts = await fetch_capped(cursor, 10000, "all hunts", user_id)
+
+    starts = set()
+    for hunt in hunts:
+        start = season_of(hunt.get("date"))
+        if start is not None:
+            starts.add(start)
+
+    return {"seasons": [{"start": s, "label": season_label(s)}
+                        for s in sorted(starts, reverse=True)]}
+
+
 @api_router.get("/hunts/years")
 async def get_hunt_years(current_user: dict = Depends(get_current_user)):
-    """Get list of years that have hunts"""
+    """Calendar years that have hunts. Superseded by /hunts/seasons, and kept
+    only for clients still running a bundle from before the season switch."""
     user_id = str(current_user["_id"])
-    
-    # Get all hunts and extract unique years
-    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}), 10000, "all hunts", user_id)
+
+    hunts = await fetch_capped(db.hunts.find({"user_id": user_id}, {"date": 1}), 10000, "all hunts", user_id)
     years = set()
-    
+
     for hunt in hunts:
         try:
-            year = int(hunt["date"].split("-")[0])
-            years.add(year)
-        except:
+            years.add(int(hunt["date"].split("-")[0]))
+        except (AttributeError, IndexError, ValueError, KeyError):
             pass
-    
+
     return {"years": sorted(list(years), reverse=True)}
 
 @api_router.post("/hunts", response_model=Hunt)
@@ -1402,12 +1472,14 @@ WIND_ORDER = ["Calm (≤5)", "Light (6–12)", "Moderate (13–20)", "Strong (21
 DOW_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 @api_router.get("/statistics")
-async def get_statistics(year: Optional[int] = None, current_user: dict = Depends(require_pro)):
+async def get_statistics(season: Optional[int] = None, year: Optional[int] = None,
+                         current_user: dict = Depends(require_pro)):
     user_id = str(current_user["_id"])
 
     query_filter = {"user_id": user_id}
-    if year:
-        query_filter["date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+    date_filter = hunt_date_filter(season, year)
+    if date_filter:
+        query_filter["date"] = date_filter
 
     hunts = await fetch_capped(db.hunts.find(query_filter), 10000, "hunts for statistics", user_id)
 
@@ -1690,7 +1762,7 @@ def _season_insight(rows: list) -> Optional[dict]:
 
 
 @api_router.get("/statistics/summary")
-async def get_statistics_summary(year: Optional[int] = None,
+async def get_statistics_summary(season: Optional[int] = None, year: Optional[int] = None,
                                  current_user: dict = Depends(get_current_user)):
     """The free tier's Season Card: what the hunter did, not what it means.
 
@@ -1702,8 +1774,9 @@ async def get_statistics_summary(year: Optional[int] = None,
     user_id = str(current_user["_id"])
 
     query_filter = {"user_id": user_id}
-    if year:
-        query_filter["date"] = {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}
+    date_filter = hunt_date_filter(season, year)
+    if date_filter:
+        query_filter["date"] = date_filter
 
     cursor = db.hunts.find(
         query_filter,
@@ -2391,8 +2464,11 @@ def _season_bin(date_str: str):
 
 
 def _season_year(date_str: str):
-    """Which waterfowl season a date belongs to. Sep–Feb spans a year boundary,
-    so January 8th 2026 is part of the 2025 season, not a season of its own."""
+    """Which waterfowl season a date belongs to, for the migration curve.
+
+    Not `season_of`: this one answers only for the Sep–Feb months the curve is
+    built over and returns None outside them, where `season_of` has to place
+    every hunt a user logs, whenever they logged it."""
     from datetime import date as _d
     try:
         d = _d.fromisoformat(date_str)
@@ -4413,7 +4489,7 @@ INDEXES = [
     # which is worse than the duplicate it was meant to catch.
     ("users", [("stripe_customer_id", 1)],
      {"name": "users_stripe_customer", "sparse": True}),
-    # Covers filtering by user, the year range filter, and the newest-first sort
+    # Covers filtering by user, the season date-range filter, and the newest-first sort
     # in one pass. A compound index also serves its own prefix, so plain
     # "this user's hunts" lookups and the free-tier count use it too.
     ("hunts", [("user_id", 1), ("date", -1)], {"name": "hunts_user_id_date"}),
