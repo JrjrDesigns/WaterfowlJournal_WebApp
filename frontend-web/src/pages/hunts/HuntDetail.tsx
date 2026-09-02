@@ -221,6 +221,8 @@ function tempColor(t: number): string {
   return '#DC2626'               // red — warm
 }
 
+// Reads the same direction as the numbers beneath it: the low on the left,
+// the high on the right, cold colour to warm colour.
 function TempRangeBar({ min, max }: { min: number; max: number }) {
   const lo = tempColor(min)
   const hi = tempColor(max)
@@ -479,19 +481,19 @@ export default function HuntDetail() {
                   <span className="text-xs text-muted uppercase tracking-widest">Avg</span>
                 </div>
 
-                {/* High / Low */}
+                {/* Low / High */}
                 <div className="flex-1 flex flex-col items-center gap-1.5 px-2">
                   {hunt.weather_data.temp_max != null && hunt.weather_data.temp_min != null ? (
                     <>
                       <TempRangeBar min={hunt.weather_data.temp_min} max={hunt.weather_data.temp_max} />
                       <span className="text-xs font-semibold text-ink tabular-nums">
-                        {hunt.weather_data.temp_max}° / {hunt.weather_data.temp_min}°
+                        {hunt.weather_data.temp_min}° / {hunt.weather_data.temp_max}°
                       </span>
                     </>
                   ) : (
                     <span className="text-xs font-semibold text-ink">—</span>
                   )}
-                  <span className="text-xs text-muted uppercase tracking-widest">Hi / Lo</span>
+                  <span className="text-xs text-muted uppercase tracking-widest">Lo / Hi</span>
                 </div>
 
                 {/* Moon */}

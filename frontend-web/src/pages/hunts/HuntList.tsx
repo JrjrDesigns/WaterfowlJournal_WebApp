@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-import { fetchHunts, fetchHuntYears, fetchLocations } from '../../utils/api'
+import { fetchHunts, fetchHuntSeasons, fetchLocations, type Season } from '../../utils/api'
 
 interface Hunt {
   id: string
@@ -52,8 +52,8 @@ function ConditionIcon({ code }: { code: number | undefined }) {
 
 export default function HuntList() {
   const [hunts, setHunts] = useState<Hunt[]>([])
-  const [years, setYears] = useState<number[]>([])
-  const [yearsLoaded, setYearsLoaded] = useState(false)
+  const [seasons, setSeasons] = useState<Season[]>([])
+  const [seasonsLoaded, setSeasonsLoaded] = useState(false)
   // null while unknown — a failed check falls back to the plain empty state
   // rather than guessing and sending someone to Locations they don't need.
   const [hasLocations, setHasLocations] = useState<boolean | null>(null)
@@ -61,17 +61,19 @@ export default function HuntList() {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  const yearParam = searchParams.get('year')
-  const selectedYear = yearParam ? Number(yearParam) : null
+  // The season a hunt belongs to is the year it opened in: 2025 is "25/26".
+  const seasonParam = searchParams.get('season')
+  const selectedSeason = seasonParam ? Number(seasonParam) : null
+  const selectedLabel = seasons.find(s => s.start === selectedSeason)?.label
 
-  useEffect(() => { loadYears() }, [])
-  useEffect(() => { loadHunts() }, [selectedYear])
+  useEffect(() => { loadSeasons() }, [])
+  useEffect(() => { loadHunts() }, [selectedSeason])
 
   // "First run" means no hunts on the account at all — not a season tab that
-  // happens to be empty. Someone with 2025 hunts looking at an empty 2026
-  // shouldn't be walked through onboarding again, so the year list is what
+  // happens to be empty. Someone with 25/26 hunts looking at an empty 26/27
+  // shouldn't be walked through onboarding again, so the season list is what
   // separates the two cases.
-  const noHuntsEver = yearsLoaded && years.length === 0 && !loading && hunts.length === 0
+  const noHuntsEver = seasonsLoaded && seasons.length === 0 && !loading && hunts.length === 0
 
   // Only a genuinely empty account pays for this request; everyone else never
   // fires it.
@@ -84,23 +86,23 @@ export default function HuntList() {
     return () => { cancelled = true }
   }, [noHuntsEver])
 
-  const loadYears = async () => {
+  const loadSeasons = async () => {
     try {
-      const data = await fetchHuntYears()
-      const available = data.years || []
-      setYears(available)
-      if (available.length > 0 && !yearParam) {
-        setSearchParams({ year: String(available[0]) }, { replace: true })
+      const data = await fetchHuntSeasons()
+      const available = data.seasons || []
+      setSeasons(available)
+      if (available.length > 0 && !seasonParam) {
+        setSearchParams({ season: String(available[0].start) }, { replace: true })
       }
     } catch { /* ignore */ } finally {
-      setYearsLoaded(true)
+      setSeasonsLoaded(true)
     }
   }
 
   const loadHunts = async () => {
     setLoading(true)
     try {
-      const data = await fetchHunts(selectedYear || undefined)
+      const data = await fetchHunts(selectedSeason || undefined)
       setHunts(data)
     } catch { /* ignore */ } finally {
       setLoading(false)
@@ -143,20 +145,20 @@ export default function HuntList() {
         </button>
       </div>
 
-      {/* Year tabs */}
-      {years.length > 0 && (
+      {/* Season tabs */}
+      {seasons.length > 0 && (
         <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-          {years.map(year => (
+          {seasons.map(season => (
             <button
-              key={year}
-              onClick={() => setSearchParams({ year: String(year) }, { replace: true })}
+              key={season.start}
+              onClick={() => setSearchParams({ season: String(season.start) }, { replace: true })}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
-                selectedYear === year
+                selectedSeason === season.start
                   ? 'bg-ink text-white border-ink'
                   : 'bg-surface text-muted border-hairline hover:border-ink hover:text-ink'
               }`}
             >
-              {year}
+              {season.label}
             </button>
           ))}
         </div>
@@ -196,7 +198,7 @@ export default function HuntList() {
           ) : (
             <>
               <p className="text-muted font-semibold">
-                {selectedYear ? `No hunts logged for ${selectedYear}.` : 'No hunts logged yet.'}
+                {selectedLabel ? `No hunts logged for the ${selectedLabel} season.` : 'No hunts logged yet.'}
               </p>
               <p className="text-muted text-sm mt-1">Tap "Log Hunt" to record a sit.</p>
             </>
