@@ -2006,8 +2006,12 @@ SEASON_MONTH_ORDER = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4, 2: 5}
 #      different thing (see each parse_*.py for the specific reason).
 #   20 have NOTHING - built offline, unauditable, and unfixable without re-collecting.
 #   An earlier revision of this note said "78 rebuildable", which wrongly counted the
-#   data-only 24 as rebuilt. See ANCHOR_RULES.md; every new anchor must ship with its
-#   raw data and a rebuild script.
+#   data-only 24 as rebuilt. The commit that added Fish Springs (35075a1) then said
+#   "16 data-only, 19 with nothing" in its MESSAGE, which is also wrong -- Sabine's
+#   data is committed but Sabine is not an anchor, so it belongs to none of these
+#   three counts. The numbers above are the ones that reconcile: 87 + 15 + 20 = 122.
+#   See ANCHOR_RULES.md; every new anchor must ship with its raw data and a rebuild
+#   script.
 MIGRATION_ANCHORS = [
     ("Arkansas Delta (MAV)", 34.7, -90.9, "Mississippi", 1160465, [3, 5, 12, 26, 57, 59, 73, 86, 100, 85]),
     ("Mississippi Delta", 33.3, -90.6, "Mississippi", 666325, [3, 3, 7, 17, 37, 54, 72, 86, 99, 100]),
